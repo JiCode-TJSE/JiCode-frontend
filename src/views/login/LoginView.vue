@@ -14,9 +14,10 @@
         </form>
         <div class="section">
           <el-checkbox v-model="checkPassword" class="rememberMe"><span class="remember-me-text">记住我</span></el-checkbox>
-          <el-link :underline="false" @click="jumpToRegister" class="registerLink">注册账号</el-link>
+          <el-link :underline="false" @click="forgetPassword" class="passwordLink">忘记密码</el-link>
         </div>
         <el-button class="login-bt" @click="login">登录</el-button>
+        <el-link :underline="false" @click="jumpToRegister" class="registerLink">注册账号</el-link>
       </el-card>
     </div>
   </template>
@@ -40,9 +41,12 @@
       router.push('/register');
     }
 
+    const forgetPassword = () =>{
+      router.push('/forgetpwd');
+    }
+
     const login = () => {
       console.log("表单信息：", loginform.value); 
-      console.log("formName:",loginform.value.username);
       if(validateForm()){
         axios({
           url:"/api/user/login",
@@ -69,7 +73,7 @@
               });
 
             }else{
-              ElMessage.error('登录错误');
+              ElMessage.error('账号或密码错误，请重新登录！');
             }
           })
           .then(()=>{
@@ -125,6 +129,12 @@
     font-size:small;
   }
   .registerLink{
+    position: absolute;
+    bottom: 10px;
+    right: 20px;
+    font-size: small;
+  }
+  .passwordLink{
     padding-left: 25%;
     padding-bottom: 3%;
     font-size: small;
@@ -138,13 +148,14 @@
     padding: 0;
   }
   .section{
-    padding-bottom: 2%;
+    padding-bottom: 5%;
   }
   .login-card{
+    position: relative;
     display: flex;
     justify-content: center;
-    width:30%;
-    height:33%;
+    width:35%;
+    height:38%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     transition: box-shadow 0.3s, transform 0.3s;
     background-color:rgba(255, 255, 255, 0.5);
@@ -157,7 +168,7 @@
     display: grid;
     grid-template-columns: max-content 1fr;
     align-items: center;
-    margin-bottom: 10%;
+    margin-bottom: 12%;
   }
   .input-info-2 {
     display: grid;
@@ -181,7 +192,7 @@
     border: 2px solid rgb(0, 0, 0)!important;
     outline: none;
     transition: background-color .2s;
-    background-color:rgb(255, 250, 204,0.5)!important;
+    background-color:rgb(255, 255, 255,0.5)!important;
     color:rgb(0, 0, 0)!important;
     border: none;
     border-radius: 5px;
@@ -202,8 +213,8 @@
     background-color:rgba(0, 0, 0, 0.5)!important;
   }
   .login-bt:hover::before {
-    transition: ease-in-out .8s; /* 设置伪元素的过渡效果 */
-    transform: skew(45deg) translate3d(200px,0,0); /* 使用 3D 变换平移伪元素位置 */
+    transition: ease-in-out .8s; 
+    transform: skew(45deg) translate3d(200px,0,0);
   }
 
   </style>
