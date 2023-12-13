@@ -4,6 +4,7 @@ import LoginView from '../views/login/LoginView.vue'
 import RegisterView from '../views/login/RegisterView.vue'
 import ForgetPwdView from '../views/login/ForgetPwdView.vue'
 import ProjectReqView from '@/components/SideBar.vue'
+import allproductsView from '@/views/product/allproductsView.vue'
 
 const routes = [
   {
@@ -31,6 +32,11 @@ const routes = [
     path: '/project',
     name: 'project',
     component: ProjectReqView
+  },
+  {
+    path: '/allproducts',
+    name: 'allproducts',
+    component: allproductsView
   },
 ]
 

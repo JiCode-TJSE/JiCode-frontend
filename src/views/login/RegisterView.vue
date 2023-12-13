@@ -1,49 +1,122 @@
 <template>
-  <div id="forgetpassword" class="background-image">
-    <el-card class="login-card">
-      <div class="login-text">注册</div>
-      <form>
-      <div class="input-info-1">
+  <div id="register" class="background-image">
+    <el-card class="register-card">
+      <div class="register-text">注册</div>
+      <form class="form-container">
+      <div class="input-info-1 text-center">
         <div class="label">&nbsp;&nbsp;&nbsp;&nbsp;邮箱：</div>
-        <el-input v-model="mailform.mail" placeholder="请输入邮箱"></el-input>
+        <el-input v-model="registerform.email" placeholder="请输入邮箱" style="width: 390px;"></el-input>
       </div>
-      <div class="input-info-2">
+      <div class="input-info-1 text-left">
         <div class="label">验证码：</div>
-        <el-input placeholder="请输入验证码" class="input-with-button" v-model="mailform.code" show-password>
+        <el-input placeholder="请输入验证码" v-model="registerform.code" show-password style="width: 205px;">
           <template #append>
             <el-button class="verification-button" @click="getVerificationCode">获取验证码</el-button>
           </template>
         </el-input>
       </div>
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <div class="input-info-1">
+            <div class="label">用户名：</div>
+            <el-input v-model="registerform.username" placeholder="请设置用户名" style="width: 150px;"></el-input>
+          </div>
+        </el-col>
+        <el-col :span="12">
+          <div class="input-info-1">
+            <div class="label">密码：</div>
+            <el-input v-model="registerform.password" placeholder="请设置密码" style="width: 150px;"></el-input>
+          </div>
+        </el-col>
+      </el-row>
       </form>
-      <el-button class="login-bt" @click="login">登录</el-button>
+      <el-button class="register-bt" @click="register">注册</el-button>
     </el-card>
   </div>
 </template>
 
 <script setup>
   import {ref} from 'vue';
-  // import {onMounted} from 'vue';
-  // import { ElMessage } from 'element-plus';
-  // import axios from 'axios';
-  // import router from '@/router';
+  import { sendEmailCode } from '@/api/emailCode';
+  import { doRegister } from '@/api/login';
+  import { ElMessage } from 'element-plus';
+  import router from '@/router';
 
 
-  let mailform = ref({
-    mail: "",
+  let registerform = ref({
+    email: "",
     code: "",
+    username:"",
+    password:"",
   });
 
+  let verifiedCode = '';
 
-  const login = () => {
-    console.log("表单信息：", mailform.value); 
+  const getVerificationCode = () => {
+    const email = registerform.value.email.trim();
+    const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    console.log('Email:', email);
+
+    if (!email) {
+      ElMessage.error('邮箱不能为空');
+    } else if (!emailFormat.test(email)) {
+      ElMessage.error('请输入有效的邮箱地址');
+    } else {
+      
+      sendEmailCode(email)
+        .then(res => {
+          ElMessage.success(res.data.msg);
+          verifiedCode = res.data.verificationCode;
+        })
+        .catch(error => {
+          console.error('Error getting verification code:', error);
+          ElMessage.error('获取验证码失败');
+        });
+    }
   };
+
+  const register = () => {
+    console.log('表单信息：', registerform.value);
+    if (!registerform.value.code) {
+      ElMessage.error('验证码不能为空');
+    } else if (!registerform.value.email) {
+      ElMessage.error('邮箱不能为空');
+    } else if (!registerform.value.username) {
+      ElMessage.error('用户名不能为空');
+    } else if (!registerform.value.password) {
+      ElMessage.error('密码不能为空');
+    } else if (registerform.value.code === verifiedCode) {
+      console.log('验证码发送成功');
+      ElMessage.success('验证码发送成功');
+      doRegister(registerform.value)
+        .then(resp => {
+          ElMessage({
+            message: '登录成功',
+            type: 'success',
+          })
+          console.log(resp);
+          router.push("/login/");
+        })
+        .catch(resp => {
+          ElMessage({
+            message: '注册失败',
+            type: 'warning',
+          })
+          console.log(resp);
+        })
+      
+    } else {
+      ElMessage.error('验证码错误');
+    }
+  };
+  
 
 
 </script>
 
 <style scoped>
-#forgetpassword {
+#register {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -59,10 +132,15 @@
   margin: 0;
   padding: 0;
 }
-.input-with-button {
-  position: relative;
-  display: inline-block; 
+
+.text-center {
+  text-align: center;
 }
+
+.text-left {
+  text-align: left;
+}
+
 .verification-button {
   right: 20px; 
   padding: 5px 5px; 
@@ -75,7 +153,7 @@
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); 
 }
 
-.login-card{
+.register-card{
   position: relative;
   display: flex;
   justify-content: center;
@@ -85,7 +163,7 @@
   transition: box-shadow 0.3s, transform 0.3s;
   background-color:rgba(255, 255, 255, 0.5);
 }
-.login-card:hover {
+.register-card:hover {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5); 
   transform: scale(1.1); 
 }
@@ -93,27 +171,21 @@
   display: grid;
   grid-template-columns: max-content 1fr;
   align-items: center;
-  margin-bottom: 10%;
-}
-.input-info-2 {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  align-items: center;
-  margin-bottom: 8%;
+  margin-bottom: 5%;
 }
 
 .label {
   font-size: 14px; 
   justify-self: end;
-  margin-right: 10px;
+  margin-right: 5px;
 }
-.login-text{
+.register-text{
   font-size: 24px; 
   padding-top: 1%;
-  padding-bottom: 10%;
+  padding-bottom: 3%;
   margin-bottom: 5%;
 }
-.login-bt {
+.register-bt {
   overflow: hidden;
   position: relative;
   border: 2px solid rgb(0, 0, 0)!important;
@@ -123,12 +195,14 @@
   color:rgb(0, 0, 0)!important;
   border: none;
   border-radius: 5px;
-  width:50%;
+  width:30%;
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2)!important;
   cursor: pointer;
+  margin-top: 3%;
+  margin-bottom: 3%;
 }
 /* 创建一个覆盖按钮的伪元素 */
-.login-bt::before{
+.register-bt::before{
   content:"";
   position:absolute;
   width: 50%;
@@ -136,10 +210,10 @@
   background-color: rgba(255, 255, 255, 0.5)!important;
   transform: skew(45deg) translate3d(-200px,0,0);
 }
-.login-bt:hover {
+.register-bt:hover {
   background-color:rgba(0, 0, 0, 0.5)!important;
 }
-.login-bt:hover::before {
+.register-bt:hover::before {
   transition: ease-in-out .8s; 
   transform: skew(45deg) translate3d(200px,0,0);
 }
