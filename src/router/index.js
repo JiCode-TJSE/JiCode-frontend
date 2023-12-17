@@ -1,14 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import LoginView from '../views/login/LoginView.vue'
-import RegisterView from '../views/login/RegisterView.vue'
-import ProjectReqView from '@/components/SideBar.vue'
+import HomeView from '@/views/HomeView.vue'
+import LoginView from '@/views/login/LoginView.vue'
+import RegisterView from '@/views/login/RegisterView.vue'
+import ProjectManageView from '@/views/project/ProjectManageView.vue'
 
 const routes = [
   {
     path: '/',
     name: 'home',
-    component: HomeView
+    //redirect: "/homepage/:selected?",
+    component: HomeView,
+    props: true,
   },
   {
     path: '/login',
@@ -23,7 +25,8 @@ const routes = [
   {
     path: '/project',
     name: 'project',
-    component: ProjectReqView
+    component: ProjectManageView,
+    //props: true,
   },
 ]
 
