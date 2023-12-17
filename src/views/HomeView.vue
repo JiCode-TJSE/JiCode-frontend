@@ -3,7 +3,7 @@
   <el-container class="src-container">
     <!--侧边导航栏-->
     <el-aside width="13%" class="sideBarContainer">
-      <SideBar2 :selectedMenu="selectedMenu" @MenuSelect="handleSelect" />
+      <SideBar :selectedMenu="selectedMenu" @MenuSelect="handleSelect" />
     </el-aside>
 
     <el-container>
@@ -65,7 +65,7 @@ import {
   SwitchFilled,
   QuestionFilled,
 } from '@element-plus/icons-vue'
-import SideBar2 from "@/components/SideBar2.vue";
+import SideBar from "@/components/SideBar.vue";
 import ProjectManageView from "@/views/project/ProjectManageView.vue"
 
 import ProjectSideBar from "@/components/project/ProjectSideBar.vue"
