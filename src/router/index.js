@@ -1,16 +1,20 @@
 import { createRouter, createWebHistory } from 'vue-router'
+
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/login/LoginView.vue'
 import RegisterView from '../views/login/RegisterView.vue'
 import ForgetPwdView from '../views/login/ForgetPwdView.vue'
-import ProjectReqView from '@/components/SideBar.vue'
 import allproductsView from '@/views/product/allproductsView.vue'
+import ProjectManageView from '@/views/project/ProjectManageView.vue'
+
 
 const routes = [
   {
     path: '/',
     name: 'home',
-    component: HomeView
+    //redirect: "/homepage/:selected?",
+    component: HomeView,
+    props: true,
   },
   {
     path: '/login',
@@ -31,7 +35,8 @@ const routes = [
 
     path: '/project',
     name: 'project',
-    component: ProjectReqView
+    component: ProjectManageView,
+    //props: true,
   },
   {
     path: '/allproducts',

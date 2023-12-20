@@ -1,24 +1,20 @@
 <template>
-    <!-- 顶部组织名称+图标 -->
     <el-container>
+        <el-header class="header">
 
-        <el-aside width="195px" height="100%">
+            <el-icon size="45">
+                <ElementPlus />
+            </el-icon>
+            <span>
+                {{ info.userName }}
+            </span>
 
-            <el-row class="header">
-                <el-icon size="45">
-                    <ElementPlus />
-                </el-icon>
-                <span>
-                    <!-- {{ info.userName }} -->
-                    王琳的公司
-                </span>
-            </el-row>
+        </el-header>
 
-            <!--to do：侧边栏可以隐藏-->
-            <!-- <button @click="toggleSidebar">Toggle Sidebar</button> -->
+        <el-main class="sidebar">
 
-            <el-menu class="sidebar" active-text-color="#ffd04b" background-color="#545c64" default-active="workBench"
-                @select="MenuSelect" text-color="white"><!--给元素绑定监听器-->
+            <el-menu class="menu" active-text-color="#79bbff" background-color="#393f44" text-color="white"
+                :default-active="selectedMenu" @select="MenuSelect">
                 <el-menu-item index="workBench">
                     <span>
                         <el-icon>
@@ -48,18 +44,17 @@
                     </el-icon>
                     <span>账号设置</span>
                 </el-menu-item>
-                <el-menu-item index="aappMarket">
+                <el-menu-item index="appMarket">
                     <el-icon>
                         <Shop />
                     </el-icon>
                     <span>应用市场</span>
                 </el-menu-item>
             </el-menu>
-
-        </el-aside>
+        </el-main>
     </el-container>
 </template>
-  
+
 <script setup>
 import {
     Coin,
@@ -69,11 +64,19 @@ import {
     ElementPlus,
     Shop,
 } from '@element-plus/icons-vue'
-//import { useRoute } from 'vue-router';
-import { defineEmits, defineProps, ref, watch } from 'vue'
+import { reactive, computed } from 'vue'
+import store from '@/store';
+import { defineEmits } from 'vue' //子组件传值给父组件
+import { defineProps } from 'vue' //子组件接收来自父组件的值
 
-//const route = useRoute(); // 获取路由对象
+/* eslint-disable */
 
+
+const info = reactive({
+    userName: computed(() => {
+        return store.state.user.username;
+    })
+})
 // 接受来自父组件的初始菜单项
 const props = defineProps({
     selectedMenu: String, //模板template可直接使用
@@ -81,15 +84,9 @@ const props = defineProps({
 
 const emit = defineEmits(['MenuSelect']);//定义传值给父组件的方法
 
-const selectedMenu = ref(props.selectedMenu); // 使用 ref 创建响应式的本地属性
-// 监听 props 的变化，更新本地 selectedMenu 属性
-watch(() => props.selectedMenu, (newValue) => {
-    selectedMenu.value = newValue;
-});
-
 // 菜单项选择响应函数
 const MenuSelect = (value) => {
-    selectedMenu.value = value;
+    props.selectedMenu = value;
 
     //传给父组件的数据
     let param = {
@@ -98,27 +95,37 @@ const MenuSelect = (value) => {
     //传递给父组件
     emit('MenuSelect', param);
 }
-
+//用户角色：buyer/seller
+//const role = store.state.user.role;//"seller"或"buyer"
 </script>
-  
-<style>
+
+<style scoped>
 .header {
+    width: 100%;
     color: white;
-    background-color: #545c64;
-    padding-top: 20px;
-    height: 80px;
+    background-color: #393f44;
+    padding-top: 30px;
+    height: 20%;
+    display: flex;
+    flex-direction: row;
     align-items: center;
-    width: 195px;
-    justify-content: center;
     font-size: larger;
 }
 
-.sidebar {
+.sidebar .menu {
+
     width: 195px;
+}
+
+.sidebar {
+
+    width: 13%;
     /*元素的高度设置为视口高度的百分比，填满整个网页*/
-    height: 800px;
-    /* min-height: 400px; */
+    margin-top: 5%;
+    height: 100%;
     background-color: #393f44;
     position: fixed;
+    padding-left: 0%;
+    padding-top: 25px;
 }
 </style>
