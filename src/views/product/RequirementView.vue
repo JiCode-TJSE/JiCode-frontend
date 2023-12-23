@@ -2,7 +2,10 @@
     <el-container class="container" id="allrequire">
         <el-header class="header">
           <h1 class="title" style="color: black;">全部需求</h1>
+          <div class="buttons-container">
+          <el-button type="danger" :icon="Delete" class="deleterequire" @click="deleteSelectedRequirements"/>
           <el-button class="addrequire" type="primary" @click="showDialog"><el-icon><Plus /></el-icon>&nbsp;&nbsp;新建需求</el-button>
+          </div>
         </el-header>
         <el-main class="main">
           <el-table
@@ -116,23 +119,53 @@
   </template>
 
 <script setup>
-import {Plus} from '@element-plus/icons-vue'
-import {ref, reactive} from 'vue';
+import {Plus, Delete} from '@element-plus/icons-vue'
+import {ref,  reactive} from 'vue';
 import {onMounted} from 'vue';
-import { getRequireInPage, addRequire } from '@/api/require';
+import { getRequireInPage, updateRequire
+    // ,deleteRequire
+     } from '@/api/require';
 import { ElMessage } from 'element-plus';
 
-
-
+// 获取需求列表
 const allrequireData = ref([]);
-
-const multipleSelection = ref([]);  // 用于储存被选中的行的数据
-
+// 用于储存被选中的行的数据
+const multipleSelection = ref([]);  
+// 选择改变时更新被选中的行
 const handleSelectionChange = (val) => {
-  multipleSelection.value = val;  // 选择改变时更新被选中的行
+  multipleSelection.value = val;  
 }
 
+// 模拟需求列表数据
+const mockData = ref([
+  {
+    number: '1',
+    title: '需求1',
+    state: '待评审',
+    principal: '负责人A',
+    date: '2023-01-01',
+    product: '产品1',
+    parts: '模块1',
+    source: '内部需求',
+    type: '安全需求',
+    desc: '描述信息1',
+  },
+  {
+    number: '2',
+    title: '需求1',
+    state: '待评审',
+    principal: '负责人A',
+    date: '2023-01-01',
+    product: '产品1',
+    parts: '模块1',
+    source: '内部需求',
+    type: '安全需求',
+    desc: '描述信息1',
+  },
+  
+]);
 
+// 新建需求时的表单信息
 const form = reactive({
     number: '', // 编号
     title: '', //标题（需求名字）
@@ -226,7 +259,6 @@ const source_options = [
   },
 ]
 
-
 const getTypeColor = (type) => {
   switch (type) {
     case '功能需求' :
@@ -259,126 +291,85 @@ const getfromback = Array.from({ length: 10000 }).map((_, idx) => ({
 
 
 
-// 分页
+/**
+ * 分页部分逻辑
+ */
 const currentPage = ref(1);
 const pageSize = 1;
-
-const total = ref(allrequireData.value.length);
-
-
-// const getAllRequire = () => {
-//   getRequireInPage({
-//     pageSize: pageSize,
-//     pageIndex: currentPage.value,
-//     number: '', // 编号
-//     title: '', //标题（需求名字）
-//     state: '', //状态
-//     principal: '', //负责人
-//     date: '', // 创建时间
-//     product: '', //所属产品
-//     parts: '', //所属模块
-//     source: '', //需求来源
-//     type: '', //需求类型
-//     desc: '', //描述
-//   })
-//     .then(resp => {
-//       allrequireData.value=resp.data.records;
-//       total.value=resp.data.total;
-//       console.log(resp);
-
-//       ElMessage({
-//           message: '拉取产品成功',
-//           type: 'success',
-//         })
-//         console.log(resp);
-//     })
-//     .catch(err => {
-//       console.log(err);
-//       ElMessage.error('拉取产品失败');
-//     })
-// }
-
-
-
-
-//以下是点击新建需求之后的逻辑
-
-const dialogTableVisible = ref(false);
-
-const showDialog = () => {
-  dialogTableVisible.value = true;
-};
-
-
-const handleClose = () => {
-  dialogTableVisible.value = false;
-};
-
-// const submitForm = () => {
-//   allrequireData.value.push({
-//     number: form.number,
-//     title: form.title,
-//     state: form.state,
-//     date: new Date(),
-//     principal: form.principal,
-//     product: form.product, //所属产品
-//     parts: form.parts, //所属模块
-//     source: form.source, //需求来源
-//     type: form.type, //需求类型
-//     desc: form.desc, //描述
-//   });
-//   addRequire(form.value)
-//     .then(resp => {
-//       ElMessage({
-//           message: '添加产品成功',
-//           type: 'success',
-//         })
-//         console.log(resp);
-//     })
-//     .catch(err => {
-//       console.log(err);
-//       ElMessage.error('添加产品失败');
-//     })
-//   handleClose();
-// }
-
-onMounted(() => {
-  getPageDataFromServer();
-})
+const total = ref(1);
 
 const getPageDataFromServer = () => {
   getRequireInPage({
     pageSize: pageSize,
     currentPage: currentPage.value,
-    number: form.number,
-    title: form.title,
-    state: form.state,
-    principal: form.principal,
-    date: form.date,
-    product: form.product,
-    parts: form.parts,
-    source: form.source,
-    type: form.type,
-    desc: form.desc,
+    number: null,
+    title: null,
+    state: null,
+    principal: null,
+    date: null,
+    product: null,
+    parts: null,
+    source: null,
+    type: null,
+    desc: null,
   })
     .then(resp => {
-      allrequireData.value = resp.data.records;
-      total.value = resp.data.total;
+      allrequireData.value = [];
       console.log(resp);
+      for(let i=0;i<resp.data.records.length;i++){
+        allrequireData.value.push({
+            title: resp.data.records[i].title,
+            state: resp.data.records[i].state,
+            principal: resp.data.records[i].principal,
+            date: resp.data.records[i].date,
+            product: resp.data.records[i].product,
+            parts: resp.data.records[i].parts,
+            source: resp.data.records[i].source,
+            type: resp.data.records[i].type,
+            desc: resp.data.records[i].desc,
+        })
+      }
+      total.value = resp.data.total;
       ElMessage({
-        message: '拉取产品成功',
+        message: '拉取需求成功',
         type: 'success',
       });
     })
     .catch(err => {
       console.log(err);
-      ElMessage.error('拉取产品失败');
+      ElMessage.error('拉取需求失败');
     })
 }
 
+// 分页请求
 const handlePageChange = (newPage) => {
   currentPage.value = newPage;
   getPageDataFromServer();
+};
+
+// 初始调用
+onMounted(() => {
+  // 测试数据
+  allrequireData.value = mockData.value;
+  total.value = mockData.value.length;
+
+  getPageDataFromServer();
+})
+
+/**
+ * TODO：删除选择的需求部分逻辑
+ */
+
+
+/**
+ * 新建需求部分逻辑
+ */
+const dialogTableVisible = ref(false);
+const showDialog = () => {
+  dialogTableVisible.value = true;
+};
+const handleClose = () => {
+  dialogTableVisible.value = false;
 };
 
 const submitForm = () => {
@@ -393,20 +384,22 @@ const submitForm = () => {
     type: form.type,
     desc: form.desc,
   };
-  addRequire(submitData)
+  updateRequire(submitData)
     .then(resp => {
+        // 直接在前端添加：之后删掉
+        allrequireData.value.push(resp.data);
         console.log(resp);
-      ElMessage({
-          message: '添加产品成功',
+        ElMessage({
+          message: '添加需求成功',
           type: 'success',
         })
-      // 这里重新获取当前页的数据，确保新添加的项目能够出现在表格中
-      getPageDataFromServer();
-      handleClose();
+        // 从后端重新获取当前页的数据，确保新添加的项目能够出现在表格中
+        getPageDataFromServer();
+        handleClose();
     })
     .catch(err => {
       console.log(err);
-      ElMessage.error('添加产品失败');
+      ElMessage.error('添加需求失败');
     })
   
 }
@@ -440,6 +433,9 @@ const submitForm = () => {
 }
 .page{
     margin-bottom: 5%;
+}
+.buttons-container {
+  margin-left: auto;
 }
 .hidden-text::v-deep .el-input__inner {
     color: transparent!important;

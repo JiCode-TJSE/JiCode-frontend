@@ -12,7 +12,7 @@ export function deleteRequire(data) {
 }
 export function getRequireInPage(data) {
     return request({
-        url: "/api/require/get/",
+        url: "/api/require/pageQuery/",
         method: "POST",
         headers: {
             Authorization: "Bearer " + localStorage.getItem("jwtToken")
@@ -20,9 +20,9 @@ export function getRequireInPage(data) {
         data: data
     })
 }
-export function addRequire(data) {
+export function updateRequire(data) {
     return request({
-        url: "/api/require/add/",
+        url: "/api/require/update/",
         method: "POST",
         headers: {
             Authorization: "Bearer " + localStorage.getItem("jwtToken")
