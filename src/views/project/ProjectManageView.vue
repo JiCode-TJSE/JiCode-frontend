@@ -13,22 +13,37 @@
         </el-header>
         <el-container>
             <el-header>
-                <ProjectTopBar />
+                <ProjectTopBar :selectedMenu="selectedMenu" @MenuSelect="handleSelect" />
             </el-header>
             <el-main>
-                <AllProject />
+                <RouterView />
             </el-main>
         </el-container>
     </el-container>
 </template>
 
 <script setup>
-import AllProject from "@/components/project/AllProject.vue"
+/* eslint-disable */
 import ProjectTopBar from "@/components/project/ProjectTopBar.vue"
 import {
     SwitchFilled,
     QuestionFilled,
 } from '@element-plus/icons-vue'
+import { useRoute, useRouter } from 'vue-router'
+import { ref } from 'vue'
+
+const route = useRoute(); // 获取路由对象
+const router = useRouter();
+// 使用路由参数
+const selectedMenu = ref(route.params.selected || 'allProject');
+//默认进去就是全部项目
+router.push({ name: 'allProject' });
+//点击菜单项事件：
+const handleSelect = (val) => {
+    selectedMenu.value = val.item;
+    router.push({ name: val.item });
+}
+
 </script>
 
 <style scoped>

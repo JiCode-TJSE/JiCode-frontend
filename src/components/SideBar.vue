@@ -72,7 +72,6 @@ import { defineProps } from 'vue' //子组件接收来自父组件的值
 
 
 
-
 const info = reactive({
     userName: computed(() => {
         return store.state.user.username;
@@ -84,6 +83,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['MenuSelect']);//定义传值给父组件的方法
+
 
 // 菜单项选择响应函数
 const MenuSelect = (value) => {

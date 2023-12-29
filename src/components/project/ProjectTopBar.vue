@@ -1,7 +1,8 @@
 <template>
-    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="MenuSelect">
-        <el-menu-item index="allproject">全部项目</el-menu-item>
-        <el-menu-item index="filter">筛选器</el-menu-item>
+    <el-menu :default-active="selectedMenu" class="el-menu-demo" mode="horizontal" active-text-color="#79bbff"
+        @select="MenuSelect">
+        <el-menu-item index="allProject">全部项目</el-menu-item>
+        <el-menu-item index="projectFilter">筛选器</el-menu-item>
     </el-menu>
 </template>
 
@@ -12,13 +13,8 @@ import { reactive, computed } from 'vue'
 import { defineEmits } from 'vue' //子组件传值给父组件
 import { defineProps } from 'vue' //子组件接收来自父组件的值
 
-const activeIndex = ref('1')
 
-const info = reactive({
-    userName: computed(() => {
-        return store.state.user.username;
-    })
-})
+
 // 接受来自父组件的初始菜单项
 const props = defineProps({
     selectedMenu: String, //模板template可直接使用

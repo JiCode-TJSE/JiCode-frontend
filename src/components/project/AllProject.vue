@@ -2,7 +2,7 @@
     <el-container class="container">
         <el-header class="header">
             <div>
-                <span>项目管理</span>
+                <span>全部项目</span>
             </div>
             <el-button class="addProject" type="primary" @click="dialogFormVisible = true"><el-icon>
                     <Plus />
@@ -34,14 +34,6 @@
             </el-form-item>
             <el-form-item label="项目名称" :label-width="formLabelWidth" prop="name">
                 <el-input v-model="form.name" />
-            </el-form-item>
-            <el-form-item label="可见范围" :label-width="formLabelWidth" prop="visibility">
-                <el-select v-model="form.visibility" :options="options">
-
-                </el-select>
-            </el-form-item>
-            <el-form-item label="项目标识" :label-width="formLabelWidth" prop="label">
-                <el-input v-model="form.label" />
             </el-form-item>
             <el-form-item label="项目描述" :label-width="formLabelWidth" prop="desc">
                 <el-input v-model="form.desc" autocomplete="off" />
@@ -95,7 +87,7 @@ const dialogFormVisible = ref(false);
 const formLabelWidth = '140px';
 const router = useRouter();
 const goToSpecificProject = () => {
-    router.push({ name: 'SpecificProject' });
+    router.push({ name: 'specificProject' });
 };
 const form = reactive({
     name: '',
@@ -116,14 +108,7 @@ const rules = reactive({
         { required: true, message: 'Please input project name', trigger: 'blur' },
         { max: 32, message: '超过最大长度', trigger: 'blur' },
     ],
-    label: [
-        {
-            required: true,
-            message: 'Please select Activity zone',
-            trigger: 'blur',
-        },
-    ],
-    visibility: [{ required: true }],
+
     desc: [
         { max: 200, message: '超过最大长度', trigger: 'blur' },
     ],

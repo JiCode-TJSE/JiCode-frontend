@@ -1,6 +1,6 @@
 <template>
-    <el-container>
-        <el-header>
+    <el-container class="specificproject">
+        <el-header class="header">
             <TopBar :default-active="selectedMenu" selectedMenu="selectedMenu" @MenuSelect="handleSelect" />
         </el-header>
         <el-main class="main">
@@ -28,5 +28,17 @@ const handleSelect = (val) => {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.specificproject {
+    flex: 1;
+    height: 100%;
+    width: 87%;
+    position: absolute;
+}
+
+.main,
+.header {
+    padding: 0%;
+}
+</style>
   
