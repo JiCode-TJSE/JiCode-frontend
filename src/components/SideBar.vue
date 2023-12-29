@@ -56,6 +56,7 @@
 </template>
 
 <script setup>
+/* eslint-disable */
 import {
     Coin,
     Menu as IconMenu,
@@ -69,7 +70,7 @@ import store from '@/store';
 import { defineEmits } from 'vue' //子组件传值给父组件
 import { defineProps } from 'vue' //子组件接收来自父组件的值
 
-/* eslint-disable */
+
 
 
 const info = reactive({
@@ -95,8 +96,7 @@ const MenuSelect = (value) => {
     //传递给父组件
     emit('MenuSelect', param);
 }
-//用户角色：buyer/seller
-//const role = store.state.user.role;//"seller"或"buyer"
+
 </script>
 
 <style scoped>
