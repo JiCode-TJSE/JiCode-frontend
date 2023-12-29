@@ -16,8 +16,7 @@
           @selection-change="handleSelectionChange"
           >
             <el-table-column type="selection" width="50"></el-table-column>
-            <el-table-column prop="number" label="编号" sortable>
-            </el-table-column>
+
             <el-table-column prop="title" label="标题" sortable>
             </el-table-column>
 
@@ -37,8 +36,7 @@
 
             <el-table-column prop="principal" label="负责人" sortable>
             </el-table-column> 
-            <el-table-column prop="date" label="创建时间" sortable>
-            </el-table-column>     
+
           </el-table>
         </el-main>
         

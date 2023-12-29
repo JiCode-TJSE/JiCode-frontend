@@ -7,14 +7,6 @@
         <div class="label">&nbsp;&nbsp;&nbsp;&nbsp;邮箱：</div>
         <el-input v-model="registerform.email" placeholder="请输入邮箱" style="width: 390px;"></el-input>
       </div>
-      <div class="input-info-1 text-left">
-        <div class="label">验证码：</div>
-        <el-input placeholder="请输入验证码" v-model="registerform.code" show-password style="width: 205px;">
-          <template #append>
-            <el-button class="verification-button" @click="getVerificationCode">获取验证码</el-button>
-          </template>
-        </el-input>
-      </div>
       <el-row :gutter="20">
         <el-col :span="12">
           <div class="input-info-1">
@@ -37,7 +29,7 @@
 
 <script setup>
   import {ref} from 'vue';
-  import { sendEmailCode } from '@/api/emailCode';
+  // import { sendEmailCode } from '@/api/emailCode';
   import { doRegister } from '@/api/login';
   import { ElMessage } from 'element-plus';
   import router from '@/router';
@@ -48,55 +40,67 @@
     code: "",
     username:"",
     password:"",
+    teamname: "王琳的公司"
   });
 
-  let verifiedCode = '';
+  // let verifiedCode = '';
 
-  const getVerificationCode = () => {
-    const email = registerform.value.email.trim();
-    const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // const getVerificationCode = () => {
+  //   const email = registerform.value.email.trim();
+  //   const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    console.log('Email:', email);
+  //   console.log('Email:', email);
 
-    if (!email) {
-      ElMessage.error('邮箱不能为空');
-    } else if (!emailFormat.test(email)) {
-      ElMessage.error('请输入有效的邮箱地址');
-    } else {
+  //   if (!email) {
+  //     ElMessage.error('邮箱不能为空');
+  //   } else if (!emailFormat.test(email)) {
+  //     ElMessage.error('请输入有效的邮箱地址');
+  //   } else {
       
-      sendEmailCode(email)
-        .then(res => {
-          ElMessage.success(res.data.msg);
-          verifiedCode = res.data.verificationCode;
-        })
-        .catch(error => {
-          console.error('Error getting verification code:', error);
-          ElMessage.error('获取验证码失败');
-        });
-    }
-  };
+  //     sendEmailCode(email)
+  //       .then(res => {
+  //         ElMessage.success(res.data.msg);
+  //         verifiedCode = res.data.verificationCode;
+  //       })
+  //       .catch(error => {
+  //         console.error('Error getting verification code:', error);
+  //         ElMessage.error('获取验证码失败');
+  //       });
+  //   }
+  // };
 
   const register = () => {
     console.log('表单信息：', registerform.value);
-    if (!registerform.value.code) {
-      ElMessage.error('验证码不能为空');
-    } else if (!registerform.value.email) {
+    if (!registerform.value.email) {
       ElMessage.error('邮箱不能为空');
     } else if (!registerform.value.username) {
       ElMessage.error('用户名不能为空');
     } else if (!registerform.value.password) {
       ElMessage.error('密码不能为空');
-    } else if (registerform.value.code === verifiedCode) {
-      console.log('验证码发送成功');
-      ElMessage.success('验证码发送成功');
+    } else {
+      console.log('信息已经填写');
       doRegister(registerform.value)
         .then(resp => {
-          ElMessage({
-            message: '登录成功',
-            type: 'success',
-          })
+          console.log('resp');
           console.log(resp);
-          router.push("/login/");
+          console.log('resp.data');
+          console.log(resp.data);
+
+          if(resp.data==true){
+            ElMessage({
+              message: '注册成功，跳转登录页面',
+              type: 'success',
+            })
+            console.log(resp);
+            router.push("/login/");
+          }else{
+
+            ElMessage({
+              message: '注册失败',
+              type: 'warning',
+            })
+          }
+
         })
         .catch(resp => {
           ElMessage({
@@ -106,8 +110,7 @@
           console.log(resp);
         })
       
-    } else {
-      ElMessage.error('验证码错误');
+    
     }
   };
   

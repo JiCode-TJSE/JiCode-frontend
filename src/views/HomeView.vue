@@ -42,7 +42,7 @@
 
         <!-- 产品管理总页 -->
         <div v-else-if="selectedMenu === 'productManage'">
-
+          <allproductsView />
         </div>
 
         <!-- 账号设置总页 -->
@@ -67,12 +67,17 @@ import {
 } from '@element-plus/icons-vue'
 import SideBar from "@/components/SideBar.vue";
 import ProjectManageView from "@/views/project/ProjectManageView.vue"
-
+import allproductsView from "@/views/product/allproductsView.vue"
 import ProjectSideBar from "@/components/project/ProjectSideBar.vue"
-import { ref } from 'vue'
+import { ref} from 'vue'
 import { useRoute } from 'vue-router';
 
 const route = useRoute(); // 获取路由对象
+
+const accountId = route.params.accountId;
+console.log('accountId',accountId);
+
+
 // 使用路由参数
 const selectedMenu = ref(route.params.selected || 'projectManage');
 
