@@ -12,33 +12,42 @@
           ref="multipleTableRef"
           :data="allrequireData"
           style="width: 100%"
-          :default-sort = "{prop: 'date', order: 'descending'}"
           @selection-change="handleSelectionChange"
+          @row-click="handleRowClick"
           >
             <el-table-column type="selection" width="50"></el-table-column>
 
-            <el-table-column prop="title" label="标题" sortable>
+            <el-table-column prop="name" label="标题" sortable>
             </el-table-column>
 
-            <!-- 状态选择器 -->
-            <el-table-column prop="state" label="状态" sortable>
+            <!-- 类型选择器 -->
+            <el-table-column prop="typeEnum" label="类型">
                 <template #default="scope">
-                    <el-select v-model="scope.row.state" class="hidden-text" placeholder="Select" popper-class="no-border">
+                    <el-select v-model="scope.row.typeEnum" class="hidden-text" placeholder="Select" popper-class="no-border">
                         <template #prefix>
-                            <el-tag :type="getStateColor(scope.row.state)">{{scope.row.state}}</el-tag>
+                            <el-tag :type="getTypeColor(scope.row.state)">{{scope.row.typeEnum}}</el-tag>
                         </template>
-                        <el-option v-for="item in state_options" :key="item.value" :value="item.value">
-                            <el-tag :type="getStateColor(item.value)">{{ item.label }}</el-tag>
+                        <el-option v-for="item in type_options" :key="item.value" :value="item.value">
+                            <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
                         </el-option>
                     </el-select>
                 </template>
             </el-table-column>
 
-            <el-table-column prop="principal" label="负责人" sortable>
+            <el-table-column prop="supervisorName" label="负责人">
             </el-table-column> 
+
+            <el-table-column label="操作">
+              <template v-slot="{ row }">
+                <el-button type="danger" @click="deleteRequireForRow(row)" :icon="Delete" ></el-button>
+                <!-- <el-button type="primary" @click="editRequireForRow(row)" :icon="Edit" ></el-button> -->
+              </template>
+            </el-table-column>
 
           </el-table>
         </el-main>
+
+
         
         <!-- 新建需求 -->
         <el-dialog v-model="dialogTableVisible" title="新建需求" @close="handleClose">
@@ -46,11 +55,11 @@
             <el-col :span="13">
                 <el-form :model="form" label-width="80px">
                     <el-form-item label="标题">
-                    <el-input v-model="form.title"></el-input>
+                    <el-input v-model="form.name"></el-input>
                     </el-form-item>
                     <el-form-item label="描述">
                         <el-input
-                            v-model="form.desc"
+                            v-model="form.detail"
                             :autosize="{ minRows: 4, maxRows: 8 }"
                             type="textarea"
                             placeholder="Please input"
@@ -67,22 +76,22 @@
             <el-col :span="10">
                 <el-form :model="form" label-width="80px">
                     <el-form-item label="所属产品">
-                        <el-select v-model="form.state" :options="getfromback">
+                        <el-select v-model="form.belongProductId" :options="getfromback">
                         </el-select>
                     </el-form-item>
                     <el-form-item label="模块">
-                        <el-select v-model="form.parts" :options="getfromback">
+                        <el-select v-model="form.moduleEnum" :options="getfromback">
                         </el-select>
                     </el-form-item>
                     <el-form-item label="负责人">
-                        <el-select v-model="form.principal" :options="getfromback">
+                        <el-select v-model="form.supervisorId" :options="getfromback">
                         </el-select>
                     </el-form-item>
                     <el-form-item label="需求类型">
                         <!-- <template #default="scope"> -->
-                            <el-select v-model="form.type" class="hidden-text" placeholder="Select" popper-class="no-border">
+                            <el-select v-model="form.typeEnum" class="hidden-text" placeholder="Select" popper-class="no-border">
                                 <template #prefix>
-                                    <el-tag :type="getTypeColor(form.type)">{{form.type}}</el-tag>
+                                    <el-tag :type="getTypeColor(form.typeEnum)">{{form.typeEnum}}</el-tag>
                                 </template>
                                 <el-option v-for="item in type_options" :key="item.value" :value="item.value">
                                     <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
@@ -92,9 +101,9 @@
                     </el-form-item>
                     <el-form-item label="需求来源">
                         <!-- <template #default="scope"> -->
-                            <el-select v-model="form.source" class="hidden-text" placeholder="Select" popper-class="no-border">
+                            <el-select v-model="form.sourceEnum" class="hidden-text" placeholder="Select" popper-class="no-border">
                                 <template #prefix>
-                                    <el-tag :type="getTypeColor(form.source)">{{form.source}}</el-tag>
+                                    <el-tag :type="getTypeColor(form.sourceEnum)">{{form.sourceEnum}}</el-tag>
                                 </template>
                                 <el-option v-for="item in source_options" :key="item.value" :value="item.value">
                                     <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
@@ -117,11 +126,13 @@
   </template>
 
 <script setup>
-import {Plus, Delete} from '@element-plus/icons-vue'
+// import {Edit} from '@element-plus/icons-vue';
+import {Plus, Delete} from '@element-plus/icons-vue';
 import {ref,  reactive} from 'vue';
 import {onMounted} from 'vue';
-import { getRequireInPage, updateRequire
-    // ,deleteRequire
+import { getRequireInPage, addRequire ,deleteRequire
+  // , updateRequire
+    // , getRequireDetail
      } from '@/api/require';
 import { ElMessage } from 'element-plus';
 
@@ -134,90 +145,16 @@ const handleSelectionChange = (val) => {
   multipleSelection.value = val;  
 }
 
-// 模拟需求列表数据
-const mockData = ref([
-  {
-    number: '1',
-    title: '需求1',
-    state: '待评审',
-    principal: '负责人A',
-    date: '2023-01-01',
-    product: '产品1',
-    parts: '模块1',
-    source: '内部需求',
-    type: '安全需求',
-    desc: '描述信息1',
-  },
-  {
-    number: '2',
-    title: '需求1',
-    state: '待评审',
-    principal: '负责人A',
-    date: '2023-01-01',
-    product: '产品1',
-    parts: '模块1',
-    source: '内部需求',
-    type: '安全需求',
-    desc: '描述信息1',
-  },
-  
-]);
-
 // 新建需求时的表单信息
 const form = reactive({
-    number: '', // 编号
-    title: '', //标题（需求名字）
-    state: '', //状态
-    principal: '', //负责人
-    date: '', // 创建时间
-    product: '', //所属产品
-    parts: '', //所属模块
-    source: '', //需求来源
-    type: '', //需求类型
-    desc: '', //描述
+  name: '', //标题（需求名字）
+  supervisorId: '', //负责人
+  moduleEnum: '', //所属模块
+  sourceEnum: '', //需求来源
+  typeEnum: '', //需求类型
+  detail: '', //描述
+  belongProductId:'',
 });
-
-
-
-const state_options = [
-  {
-    value: '待评审',
-    label: '待评审',
-  },
-  {
-    value: '已计划',
-    label: '已计划',
-  },
-  {
-    value: '进行中',
-    label: '进行中',
-  },
-  {
-    value: '已完成',
-    label: '已完成',
-  },
-  {
-    value: '已关闭',
-    label: '已关闭',
-  },
-]
-
-const getStateColor = (state) => {
-  switch (state) {
-    case '待评审':
-      return 'warning';
-    case '已计划':
-      return 'info';
-    case '进行中':
-      return 'primary';
-    case '已完成':
-      return 'success';
-    case '已关闭':
-      return 'danger';
-    default:
-      return '';
-  }
-};
 
 const type_options = [
   {
@@ -280,8 +217,6 @@ const getTypeColor = (type) => {
   }
 };
 
-
-
 const getfromback = Array.from({ length: 10000 }).map((_, idx) => ({
     value: `${idx + 1}`,
     label: `${idx + 1}`,
@@ -293,40 +228,25 @@ const getfromback = Array.from({ length: 10000 }).map((_, idx) => ({
  * 分页部分逻辑
  */
 const currentPage = ref(1);
-const pageSize = 1;
+const pageSize = 8;
 const total = ref(1);
 
 const getPageDataFromServer = () => {
   getRequireInPage({
     pageSize: pageSize,
     currentPage: currentPage.value,
-    number: null,
-    title: null,
-    state: null,
-    principal: null,
-    date: null,
-    product: null,
-    parts: null,
-    source: null,
-    type: null,
-    desc: null,
+    requirementId: null,
+    name: null,
+    supervisorName: null,
+    typeEnum: null,
   })
     .then(resp => {
-      allrequireData.value = [];
-      console.log(resp);
-      for(let i=0;i<resp.data.records.length;i++){
-        allrequireData.value.push({
-            title: resp.data.records[i].title,
-            state: resp.data.records[i].state,
-            principal: resp.data.records[i].principal,
-            date: resp.data.records[i].date,
-            product: resp.data.records[i].product,
-            parts: resp.data.records[i].parts,
-            source: resp.data.records[i].source,
-            type: resp.data.records[i].type,
-            desc: resp.data.records[i].desc,
-        })
-      }
+      console.log('getRequireInPage', resp);
+
+      // 添加需求数据到 allrequireData 数组
+      allrequireData.value = resp.data.records; // 假设响应中的需求数据在 records 字段中
+
+
       total.value = resp.data.total;
       ElMessage({
         message: '拉取需求成功',
@@ -347,16 +267,39 @@ const handlePageChange = (newPage) => {
 
 // 初始调用
 onMounted(() => {
-  // 测试数据
-  allrequireData.value = mockData.value;
-  total.value = mockData.value.length;
-
   getPageDataFromServer();
 })
 
 /**
  * TODO：删除选择的需求部分逻辑
  */
+
+
+/**
+ * 删除某一行的需求
+ */
+  const deleteRequireForRow = (row) => {
+  console.log('Row Object:', row);
+  const id = row.requirementId; // 获取要删除的产品的 ID
+  deleteRequire({id}) // 调用删除产品的 API 函数
+    .then((resp) => {
+      console.log('resp for deleteRequire',resp);
+      console.log(resp.code);
+      if(resp.code === 0){
+        // 更新前端产品列表，移除已删除的产品
+        allrequireData.value = allrequireData.value.filter(require => require.requirementId !== id);
+        ElMessage.success('产品删除成功');
+      } else {
+        ElMessage.error('产品删除失败');
+      }
+    })
+    .catch(error => {
+      console.error('删除产品失败:', error);
+      ElMessage.error('产品删除失败');
+    });
+};
+
+
 
 
 /**
@@ -372,20 +315,16 @@ const handleClose = () => {
 
 const submitForm = () => {
   const submitData = {
-    title: form.title,
-    state: form.state,
-    principal: form.principal,
-    date: form.date,
-    product: form.product,
-    parts: form.parts,
-    source: form.source,
-    type: form.type,
-    desc: form.desc,
+    name: form.name,
+    supervisorId: form.supervisorId,
+    moduleEnum: form.moduleEnum,
+    sourceEnum: form.sourceEnum,
+    typeEnum: form.typeEnum,
+    detail: form.detail,
+    belongProductId:form.belongProductId,
   };
-  updateRequire(submitData)
-    .then(resp => {
-        // 直接在前端添加：之后删掉
-        allrequireData.value.push(resp.data);
+  addRequire(submitData)
+    .then(resp => {    
         console.log(resp);
         ElMessage({
           message: '添加需求成功',
@@ -401,6 +340,69 @@ const submitForm = () => {
     })
   
 }
+
+/**
+ * 需求详情部分逻辑：获取、修改
+ */
+const selectedRow = ref(null); 
+const detailDialogVisible = ref(false); 
+
+const handleRowClick = (row) => {
+  selectedRow.value = row; 
+  detailDialogVisible.value = true; 
+};
+
+// const detailform = {
+//   name: "示例需求",
+//   detail: "这是一个示例需求的描述。",
+//   moduleEnum: "模块A",
+//   sourceEnum: "用户反馈",
+//   typeEnum: "功能需求",
+//   supervisorName: "负责人A",
+//   belongProductId: "产品ID",
+//   clientArr: [
+//     {
+//       clientId: "clientID1",
+//       name: "客户A",
+//     },
+//     {
+//       clientId: "clientID2",
+//       name: "客户B",
+//     },
+//   ],
+//   supervisor: [
+//     {
+//       supervisorId: "string",
+//       supervisorName: "string"
+//     },
+//   ],
+//   backlogItemArr: [
+//     {
+//       backlogItemId: "backlogItemID1",
+//       name: "工作项A",
+//     },
+//     {
+//       backlogItemId: "backlogItemID2",
+//       name: "工作项B",
+//     },
+//   ],
+//   versionArr: [
+//     {
+//       id: "versionID1",
+//       name: "版本A",
+//       detail: "版本A详情",
+//       createTime: "创建时间"
+//     },
+//     {
+//       id: "versionID2",
+//       name: "版本B",
+//       detail: "版本B详情",
+//       createTime: "创建时间"
+//     },
+//   ],
+// };
+
+
 
 </script>
 <style scoped>
@@ -430,7 +432,7 @@ const submitForm = () => {
   flex: 1; 
 }
 .page{
-    margin-bottom: 5%;
+    margin-bottom: 10%;
 }
 .buttons-container {
   margin-left: auto;

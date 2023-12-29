@@ -82,8 +82,8 @@
     </el-container>
   </template>
   <script setup>
-  import {Edit, Delete} from '@element-plus/icons-vue'
-  import {Plus} from '@element-plus/icons-vue'
+  import {Edit, Delete} from '@element-plus/icons-vue';
+  import {Plus} from '@element-plus/icons-vue';
   import {ref, reactive} from 'vue';
   import {onMounted} from 'vue';
   import { addProduct } from '@/api/product';
