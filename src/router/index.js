@@ -16,7 +16,9 @@ import ProjectSprint from '@/components/project/ProjectSprint.vue'
 import ProjectSetting from '@/components/project/ProjectSetting.vue'
 import RequirementView from '@/views/product/RequirementView.vue'
 import ProductManageView from '@/views/product/ProductManageView.vue'
-
+import AccountSetView from '@/views/account/AccountSetView.vue'
+import AccountBoard from '@/views/account/AccountBoard.vue'
+import AccountInfo from '@/views/account/AccountInfo.vue'
 const routes = [
   {
     path: '/',
@@ -84,6 +86,28 @@ const routes = [
         name: 'ProductManage',
         component: ProductManageView,
         props: true,
+      },
+      {
+        path: '/account',
+        name: 'accountSet',
+        component: AccountBoard,
+        redirect: '/account/info', // 添加重定向
+        children: [
+          {
+            path: 'setting', // 注意去掉了 /account，因为它已经在父路由中指定
+            name: 'setting',
+            component: AccountSetView,
+          },
+          {
+            path: '', // 使 /account 默认指向 AccountInfo
+            name: 'info',
+            component: AccountInfo,
+          },
+          {
+            path: 'info', // 提供一个明确的路径到 AccountInfo
+            component: AccountInfo,
+          },
+        ]
       },
     ],
     props: true,
