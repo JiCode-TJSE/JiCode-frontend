@@ -20,7 +20,8 @@ const route = useRoute(); // 获取路由对象
 const router = useRouter();
 // 使用路由参数
 const selectedMenu = ref(route.params.selected || 'overview');
-
+//默认打开页面改成工作台
+router.push({ name: 'overview' });
 //点击菜单项事件：
 const handleSelect = (val) => {
     selectedMenu.value = val.item;

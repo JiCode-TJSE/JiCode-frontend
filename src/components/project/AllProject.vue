@@ -92,14 +92,12 @@ const goToSpecificProject = () => {
 const form = reactive({
     name: '',
     owner: '',
-    label: '',
-    visibility: '',
     desc: '',
 });
-const options = Array.from({ length: 10000 }).map((_, idx) => ({
-    value: `${idx + 1}`,
-    label: `${idx + 1}`,
-}))
+// const options = Array.from({ length: 10000 }).map((_, idx) => ({
+//     value: `${idx + 1}`,
+//     label: `${idx + 1}`,
+// }))
 
 
 const rules = reactive({

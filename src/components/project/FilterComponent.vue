@@ -3,7 +3,7 @@
         <el-col :span="12">
             <Card>
                 我参与的工作项
-                <el-table :data="tableData" border style="width: 100%" height="250">
+                <el-table :data="tableData" border style="width: 100%" height="500px">
                     <el-table-column fixed prop="name" label="标题" width="180" />
                     <el-table-column prop="state" label="状态" />
                     <el-table-column prop="priority" label="优先级" />
