@@ -79,6 +79,12 @@ const routes = [
           },
         ]
       },
+      {
+        path: '/product/:id',
+        name: 'ProductManage',
+        component: ProductManageView,
+        props: true,
+      },
     ],
     props: true,
   },
@@ -98,13 +104,7 @@ const routes = [
     name: 'forgetpwd',
     component: ForgetPwdView
   },
-  {
 
-    path: '/project',
-    name: 'project',
-    component: ProjectManageView,
-    //props: true,
-  },
   {
     path: '/allproducts',
     name: 'allproducts',
@@ -115,11 +115,7 @@ const routes = [
     name: 'requirement',
     component: RequirementView
   },
-  {
-    path: '/product/:id',
-    name: 'ProductManage',
-    component: ProductManageView
-  }
+
 
 ]
 

@@ -30,7 +30,12 @@ router.push({ name: 'projectManage' });
 //点击菜单项事件：
 const handleSelect = (val) => {
   selectedMenu.value = val.item;
-  router.push({ name: val.item });
+  //router.push({ name: val.item });
+  if (val.item === 'ProductManage') {
+    router.push({ name: val.item, params: { id: '1' } });
+  } else {
+    router.push({ name: val.item });
+  }
 }
 
 </script>
