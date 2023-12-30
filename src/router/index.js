@@ -59,7 +59,7 @@ const routes = [
           },
           {
             path: '/specificProject/requirement',
-            name: 'requirement',
+            name: 'projectRequirement',
             component: ProjectAllRequirement,
           },
           {

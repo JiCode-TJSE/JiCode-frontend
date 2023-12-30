@@ -10,7 +10,7 @@
             <el-menu :default-active="activeIndex" mode="horizontal" border-bottom:="none" @select="MenuSelect">
 
                 <el-menu-item index="overview">概览</el-menu-item>
-                <el-menu-item index="requirement">需求</el-menu-item>
+                <el-menu-item index="projectRequirement">需求</el-menu-item>
                 <el-menu-item index="sprint">迭代</el-menu-item>
                 <el-menu-item index="publish">发布</el-menu-item>
                 <el-menu-item index="setting">设置</el-menu-item>
