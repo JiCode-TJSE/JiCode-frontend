@@ -111,6 +111,7 @@
   import { updateProduct } from '@/api/product';
   import { ElMessage } from 'element-plus';
   import { useRouter } from 'vue-router';
+  import store from '@/store';
 
   const router = useRouter(); 
 
@@ -142,12 +143,15 @@
    * 获取产品列表
    */
   const getAllProduct = () => {
+    const accountId = store.state.user.account_id; // 从 Vuex 中获取 account_id
+    console.log('accountId',accountId);
     getProduct({
       title: '',
       mark: '',
       team_name: '',
       detail: '',
       id:'',
+      account_id: accountId, // 将 account_id 作为查询参数传递
     })
       .then(resp => {
         console.log('resp');
