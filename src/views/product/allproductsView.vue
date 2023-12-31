@@ -154,8 +154,7 @@
       account_id: accountId, // 将 account_id 作为查询参数传递
     })
       .then(resp => {
-        console.log('resp');
-        console.log(resp);
+        console.log('resp', resp);
         allproductsData.value = resp.data.records;
         ElMessage({
             message: '拉取产品成功',
