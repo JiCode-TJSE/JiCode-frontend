@@ -48,8 +48,8 @@
                 </el-table-column>
             </el-table>
 
-            <!-- 新建需求 -->
-            <el-dialog v-model="dialogTableVisible" title="新建客户" @close="handleClose">
+            <!-- 新建客户 -->
+            <el-dialog v-model="dialogTableVisible" title="新建客户" @close="handleTableClose">
             <el-row :gutter="20">
                 <el-col :span="13">
                     <el-form :model="form" label-width="80px">
@@ -101,6 +101,41 @@
             </el-row>
             </el-dialog>
 
+            <!-- 客户个人信息及修改添加等 -->
+            <el-dialog v-model="dialogVisible" title="客户信息" @close="handleClose">
+              <el-form :model="selectedClient" label-width="80px">
+                <el-form-item label="客户名称">
+                  <el-input v-model="selectedClient.name"></el-input>
+                </el-form-item>
+                <el-form-item label="客户介绍">
+                  <el-input
+                    v-model="selectedClient.detail"
+                    :autosize="{ minRows: 4, maxRows: 8 }"
+                    type="textarea"
+                    placeholder="Please input"
+                  />
+                </el-form-item>
+                <el-form-item label="等级">
+                      <el-input v-model="selectedClient.rank"></el-input>
+                  </el-form-item>
+                  <el-form-item label="规模">
+                      <el-input v-model="selectedClient.size"></el-input>
+                  </el-form-item>
+                  <el-form-item label="类别">
+                    <el-select v-model="selectedClient.type" class="hidden-text" placeholder="Select" popper-class="no-border">
+                        <template #prefix>
+                            <el-tag :type="getTypeColor(selectedClient.type)">{{selectedClient.type}}</el-tag>
+                        </template>
+                        <el-option v-for="item in type_options" :key="item.value" :value="item.value">
+                            <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                        </el-option>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item>
+                    <el-button type="primary" @click="handleSubmit">提交</el-button>
+                  </el-form-item>
+              </el-form>
+            </el-dialog>
         </el-main>
 
         <div class="page">
@@ -115,12 +150,7 @@
 import {Plus, Delete} from '@element-plus/icons-vue';
 import {ref,  reactive} from 'vue';
 import {onMounted} from 'vue';
-import { getClientInPage, 
-    addClient 
-    ,deleteClient
-//   // , updateClient
-//     // , getClientDetail
-     } from '@/api/client';
+import { getClientInPage, addClient, deleteClient, updateClient, getClientDetail } from '@/api/client';
 import { ElMessage } from 'element-plus';
 
 // 获取需求列表
@@ -131,7 +161,6 @@ const multipleSelection = ref([]);
 const handleSelectionChange = (val) => {
   multipleSelection.value = val;  
 }
-
 
 
 // 新建需求时的表单信息
@@ -222,7 +251,7 @@ const dialogTableVisible = ref(false);
 const showDialog = () => {
   dialogTableVisible.value = true;
 };
-const handleClose = () => {
+const handleTableClose = () => {
   dialogTableVisible.value = false;
 };
 
@@ -245,7 +274,7 @@ const submitForm = () => {
         })
         // 从后端重新获取当前页的数据，确保新添加的项目能够出现在表格中
         getPageDataFromServer();
-        handleClose();
+        handleTableClose();
     })
     .catch(err => {
       console.log(err);
@@ -257,7 +286,7 @@ const submitForm = () => {
 /**
  * 删除某一行的客户
  */
- const deleteClientForRow = (row) => {
+const deleteClientForRow = (row) => {
   console.log('Row Object:', row);
   const id = row.id; // 获取要删除的客户的 ID
   deleteClient({id})
@@ -277,6 +306,67 @@ const submitForm = () => {
       ElMessage.error('产品删除失败');
     });
 };
+
+/**
+ * 客户信息部分逻辑
+ */
+
+const dialogVisible = ref(false);
+const selectedClient = ref({});
+
+const handleClose = () => {
+  dialogVisible.value = false;
+};
+
+// 处理行点击事件
+const handleRowClick = (row) => {
+  
+  getClientDetail({ id: row.id }) // 传递选中行的ID作为查询参数
+    .then((response) => {
+      console.log('response',response);
+      if (response.code === true) {
+        ElMessage({
+          message: '获得客户详情成功',
+          type: 'success',
+        })
+        selectedClient.value = { ...response.data };
+        dialogVisible.value = true;
+      } else {
+        ElMessage.error('获得客户详情失败');
+        console.error(response.msg);
+      }
+    })
+    .catch((error) => {
+      ElMessage.error('获得客户详情失败');
+      console.error(error);
+    });
+
+    dialogVisible.value = true;
+};
+
+// 处理提交按钮点击事件
+const handleSubmit = () => {
+  updateClient(selectedClient.value)
+    .then((response) => {
+      console.log('updateClient response',response);
+      if (response.code === true) {
+        ElMessage({
+          message: '更新客户详情成功',
+          type: 'success',
+        })
+        console.log('更新成功');
+        dialogVisible.value = false;
+      } else {
+        ElMessage.error('更新客户详情失败');
+        console.error(response.msg);
+      }
+    })
+    .catch((error) => {
+      ElMessage.error('更新客户详情失败');
+      console.error(error);
+    });
+};
+
 </script>
 
 <style scoped>
