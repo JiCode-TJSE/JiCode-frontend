@@ -9,21 +9,21 @@
                 </el-icon>&nbsp;&nbsp;新建项目</el-button>
         </el-header>
         <el-main class="main">
-            <el-table :data="allproductsData" style="width: 100%" :default-sort="{ prop: 'date', order: 'descending' }"
+            <el-table :data="allProjectsData" style="width: 100%" :default-sort="{ prop: 'date', order: 'descending' }"
                 @selection-change="handleSelectionChange">
 
-                <el-table-column prop="project" label="项目" sortable>
+                <el-table-column prop="name" label="项目" sortable>
                     <template #default="{ row }">
                         <span @click="goToSpecificProject">{{ row.project }}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="belong" label="所属">
+                <el-table-column prop="organization_name" label="所属">
                 </el-table-column>
 
                 <el-table-column label="操作">
                     <template v-slot="{ row }">
-                        <el-button type="danger" @click="deleteProductForRow(row)" :icon="Delete"></el-button>
-                        <el-button type="primary" @click="editProductForRow(row)" :icon="Edit"></el-button>
+                        <el-button type="danger" @click="deleteProjectForRow(row)" :icon="Delete"></el-button>
+                        <el-button type="primary" @click="editProjectForRow(row)" :icon="Edit"></el-button>
                     </template>
                 </el-table-column>
 
@@ -34,7 +34,7 @@
 
     <!--新建项目弹出框-->
     <el-dialog v-model="dialogFormVisible" title="新建项目">
-        <el-form :model="form" :rules="rules">
+        <el-form :model="ProjectForm" :rules="rules">
             <el-form-item label="所属" :label-width="formLabelWidth" prop="owner">
                 王琳的公司
             </el-form-item>
@@ -57,52 +57,53 @@
 </template>
 
 <script setup>
-/* eslint-disable */
-import { Plus } from '@element-plus/icons-vue'
+import { Plus, Edit, Delete } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
 import { ref, reactive, onMounted } from 'vue';
-import { getAllProject } from '@/api/project';
-
-const allprojectsData = ref([]);
+import { getAllProject, deleteProject } from '@/api/project';
+import store from "@/store";
+//import { defineEmits, defineProps } from 'vue';
 
 onMounted(() => {
     getMyProject();
 })
 
-/**
- * 获取全部项目列表
- */
+//获取全部项目列表
+const allProjectsData = ref([]);
 const getMyProject = () => {
     getAllProject({
-        accountID: account_id,
+        accountID: store.state.account_id,
 
     })
         .then(resp => {
-            allprojectsData.value = resp.data.records;
+            allProjectsData.value = resp.data.projectList;
             console.log(resp);
+            ElMessage.success('拉取全部项目成功！');
 
         })
-        .catch(error => {
-            ElMessage('拉取全部项目失败，请刷新重试！');
-            console.log(error);
+        .catch(resp => {
+            console.log(resp);
+            // ElMessage('拉取全部项目失败，请刷新重试！');
         })
 }
 
-
-const dialogFormVisible = ref(false);
-const formLabelWidth = '140px';
+//点击具体项目跳转到该项目的详情页面
 const router = useRouter();
 const goToSpecificProject = () => {
     router.push({ name: 'specificProject' });
 };
-const form = reactive({
+
+//新建项目表单填写
+const dialogFormVisible = ref(false);
+const formLabelWidth = '140px';
+const ProjectForm = reactive({
     name: '',
-    owner: '',
-    desc: '',
+    mark: '',
+    team_name: '',
+    detail: '',
+    id: '',
 });
-
-
 const rules = reactive({
     // owner: [{ required: true }],
     name: [
@@ -115,20 +116,24 @@ const rules = reactive({
     ],
 })
 
-const props = defineProps({
-    selectedItem: String,
-})
-const emit = defineEmits(['selected-item-change']);
-const isTableContentSelected = ref(false);
-const handleSelectionChange = (selection) => {
-    //判断是否有选中的表格内容
-    isTableContentSelected = selection && selection.length > 0;
-    // 更新选中的项
-    props.selectedItem = selection && selection.length > 0 ? selection[0] : null;
-
-    // 通过自定义事件将选中的项传递给父组件
-    emit('selected-item-change', selectedItem);
+//删除项目
+const deleteProjectForRow = (row) => {
+    deleteProject(row.id)
+        .then((resp) => {
+            if (resp.code === 200) {
+                allProjectsData.value = allProjectsData.value.filter(project => project.id !== row.id);
+                ElMessage.success('项目删除成功');
+            }
+            else {
+                ElMessage.error(resp.message);
+            }
+        })
+        .catch(resp => {
+            console.log(resp);
+            //ElMessage.error('项目删除失败，请重试！');
+        })
 }
+
 
 
 </script>
