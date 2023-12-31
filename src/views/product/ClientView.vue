@@ -194,13 +194,13 @@ const getPageDataFromServer = () => {
       clientData.value = resp.data.records; 
       total.value = resp.data.total;
       ElMessage({
-        message: '拉取需求成功',
+        message: '拉取客户成功',
         type: 'success',
       });
     })
     .catch(err => {
       console.log(err);
-      ElMessage.error('拉取需求失败');
+      ElMessage.error('拉取客户失败');
     })
 }
 
