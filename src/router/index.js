@@ -82,6 +82,11 @@ const routes = [
         ]
       },
       {
+        path: '/allproducts',
+        name: 'allproducts',
+        component: allproductsView,
+      },
+      {
         path: '/product/:id',
         name: 'ProductManage',
         component: ProductManageView,
@@ -128,18 +133,11 @@ const routes = [
     name: 'forgetpwd',
     component: ForgetPwdView
   },
-
-  {
-    path: '/allproducts',
-    name: 'allproducts',
-    component: allproductsView
-  },
   {
     path: '/requirement',
     name: 'requirement',
     component: RequirementView
   },
-
 
 ]
 

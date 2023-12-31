@@ -1,5 +1,19 @@
   <template>
     <el-container class="container" id="allproduct">
+
+      <el-header class="header">
+        <div>
+          <el-icon color="#87CEFA" size="30">
+            <SwitchFilled />
+          </el-icon>
+          <span>&nbsp;&nbsp;&nbsp;产品管理</span>
+        </div>
+        <!--用抽屉Drawer写帮助文档-->
+        <!--还有Tooltip文字提示，可用性-->
+        <el-button type="help" @click="helplog" :icon="QuestionFilled" circle />
+      </el-header>
+
+
         <el-header class="header">
           <h1 class="title" style="color: black;">全部产品</h1>
           <el-button class="addproduct" type="primary" @click="showDialog"><el-icon><Plus /></el-icon>&nbsp;&nbsp;新建产品</el-button>
@@ -82,6 +96,11 @@
     </el-container>
   </template>
   <script setup>
+  // import ProjectTopBar from "@/components/project/ProjectTopBar.vue"
+  import {
+      SwitchFilled,
+      QuestionFilled,
+  } from '@element-plus/icons-vue'
   import {Edit, Delete} from '@element-plus/icons-vue';
   import {Plus} from '@element-plus/icons-vue';
   import {ref, reactive} from 'vue';
@@ -116,7 +135,7 @@
   
   const handleRowClick = (row) => {
     const productId = row.id; 
-    router.push({ name: 'ProductManage', params: { id: productId } });
+    router.push({ name: 'ProductManage', params: { id: productId }, path: `/product/${productId}` });
   };
 
   /**

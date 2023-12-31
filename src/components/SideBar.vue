@@ -30,7 +30,7 @@
                     </span>
 
                 </el-menu-item>
-                <el-menu-item index="ProductManage">
+                <el-menu-item index="allproducts">
                     <span>
                         <el-icon>
                             <Coin />

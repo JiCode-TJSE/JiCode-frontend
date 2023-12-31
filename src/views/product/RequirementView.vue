@@ -246,7 +246,6 @@ const getPageDataFromServer = () => {
       // 添加需求数据到 allrequireData 数组
       allrequireData.value = resp.data.records; // 假设响应中的需求数据在 records 字段中
 
-
       total.value = resp.data.total;
       ElMessage({
         message: '拉取需求成功',
