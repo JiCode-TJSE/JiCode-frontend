@@ -17,16 +17,22 @@
                         <span @click="goToSpecificProject">{{ row.project }}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="label" label="标识">
-                </el-table-column>
                 <el-table-column prop="belong" label="所属">
                 </el-table-column>
+
+                <el-table-column label="操作">
+                    <template v-slot="{ row }">
+                        <el-button type="danger" @click="deleteProductForRow(row)" :icon="Delete"></el-button>
+                        <el-button type="primary" @click="editProductForRow(row)" :icon="Edit"></el-button>
+                    </template>
+                </el-table-column>
+
             </el-table>
 
         </el-main>
     </el-container>
 
-
+    <!--新建项目弹出框-->
     <el-dialog v-model="dialogFormVisible" title="新建项目">
         <el-form :model="form" :rules="rules">
             <el-form-item label="所属" :label-width="formLabelWidth" prop="owner">
@@ -55,33 +61,34 @@
 import { Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
-import { ref, reactive } from 'vue';
-const allproductsData = [
-    {
-        project: '巴拉巴拉',
-        label: 'TSL',
-        belong: '王琳的公司',
-        date: '2016-05-03'
-    },
-    {
-        project: '巴拉巴拉',
-        label: 'TSL',
-        belong: '王琳的公司',
-        date: '2016-05-02'
-    },
-    {
-        project: '巴拉巴拉',
-        label: 'TSL',
-        belong: '王琳的公司',
-        date: '2016-05-02'
-    },
-    {
-        project: '巴拉巴拉',
-        label: 'TSL',
-        belong: '王琳的公司',
-        date: '2016-05-03'
-    },
-]
+import { ref, reactive, onMounted } from 'vue';
+import { getAllProject } from '@/api/project';
+
+const allprojectsData = ref([]);
+
+onMounted(() => {
+    getMyProject();
+})
+
+/**
+ * 获取全部项目列表
+ */
+const getMyProject = () => {
+    getAllProject({
+        accountID: account_id,
+
+    })
+        .then(resp => {
+            allprojectsData.value = resp.data.records;
+            console.log(resp);
+
+        })
+        .catch(error => {
+            ElMessage('拉取全部项目失败，请刷新重试！');
+            console.log(error);
+        })
+}
+
 
 const dialogFormVisible = ref(false);
 const formLabelWidth = '140px';
@@ -94,10 +101,6 @@ const form = reactive({
     owner: '',
     desc: '',
 });
-// const options = Array.from({ length: 10000 }).map((_, idx) => ({
-//     value: `${idx + 1}`,
-//     label: `${idx + 1}`,
-// }))
 
 
 const rules = reactive({
