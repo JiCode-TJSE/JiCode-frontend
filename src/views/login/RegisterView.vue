@@ -86,7 +86,7 @@
           console.log('resp.data');
           console.log(resp.data);
 
-          if(resp.data==true){
+          if(resp.data === true){
             ElMessage({
               message: '注册成功，跳转登录页面',
               type: 'success',
