@@ -5,13 +5,17 @@ export default {
         username: "王琳的公司",
         role: null, //orgnazationer、member
         usePhoto: '',
-        token: "",
+        account_id: "",
     },
     getters: {
     },
     mutations: {
+        setAccountId(state, accountId) {
+            state.account_id = accountId;
+        },
     },
     actions: {
+
     },
     modules: {
     }

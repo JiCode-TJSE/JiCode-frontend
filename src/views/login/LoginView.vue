@@ -23,11 +23,13 @@
   </template>
   
   <script setup>
+    // import { mapActions } from 'vuex';
     import {ref} from 'vue';
     import {onMounted} from 'vue';
     import { ElMessage } from 'element-plus';
     import axios from 'axios';
     import router from '@/router';
+    import { setAccountId } from '@/store/user'; // 导入 setAccountId mutation
 
 
     let loginform = ref({
@@ -53,28 +55,42 @@
             password:loginform.value.password,
           }
         }).then((response) => {
-            // 处理响应
-            console.log(response.data);
-            console.log(response.data.data);
-            if(response.data.code=='200'){
+
+          console.log('response',response);
+
+            // if(response.data.code=='200'){
               
               localStorage.setItem("userInfo", JSON.stringify(response.data.data));
               localStorage.setItem('accountId', response.data.data[0].accountId);
               // 跳转页面到首页
               // router.push(/home');
-              console.log('response.data.data[0].accountId');
-              console.log(response.data.data[0].accountId);
+              console.log('response.data.data[0].accountId',response.data.data[0].accountId);
+
+              const accountId = response.data.data[0].accountId;
+
+              // 调用 setAccountId 将 accountId 存储在 Vuex 中
+              // 在这里调用会直接跳转到catch,看不出是setAccountId错了还是接口错了
+              // setAccountId(accountId);
+
+
               // 在路由跳转时传递 accountId 参数
-              router.push({ name: 'home', params: { accountId: localStorage.getItem('accountId') } });
+              // router.push({ name: 'home', params: { accountId: localStorage.getItem('accountId') } });
+              // router.push({ name: 'home'});
+              router.push('/homepage');
 
               ElMessage({
                 message: response.data.msg,
                 type: "success",
               });
 
-            }else{
-              ElMessage.error('账号或密码错误，请重新登录！');
-            }
+              // 调用 setAccountId 将 accountId 存储在 Vuex 中
+              // 改到这里发现页面能跳转,但跳转成功后又到catch显示登录失败
+              setAccountId(accountId);
+
+
+            // }else{
+            //   ElMessage.error('账号或密码错误，请重新登录！');
+            // }
           })
           .then(()=>{
             if (checkPassword.value) {
@@ -87,7 +103,8 @@
           })
           .catch((error) => {
             // 处理错误
-            console.error(error);
+            console.error('登录失败', error);
+            ElMessage.error('登录失败');
           });
       }else{
         ElMessage.error('用户名或密码为空');
@@ -103,6 +120,7 @@
       }
       return true; // 验证通过
     };
+
 
     onMounted(() => {
       if (localStorage.getItem("email") != null) {
