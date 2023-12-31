@@ -9,12 +9,11 @@
                 </el-icon>&nbsp;&nbsp;新建项目</el-button>
         </el-header>
         <el-main class="main">
-            <el-table :data="allProjectsData" style="width: 100%" :default-sort="{ prop: 'date', order: 'descending' }"
-                @selection-change="handleSelectionChange">
+            <el-table :data="allProjectsData" style="width: 100%" :default-sort="{ prop: 'date', order: 'descending' }">
 
                 <el-table-column prop="name" label="项目" sortable>
                     <template #default="{ row }">
-                        <span @click="goToSpecificProject">{{ row.project }}</span>
+                        <span @click="goToSpecificProject(row)">{{ row.name }}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="organization_name" label="所属">
@@ -39,16 +38,16 @@
                 王琳的公司
             </el-form-item>
             <el-form-item label="项目名称" :label-width="formLabelWidth" prop="name">
-                <el-input v-model="form.name" />
+                <el-input v-model="ProjectForm.name" />
             </el-form-item>
             <el-form-item label="项目描述" :label-width="formLabelWidth" prop="desc">
-                <el-input v-model="form.desc" autocomplete="off" />
+                <el-input v-model="ProjectForm.desc" autocomplete="off" />
             </el-form-item>
         </el-form>
         <template #footer>
             <span class="dialog-footer">
-                <el-button @click="dialogFormVisible = false">Cancel</el-button>
-                <el-button type="primary" @click="dialogFormVisible = false">
+                <el-button @click="handleclose">Cancel</el-button>
+                <el-button type="primary" @click="submit">
                     Confirm
                 </el-button>
             </span>
@@ -61,7 +60,7 @@ import { Plus, Edit, Delete } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
 import { ref, reactive, onMounted } from 'vue';
-import { getAllProject, deleteProject } from '@/api/project';
+import { getAllProject, deleteProject, addProject } from '@/api/project';
 import store from "@/store";
 //import { defineEmits, defineProps } from 'vue';
 
@@ -74,11 +73,11 @@ const allProjectsData = ref([]);
 const getMyProject = () => {
     getAllProject({
         accountID: store.state.account_id,
-
     })
         .then(resp => {
             allProjectsData.value = resp.data.projectList;
             console.log(resp);
+            console.log(allProjectsData);
             ElMessage.success('拉取全部项目成功！');
 
         })
@@ -90,19 +89,38 @@ const getMyProject = () => {
 
 //点击具体项目跳转到该项目的详情页面
 const router = useRouter();
-const goToSpecificProject = () => {
-    router.push({ name: 'specificProject' });
+const goToSpecificProject = (row) => {
+    router.push({ name: 'specificProject', params: { id: row.id } });
+
 };
+
+
+//删除项目
+const deleteProjectForRow = (row) => {
+    deleteProject(row.id)
+        .then((resp) => {
+            if (resp.code === 200) {
+                console.log(row.id);
+                allProjectsData.value = allProjectsData.value.filter(project => project.id !== row.id);
+                ElMessage.success('项目删除成功');
+            }
+            else {
+                ElMessage.error(resp.message);
+            }
+        })
+        .catch(resp => {
+            console.log(resp);
+            //ElMessage.error('项目删除失败，请重试！');
+        })
+}
+
 
 //新建项目表单填写
 const dialogFormVisible = ref(false);
 const formLabelWidth = '140px';
 const ProjectForm = reactive({
     name: '',
-    mark: '',
-    team_name: '',
-    detail: '',
-    id: '',
+    desc: '',
 });
 const rules = reactive({
     // owner: [{ required: true }],
@@ -116,23 +134,33 @@ const rules = reactive({
     ],
 })
 
-//删除项目
-const deleteProjectForRow = (row) => {
-    deleteProject(row.id)
-        .then((resp) => {
-            if (resp.code === 200) {
-                allProjectsData.value = allProjectsData.value.filter(project => project.id !== row.id);
-                ElMessage.success('项目删除成功');
-            }
-            else {
-                ElMessage.error(resp.message);
-            }
+//新建项目
+const submit = () => {
+    addProject({
+        account_id: store.state.account_id,
+        name: ProjectForm.name,
+        desc: ProjectForm.desc,
+    })
+        .then(resp => {
+            console.log(resp);
+            ElMessage.success('新建项目成功！')
         })
         .catch(resp => {
-            console.log(resp);
-            //ElMessage.error('项目删除失败，请重试！');
+            console.error(resp);
         })
+
+
+
+    dialogFormVisible.value = false;
 }
+
+//控制退出表单填写之后，再次进入清空原先填写的内容
+const handleclose = () => {
+    dialogFormVisible.value = false;
+    ProjectForm.name = '';
+    ProjectForm.desc = '';
+}
+
 
 
 

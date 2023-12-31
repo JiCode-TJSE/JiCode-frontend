@@ -50,36 +50,37 @@ const routes = [
         ]
       },
       {
-        path: '/specificProject',
+        path: '/specificProject/:id',
         name: 'specificProject',
         component: SpecificProjectView,
         children: [
           {
-            path: '/specificProject/overview',
+            path: '/specificProject/:id/overview',
             name: 'overview',
             component: ProjectOverview,
           },
           {
-            path: '/specificProject/requirement',
+            path: '/specificProject/:id/requirement',
             name: 'projectRequirement',
             component: ProjectAllRequirement,
           },
           {
-            path: '/specificProject/publish',
+            path: '/specificProject/:id/publish',
             name: 'publish',
             component: ProjectPublish,
           },
           {
-            path: '/specificProject/sprint',
+            path: '/specificProject/:id/sprint',
             name: 'sprint',
             component: ProjectSprint,
           },
           {
-            path: '/specificProject/setting',
+            path: '/specificProject/:id/setting',
             name: 'setting',
             component: ProjectSetting,
           },
-        ]
+        ],
+        props: true,
       },
       {
         path: '/allproducts',
