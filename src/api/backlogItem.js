@@ -8,3 +8,13 @@ export function getAllBacklogItems(data) {
         data: data,
     });
 }
+
+
+//删除需求
+export function deleteRequirement(data) {
+    return request({
+        url: `https://mock.apifox.com/m1/3754258-0-default/api/backlogItem/deleteRequirement`,
+        method: "DELETE",
+        data: data,
+    });
+}

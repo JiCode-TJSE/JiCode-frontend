@@ -3,7 +3,6 @@
         <el-header class="header">
             <h1 class="title" style="color: black;">全部需求</h1>
             <div class="buttons-container">
-                <el-button type="danger" :icon="Delete" class="deleterequire" @click="deleteSelectedRequirements" />
                 <el-button class="addrequire" type="primary" @click="showDialog"><el-icon>
                         <Plus />
                     </el-icon>&nbsp;&nbsp;新建需求</el-button>
@@ -12,13 +11,18 @@
         <el-main class="main">
             <!--全部需求列表-->
             <el-table ref="multipleTableRef" :data="allrequireData" style="width: 100%"
-                @selection-change="handleSelectionChange" @row-click="handleRowClick">
+                @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="50"></el-table-column>
                 <el-table-column prop="id" label="编号" sortable>
+                    <template #default="{ row }">
+                        <span @click="goToSpecificRequirement(row)">{{ row.id }}</span>
+                    </template>
                 </el-table-column>
                 <el-table-column prop="topic" label="标题">
+                    <template #default="{ row }">
+                        <span @click="goToSpecificRequirement(row)">{{ row.topic }}</span>
+                    </template>
                 </el-table-column>
-                <!--仅显示,在编辑的时候才让他修改--->
                 <el-table-column prop="status" label="状态">
                 </el-table-column>
                 <el-table-column prop="type" label="类型">
@@ -30,112 +34,122 @@
                 <el-table-column label="操作">
                     <template v-slot="{ row }">
                         <el-button type="danger" @click="deleteRequireForRow(row)" :icon="Delete"></el-button>
-                        <el-button type="primary" @click="editRequireForRow(row)" :icon="Edit"></el-button>
                     </template>
                 </el-table-column>
 
             </el-table>
         </el-main>
-
-
-
-        <!-- 新建需求 -->
-        <el-dialog v-model="dialogTableVisible" title="新建需求" @close="handleClose" width="80%">
-            <el-row :gutter="20">
-                <el-col :span="8">
-                    <el-form :model="form" label-width="80px">
-                        <el-form-item label="标题">
-                            <el-input v-model="form.topic"></el-input>
-                        </el-form-item>
-                        <el-form-item label="描述">
-                            <el-input v-model="form.detail" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea"
-                                placeholder="Please input" />
-                        </el-form-item>
-                    </el-form>
-                </el-col>
-
-                <!-- 分割线 -->
-                <el-col :span="1">
-                    <el-divider direction="vertical" style="height: 90%;"></el-divider>
-                </el-col>
-
-                <el-col :span="15">
-                    <el-form :model="form" label-width="80px">
-                        <el-form-item label="所属项目">
-                            <el-select v-model="form.belongProductId" :options="getfromback">
-                            </el-select>
-                        </el-form-item>
-                        <el-form-item label="优先级">
-                            <el-select v-model="form.moduleEnum" :options="getfromback">
-                            </el-select>
-                        </el-form-item>
-                        <el-form-item label="负责人">
-                            <el-select v-model="form.supervisorId" :options="getfromback">
-                            </el-select>
-                        </el-form-item>
-                        <el-form-item label="需求类型">
-                            <!-- <template #default="scope"> -->
-                            <el-select v-model="form.typeEnum" class="hidden-text" placeholder="Select"
-                                popper-class="no-border">
-                                <template #prefix>
-                                    <el-tag :type="getTypeColor(form.typeEnum)">{{ form.typeEnum }}</el-tag>
-                                </template>
-                                <el-option v-for="item in type_options" :key="item.value" :value="item.value">
-                                    <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
-                                </el-option>
-                            </el-select>
-                            <!-- </template> -->
-                        </el-form-item>
-                        <el-form-item label="需求来源">
-                            <el-select v-model="form.sourceEnum" class="hidden-text" placeholder="Select"
-                                popper-class="no-border">
-                                <template #prefix>
-                                    <el-tag :type="getTypeColor(form.sourceEnum)">{{ form.sourceEnum }}</el-tag>
-                                </template>
-                                <el-option v-for="item in source_options" :key="item.value" :value="item.value">
-                                    <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                        <el-row>
-                            <el-col :span="11">
-                                <el-form-item label="开始时间">
-                                    <el-date-picker v-model="form.start_time" type="date" placeholder="Pick a date"
-                                        class='date-picker' style="width: 100%" />
-                                </el-form-item>
-                            </el-col>
-                            <el-col :span="2" class="text-center">
-                                <span class="text-gray-500"><br><br>-</span>
-                            </el-col>
-                            <el-col :span="11">
-                                <el-form-item label="结束时间">
-                                    <el-date-picker v-model="form.end_time" type="date" placeholder="Pick a date"
-                                        class='date-picker' style="width: 100%" />
-                                </el-form-item>
-                            </el-col>
-                        </el-row>
-                    </el-form>
-                </el-col>
-            </el-row>
-            <el-row class="button-container">
-                <el-button type="primary" @click="submitForm">提交</el-button>
-            </el-row>
-        </el-dialog>
         <div class="page">
             <el-pagination background :current-page="currentPage" :page-size="pageSize" :total="total"
                 @current-change="handlePageChange"></el-pagination>
         </div>
     </el-container>
+
+    <!-- 新建需求 -->
+    <el-dialog v-model="dialogTableVisible" title="新建需求" @close="handleClose" width="80%">
+        <el-row :gutter="20">
+            <el-col :span="8">
+                <el-form :model="form" label-width="80px">
+                    <el-form-item label="标题">
+                        <el-input v-model="form.topic"></el-input>
+                    </el-form-item>
+                    <el-form-item label="描述">
+                        <el-input v-model="form.detail" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea"
+                            placeholder="Please input" />
+                    </el-form-item>
+                </el-form>
+            </el-col>
+
+            <!-- 分割线 -->
+            <el-col :span="1">
+                <el-divider direction="vertical" style="height: 90%;"></el-divider>
+            </el-col>
+
+            <el-col :span="15">
+                <el-form :model="form" label-width="80px">
+                    <el-form-item label="所属项目">
+                        <span>{{ form.project_topic }}</span>
+                    </el-form-item>
+                    <el-form-item label="优先级">
+                        <el-select v-model="form.priority" class="hidden-text" placeholder="Select"
+                            popper-class="no-border">
+                            <template #prefix>
+                                <el-tag :type="getTypeColor(form.priority)">{{ form.priority }}</el-tag>
+                            </template>
+                            <el-option v-for="item in priority_options" :key="item.value" :value="item.value">
+                                <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="负责人">
+                        <el-select v-model="form.manager_name" :options="getfromback">
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="需求类型">
+                        <!-- <template #default="scope"> -->
+                        <el-select v-model="form.typeEnum" class="hidden-text" placeholder="Select"
+                            popper-class="no-border">
+                            <template #prefix>
+                                <el-tag :type="getTypeColor(form.typeEnum)">{{ form.typeEnum }}</el-tag>
+                            </template>
+                            <el-option v-for="item in type_options" :key="item.value" :value="item.value">
+                                <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                            </el-option>
+                        </el-select>
+                        <!-- </template> -->
+                    </el-form-item>
+                    <el-form-item label="需求来源">
+                        <el-select v-model="form.sourceEnum" class="hidden-text" placeholder="Select"
+                            popper-class="no-border">
+                            <template #prefix>
+                                <el-tag :type="getTypeColor(form.sourceEnum)">{{ form.sourceEnum }}</el-tag>
+                            </template>
+                            <el-option v-for="item in source_options" :key="item.value" :value="item.value">
+                                <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-row>
+                        <el-col :span="11">
+                            <el-form-item label="开始时间">
+                                <el-date-picker v-model="form.start_time" type="date" placeholder="Pick a date"
+                                    class='date-picker' style="width: 100%" />
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="2" class="text-center">
+                            <span class="text-gray-500"><br><br>-</span>
+                        </el-col>
+                        <el-col :span="11">
+                            <el-form-item label="结束时间">
+                                <el-date-picker v-model="form.end_time" type="date" placeholder="Pick a date"
+                                    class='date-picker' style="width: 100%" />
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </el-form>
+            </el-col>
+        </el-row>
+        <el-row class="button-container">
+            <el-button type="primary" @click="submitForm">提交</el-button>
+        </el-row>
+    </el-dialog>
+    <!--需求详情弹出框-->
+    <el-dialog v-model="detailDialogVisible" title="需求详情" @close="handleClose" width="80%">
+
+    </el-dialog>
 </template>
 
 <script setup>
-// import {Edit} from '@element-plus/icons-vue';
-import { Plus, Delete, Edit } from '@element-plus/icons-vue';
+import { Plus, Delete } from '@element-plus/icons-vue';
 import { ref, reactive } from 'vue';
 import { onMounted } from 'vue';
 import {
-    getAllBacklogItems,
+    getAllBacklogItems, deleteRequirement
 } from '@/api/backlogItem';
+import {
+    getProjectInfo,
+} from '@/api/project';
+import { getUserName } from '@/api/user';
 import { ElMessage } from 'element-plus';
 import { useRoute } from 'vue-router';
 
@@ -146,16 +160,60 @@ const handleSelectionChange = (val) => {
     multipleSelection.value = val;
 }
 
-// 新建需求时的表单信息
+// 分页查询获取需求列表
+const allrequireData = ref([]);
+const currentPage = ref(1);//当前页数,默认为第一页
+const pageSize = 10; //每页放10条需求
+const total = ref(1); //总共需求条数
+const route = useRoute();
+const getPageDataFromServer = () => {
+    getAllBacklogItems({
+        id: route.params.id,
+        currentPage: currentPage.value,
+        pageSize: pageSize,
+
+    })
+        .then(resp => {
+            console.log('getRequireInPage', resp);
+
+            // 添加需求数据到 allrequireData 数组
+            allrequireData.value = resp.data.backlogList;
+            total.value = resp.data.total;
+            ElMessage.success('拉取需求成功');
+        })
+        .catch(err => {
+            console.log(err);
+            ElMessage.error('拉取需求失败');
+        })
+}
+
+// 分页请求
+const handlePageChange = (newPage) => {
+    currentPage.value = newPage;
+    getPageDataFromServer();
+};
+
+// 初始调用
+onMounted(() => {
+    getPageDataFromServer();
+})
+
+//新建需求时的表单信息
 const form = reactive({
-    name: '', //标题（需求名字）
-    supervisorId: '', //负责人
-    moduleEnum: '', //所属模块
-    sourceEnum: '', //需求来源
-    typeEnum: '', //需求类型
-    detail: '', //描述
-    belongProductId: '',
+    topic: '', //标题（需求名字）
+    manager_name: '', //负责人
+    type: '', //需求类型
+    description: '', //描述
+    belongProjectId: '',
+    priority: '',
+    source: '',
+    start_time: '',
+    end_time: '',
+    project_topic: '',
+    manager_id: '',
+
 });
+
 
 const type_options = [
     {
@@ -209,6 +267,21 @@ const source_options = [
 //         label: '延期',
 //     },
 // ]
+const priority_options = [
+    {
+        value: '高',
+        label: '高',
+    },
+    {
+        value: '中',
+        label: '中',
+    },
+    {
+        value: '低',
+        label: '低',
+    },
+]
+
 
 const getTypeColor = (type) => {
     switch (type) {
@@ -228,88 +301,66 @@ const getTypeColor = (type) => {
             return 'primary';
         case '内部需求':
             return 'success';
+        case '高':
+            return 'warning';
+        case '中':
+            return 'primary';
+        case '低':
+            return 'success';
         default:
             return '';
     }
 };
 
-
-// const getfromback = Array.from({ length: 10000 }).map((_, idx) => ({
-//     value: `${idx + 1}`,
-//     label: `${idx + 1}`,
-// }))
-
-
-
-/**
- * 分页部分逻辑
- */
-// 获取需求列表
-const allrequireData = ref([]);
-const currentPage = ref(1);//当前页数,默认为第一页
-const pageSize = 10; //每页放10条需求
-const total = ref(1); //总共需求条数
-const route = useRoute();
-const getPageDataFromServer = () => {
-    getAllBacklogItems({
-        id: route.params.id,
-        currentPage: currentPage.value,
-        pageSize: pageSize,
-
-    })
-        .then(resp => {
-            console.log('getRequireInPage', resp);
-
-            // 添加需求数据到 allrequireData 数组
-            allrequireData.value = resp.data.backlogList;
-            total.value = resp.data.total;
-            ElMessage.success('拉取需求成功');
+//删除需求/工作项
+const deleteRequireForRow = (row) => {
+    deleteRequirement(row.id)
+        .then((resp) => {
+            if (resp.code === 200) {
+                console.log(row.id);
+                allrequireData.value = allrequireData.value.filter(requirement => requirement.id !== row.id);
+                ElMessage.success('需求删除成功');
+            }
+            else {
+                ElMessage.error(resp.message);
+            }
         })
-        .catch(err => {
-            console.log(err);
-            ElMessage.error('拉取需求失败');
+        .catch(resp => {
+            console.log(resp);
+            //ElMessage.error('项目删除失败，请重试！');
         })
 }
 
-// 分页请求
-const handlePageChange = (newPage) => {
-    currentPage.value = newPage;
-    getPageDataFromServer();
-};
+const memberList = ref([]);
+const getMemberList = () => {
+    getProjectInfo({
+        id: route.params.id,
+    })
+        .then(resp => {
+            memberList.value = resp.MemeberList;
 
-// 初始调用
-onMounted(() => {
-    getPageDataFromServer();
-})
+        })
+        .catch(resp => {
+            console.log('获取成员列表：' + resp);
+        })
+}
 
-/**
- * TODO：删除选择的需求部分逻辑
- */
+//获取负责人列表
+const getfromback = ref([]);
+const getManageName = () => {
 
+    getUserName({
+        accountIdArr: memberList.value,
+    })
+        .then(resp => {
+            getfromback.value = resp.userNameArr;
 
-/**
- * 删除某一行的需求
- */
-// const deleteRequireForRow = (row) => {
-//     console.log('Row Object:', row);
-//     const id = row.requirementId; // 获取要删除的产品的 ID
-//     deleteRequire({ id }) // 调用删除产品的 API 函数
-//         .then((resp) => {
-//             console.log('resp for deleteRequire', resp);
-//             console.log(resp.code);
-//             if (resp.code === 0) {
-//                 // 更新前端产品列表，移除已删除的产品
-//                 allrequireData.value = allrequireData.value.filter(require => require.requirementId !== id);
-//                 ElMessage.success('产品删除成功');
-//             } else {
-//                 ElMessage.error('产品删除失败');
-//             }
-//         })
-//         .catch(error => {
-//             console.error('删除产品失败:', error);
-//             ElMessage.error('产品删除失败');
-//         });
-// };
+        })
+        .catch(resp => {
+            console.log('获取成员name：' + resp);
+        })
+}
+
 
 /**
  * 新建需求部分逻辑
@@ -317,6 +368,8 @@ onMounted(() => {
 const dialogTableVisible = ref(false);
 const showDialog = () => {
     dialogTableVisible.value = true;
+    getMemberList();
+    getManageName();
 };
 const handleClose = () => {
     dialogTableVisible.value = false;
@@ -356,11 +409,16 @@ const handleClose = () => {
 const selectedRow = ref(null);
 const detailDialogVisible = ref(false);
 
-const handleRowClick = (row) => {
+const goToSpecificRequirement = (row) => {
     selectedRow.value = row;
     detailDialogVisible.value = true;
 };
 
+
+// const router = useRouter();
+// const goToSpecificRequirement = (row) => {
+
+// }
 // const detailform = {
 //   name: "示例需求",
 //   detail: "这是一个示例需求的描述。",

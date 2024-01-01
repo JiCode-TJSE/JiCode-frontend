@@ -22,7 +22,6 @@
                 <el-table-column label="操作">
                     <template v-slot="{ row }">
                         <el-button type="danger" @click="deleteProjectForRow(row)" :icon="Delete"></el-button>
-                        <el-button type="primary" @click="editProjectForRow(row)" :icon="Edit"></el-button>
                     </template>
                 </el-table-column>
 
@@ -56,7 +55,7 @@
 </template>
 
 <script setup>
-import { Plus, Edit, Delete } from '@element-plus/icons-vue'
+import { Plus, Delete } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
 import { ref, reactive, onMounted } from 'vue';
@@ -160,7 +159,6 @@ const handleclose = () => {
     ProjectForm.name = '';
     ProjectForm.desc = '';
 }
-
 
 </script>
 

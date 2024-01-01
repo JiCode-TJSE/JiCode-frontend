@@ -31,8 +31,17 @@ export function addProject(data) {
 //获取项目基本信息
 export function getProjectInfo(data) {
     return request({
-        url: `https://mock.apifox.com/m1/3754258-0-default/api/project/addProject`,
+        url: `https://mock.apifox.com/m1/3754258-0-default/api/project/getProjectInfo`,
         method: "GET",
+        data: data,
+    });
+}
+
+//修改项目基本信息
+export function updateProject(data) {
+    return request({
+        url: `https://mock.apifox.com/m1/3754258-0-default/api/project/updateProject`,
+        method: "PUT",
         data: data,
     });
 }
