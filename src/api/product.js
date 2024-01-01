@@ -11,6 +11,9 @@ export function getProduct(data) {
     return request({
         url: "https://mock.apifox.com/m1/3754258-0-default/api/product/itmes",
         method: "GET",
+        headers: {
+            Authorization: "Bearer " + localStorage.getItem("jwtToken")
+        },
         data: data
     })
 }
@@ -18,6 +21,9 @@ export function addProduct(data) {
     return request({
         url: "https://mock.apifox.com/m1/3754258-0-default/api/product/item",
         method: "POST",
+        headers: {
+            Authorization: "Bearer " + localStorage.getItem("jwtToken")
+        },
         data: data
     })
 }

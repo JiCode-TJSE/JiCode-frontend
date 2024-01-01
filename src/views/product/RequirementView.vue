@@ -4,7 +4,7 @@
           <h1 class="title" style="color: black;">全部需求</h1>
           <div class="buttons-container">
           <el-button type="danger" :icon="Delete" class="deleterequire" @click="deleteSelectedRequirements"/>
-          <el-button class="addrequire" type="primary" @click="showDialog"><el-icon><Plus /></el-icon>&nbsp;&nbsp;新建需求</el-button>
+          <el-button class="addrequire" type="primary" @click="showTableDialog"><el-icon><Plus /></el-icon>&nbsp;&nbsp;新建需求</el-button>
           </div>
         </el-header>
         <el-main class="main">
@@ -13,11 +13,13 @@
           :data="allrequireData"
           style="width: 100%"
           @selection-change="handleSelectionChange"
-          @row-click="handleRowClick"
           >
             <el-table-column type="selection" width="50"></el-table-column>
 
             <el-table-column prop="name" label="标题" sortable>
+              <template #default="{ row }">
+                  <span @click="handleRowClick(row)">{{ row.name }}</span>
+              </template>
             </el-table-column>
 
             <!-- 类型选择器 -->
@@ -47,10 +49,86 @@
           </el-table>
         </el-main>
 
+        <el-dialog v-model="dialogVisible" title="需求详情" @close="handleClose">
+          <el-tabs type="border-card">
+            <el-tab-pane label="基本信息">
+              <el-form :model="selectedRow" label-width="80px">
+                <el-form-item label="标题">
+                <el-input v-model="selectedRow.name"></el-input>
+                </el-form-item>
+                <el-form-item label="描述">
+                    <el-input
+                        v-model="selectedRow.detail"
+                        :autosize="{ minRows: 4, maxRows: 8 }"
+                        type="textarea"
+                        placeholder="Please input"
+                    />
+                </el-form-item>
+                <el-form-item label="模块">
+                    <el-select v-model="selectedRow.moduleEnum" :options="getfromback">
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="负责人">
+                    <el-select v-model="selectedRow.supervisorName" :options="getfromback">
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="需求类型">
+                  <el-select v-model="selectedRow.typeEnum" class="hidden-text" placeholder="Select" popper-class="no-border">
+                      <template #prefix>
+                          <el-tag :type="getTypeColor(selectedRow.typeEnum)">{{selectedRow.typeEnum}}</el-tag>
+                      </template>
+                      <el-option v-for="item in type_options" :key="item.value" :value="item.value">
+                          <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                      </el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="需求来源">
+                  <el-select v-model="selectedRow.sourceEnum" class="hidden-text" placeholder="Select" popper-class="no-border">
+                      <template #prefix>
+                          <el-tag :type="getTypeColor(selectedRow.sourceEnum)">{{selectedRow.sourceEnum}}</el-tag>
+                      </template>
+                      <el-option v-for="item in source_options" :key="item.value" :value="item.value">
+                          <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                      </el-option>
+                  </el-select>
+                </el-form-item>   
+                <el-form-item label="保存">
+                  <el-button type="primary" :icon="Check" @click="saveDetails" />
+                </el-form-item>
+              </el-form>
+            </el-tab-pane>
+            <el-tab-pane label="客户">
+              <el-row>
+                <el-col :span="6" v-for="client in selectedRow.clientArr" :key="client.clientId">
+                  <el-tag>{{ client.name }}</el-tag>
+                </el-col>
+              </el-row>
+
+              
+              <el-select
+                v-model="value1"
+                multiple
+                placeholder="Select"
+                style="width: 240px"
+              >
+                <el-option
+                  v-for="item in options"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-tab-pane>
+            <el-tab-pane label="工作项">
+              
+            </el-tab-pane>
+            <el-tab-pane label="版本记录">版本记录</el-tab-pane>
+          </el-tabs>
+        </el-dialog>
 
         
         <!-- 新建需求 -->
-        <el-dialog v-model="dialogTableVisible" title="新建需求" @close="handleClose">
+        <el-dialog v-model="dialogTableVisible" title="新建需求" @close="handleTableClose">
           <el-row :gutter="20">
             <el-col :span="13">
                 <el-form :model="form" label-width="80px">
@@ -128,12 +206,10 @@
 <script setup>
 // import {Edit} from '@element-plus/icons-vue';
 import {Plus, Delete} from '@element-plus/icons-vue';
+import { Check } from '@element-plus/icons-vue'
 import {ref,  reactive} from 'vue';
 import {onMounted} from 'vue';
-import { getRequireInPage, addRequire ,deleteRequire
-  // , updateRequire
-    // , getRequireDetail
-     } from '@/api/require';
+import { getRequireInPage, addRequire ,deleteRequire, updateRequire, getRequireDetail} from '@/api/require';
 import { ElMessage } from 'element-plus';
 
 // 获取需求列表
@@ -284,13 +360,13 @@ onMounted(() => {
     .then((resp) => {
       console.log('resp for deleteRequire',resp);
       console.log(resp.code);
-      if(resp.code === 0){
+      // if(resp.code === 0){
         // 更新前端产品列表，移除已删除的产品
         allrequireData.value = allrequireData.value.filter(require => require.requirementId !== id);
         ElMessage.success('产品删除成功');
-      } else {
-        ElMessage.error('产品删除失败');
-      }
+      // } else {
+      //   ElMessage.error('产品删除失败');
+      // }
     })
     .catch(error => {
       console.error('删除产品失败:', error);
@@ -305,10 +381,10 @@ onMounted(() => {
  * 新建需求部分逻辑
  */
 const dialogTableVisible = ref(false);
-const showDialog = () => {
+const showTableDialog = () => {
   dialogTableVisible.value = true;
 };
-const handleClose = () => {
+const handleTableClose = () => {
   dialogTableVisible.value = false;
 };
 
@@ -331,7 +407,7 @@ const submitForm = () => {
         })
         // 从后端重新获取当前页的数据，确保新添加的项目能够出现在表格中
         getPageDataFromServer();
-        handleClose();
+        handleTableClose();
     })
     .catch(err => {
       console.log(err);
@@ -343,64 +419,94 @@ const submitForm = () => {
 /**
  * 需求详情部分逻辑：获取、修改
  */
-const selectedRow = ref(null); 
-const detailDialogVisible = ref(false); 
+const selectedRow = ref({
+  name: '',
+  detail: '',
+  moduleEnum: '',
+  sourceEnum: '',
+  typeEnum: '',
+  supervisorName: '',
+  supervisorId: '',
+  clientArr: [],
+});
 
-const handleRowClick = (row) => {
-  selectedRow.value = row; 
-  detailDialogVisible.value = true; 
+const dialogVisible = ref(false); 
+const handleClose = () => {
+  dialogVisible.value = false;
 };
 
-// const detailform = {
-//   name: "示例需求",
-//   detail: "这是一个示例需求的描述。",
-//   moduleEnum: "模块A",
-//   sourceEnum: "用户反馈",
-//   typeEnum: "功能需求",
-//   supervisorName: "负责人A",
-//   belongProductId: "产品ID",
-//   clientArr: [
-//     {
-//       clientId: "clientID1",
-//       name: "客户A",
-//     },
-//     {
-//       clientId: "clientID2",
-//       name: "客户B",
-//     },
-//   ],
-//   supervisor: [
-//     {
-//       supervisorId: "string",
-//       supervisorName: "string"
-//     },
-//   ],
-//   backlogItemArr: [
-//     {
-//       backlogItemId: "backlogItemID1",
-//       name: "工作项A",
-//     },
-//     {
-//       backlogItemId: "backlogItemID2",
-//       name: "工作项B",
-//     },
-//   ],
-//   versionArr: [
-//     {
-//       id: "versionID1",
-//       name: "版本A",
-//       detail: "版本A详情",
-//       createTime: "创建时间"
-//     },
-//     {
-//       id: "versionID2",
-//       name: "版本B",
-//       detail: "版本B详情",
-//       createTime: "创建时间"
-//     },
-//   ],
-// };
+const handleRowClick = (row) => {
+  // 基本信息
+  getRequireDetail({ id: row.requirementId }) 
+    .then((response) => {
+      console.log('row.requirementId',row.requirementId)
+      console.log('response',response);
+      // if (response.code === true) {
+        ElMessage({
+          message: '获取需求详情成功',
+          type: 'success',
+        })
+        const data = response.data;
+        selectedRow.value.name = data.name;
+        selectedRow.value.detail = data.detail;
+        selectedRow.value.moduleEnum = data.moduleEnum;
+        selectedRow.value.sourceEnum = data.sourceEnum;
+        selectedRow.value.typeEnum = data.typeEnum;
+        
+        // 设置负责人的 ID 和姓名
+        if (response.data.supervisor) {
+          selectedRow.value.supervisorName = response.data.supervisor.supervisorId;
+          selectedRow.value.supervisorId = response.data.supervisor.supervisorName;
+        } else {
+          selectedRow.value.supervisorName = '';
+          selectedRow.value.supervisorId = '';
+        }
 
+        selectedRow.value.clientArr = response.data.clientArr;
+        console.log('response.data.clientArr',response.data.clientArr);
+        console.log('selectedRow.value.clientArr',selectedRow.value.clientArr);
+
+        dialogVisible.value = true;
+
+      // } else {
+      //   ElMessage.error('获取需求详情失败');
+      //   console.error(response.msg);
+      // }
+    })
+    .catch((error) => {
+      ElMessage.error('获取需求详情失败');
+      console.error(error);
+    });
+
+
+    dialogVisible.value = true;
+};
+
+// 基本信息
+const saveDetails = () => {
+  // 构造请求参数
+  const requestData = {
+    name: selectedRow.value.name,
+    detail: selectedRow.value.detail,
+    moduleEnum: selectedRow.value.moduleEnum,
+    sourceEnum: selectedRow.value.sourceEnum,
+    typeEnum: selectedRow.value.typeEnum,
+    supervisorId: selectedRow.value.supervisorId,
+  };
+
+  updateRequire(requestData)
+    .then((response) => {
+      console.log('保存成功', response.data);
+      ElMessage({
+        message: '保存需求详情成功',
+        type: 'success',
+      })
+    })
+    .catch((error) => {
+      console.error('保存失败', error);
+      ElMessage.error('保存需求详情失败');
+    });
+};
 
 
 </script>

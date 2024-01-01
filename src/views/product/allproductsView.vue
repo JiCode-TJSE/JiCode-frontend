@@ -22,13 +22,22 @@
           <el-table
           :data="allproductsData"
           style="width: 100%"
-          @row-click="handleRowClick"
+
           >
             <el-table-column prop="title" label="产品" sortable>
+              <template #default="{ row }">
+                  <span @click="handleRowClick(row)">{{ row.title }}</span>
+              </template>
             </el-table-column>
             <el-table-column prop="mark" label="标识">
+              <template #default="{ row }">
+                  <span @click="handleRowClick(row)">{{ row.mark }}</span>
+              </template>
             </el-table-column>
             <el-table-column prop="team_name" label="所属">
+              <template #default="{ row }">
+                  <span @click="handleRowClick(row)">{{ row.team_name }}</span>
+              </template>
             </el-table-column>
 
             <el-table-column label="操作">
@@ -151,7 +160,7 @@
       team_name: '',
       detail: '',
       id:'',
-      account_id: accountId, // 将 account_id 作为查询参数传递
+      // account_id: accountId, // 将 account_id 作为查询参数传递
     })
       .then(resp => {
         console.log('resp', resp);

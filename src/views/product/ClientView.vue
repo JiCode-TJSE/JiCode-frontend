@@ -12,11 +12,13 @@
             :data="clientData"
             style="width: 100%"
             @selection-change="handleSelectionChange"
-            @row-click="handleRowClick"
             >
                 <el-table-column type="selection" width="50"></el-table-column>
 
                 <el-table-column prop="name" label="客户名" sortable>
+                  <template #default="{ row }">
+                  <span @click="handleRowClick(row)">{{ row.name }}</span>
+              </template>
                 </el-table-column>
 
                 <!-- 等级选择器 -->
@@ -293,13 +295,13 @@ const deleteClientForRow = (row) => {
     .then((resp) => {
       console.log('resp for deleteClient',resp);
       console.log(resp.code);
-      if(resp.code === true){
+      // if(resp.code === true){
         // 更新前端客户列表，移除已删除的客户
         clientData.value = clientData.value.filter(client => client.id !== id);
         ElMessage.success('产品删除成功');
-      } else {
-        ElMessage.error('产品删除失败');
-      }
+      // } else {
+      //   ElMessage.error('产品删除失败');
+      // }
     })
     .catch(error => {
       console.error('删除产品失败:', error);
@@ -324,17 +326,17 @@ const handleRowClick = (row) => {
   getClientDetail({ id: row.id }) // 传递选中行的ID作为查询参数
     .then((response) => {
       console.log('response',response);
-      if (response.code === true) {
+      // if (response.code === true) {
         ElMessage({
           message: '获得客户详情成功',
           type: 'success',
         })
         selectedClient.value = { ...response.data };
         dialogVisible.value = true;
-      } else {
-        ElMessage.error('获得客户详情失败');
-        console.error(response.msg);
-      }
+      // } else {
+      //   ElMessage.error('获得客户详情失败');
+      //   console.error(response.msg);
+      // }
     })
     .catch((error) => {
       ElMessage.error('获得客户详情失败');
@@ -349,17 +351,17 @@ const handleSubmit = () => {
   updateClient(selectedClient.value)
     .then((response) => {
       console.log('updateClient response',response);
-      if (response.code === true) {
+      // if (response.code === true) {
         ElMessage({
           message: '更新客户详情成功',
           type: 'success',
         })
         console.log('更新成功');
         dialogVisible.value = false;
-      } else {
-        ElMessage.error('更新客户详情失败');
-        console.error(response.msg);
-      }
+      // } else {
+      //   ElMessage.error('更新客户详情失败');
+      //   console.error(response.msg);
+      // }
     })
     .catch((error) => {
       ElMessage.error('更新客户详情失败');
