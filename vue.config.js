@@ -20,3 +20,12 @@ module.exports = defineConfig({
 //       }
 //   }
 // }
+
+module.exports = {
+  // ...
+
+  // 设为false可关闭ESLint
+  lintOnSave: false,
+
+  // ...
+}

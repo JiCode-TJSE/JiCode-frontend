@@ -14,6 +14,7 @@
 import TopBar from '@/components/project/TopBar.vue';
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router';
+import axios from "axios";
 
 
 const route = useRoute(); // 获取路由对象

@@ -3,20 +3,26 @@
       <el-card class="login-card">
         <div class="login-text">登录</div>
         <form>
-        <div class="input-info-1">
+        <div v-if="chooseAccountId === false" class="input-info-1">
           <div class="label">邮箱：</div>
           <el-input v-model="loginform.email" placeholder="请输入邮箱"></el-input>
         </div>
-        <div class="input-info-2">
+        <div v-if="chooseAccountId === false" class="input-info-2">
           <div class="label">密码：</div>
           <el-input placeholder="请输入密码" v-model="loginform.password" show-password></el-input>
         </div>
+            <el-cascader v-if="chooseAccountId === true"
+                :options="options"  v-model="selectedValues"
+                @change="handleChange"
+                placeholder="请选择账号"
+                style="margin-top: 20px; margin-left: 50px;"
+            />
         </form>
         <div class="section">
           <el-checkbox v-model="checkPassword" class="rememberMe"><span class="remember-me-text">记住我</span></el-checkbox>
           <!-- <el-link :underline="false" @click="forgetPassword" class="passwordLink">忘记密码</el-link> -->
         </div>
-        <el-button class="login-bt" @click="login">登录</el-button>
+        <el-button class="login-bt" @click="login" v-if="chooseAccountId === false">登录</el-button>
         <el-link :underline="false" @click="jumpToRegister" class="registerLink">注册账号</el-link>
       </el-card>
     </div>
@@ -30,7 +36,37 @@
     import axios from 'axios';
     import router from '@/router';
     import store from '@/store';
+    import {getAccountInfo, myLogin} from "@/api/login";
 
+    let chooseAccountId = ref(false);
+
+    let options = ref([
+        {
+            value: '1',
+            label: '账号1',
+        },
+        {
+            value: '2',
+            label: '账号2',
+        }
+    ]);
+
+    let selectedValues = ref([]);
+
+    const handleChange = () => {
+        localStorage.setItem("accountId", selectedValues.value[0]);
+        getAccountInfo({
+            accountId: selectedValues.value[0],
+        })
+            .then(resp => {
+                localStorage.setItem("organizationId", resp.data.organizationId);
+            })
+            .catch(resp => {
+                console.log(resp);
+                ElMessage.error('获取账号信息失败，请刷新重试！');
+            })
+        router.push('/homepage');
+    }
 
     let loginform = ref({
       email: "",
@@ -47,64 +83,36 @@
     const login = () => {
       console.log("表单信息：", loginform.value); 
       if(validateForm()){
-        axios({
-          url:"https://mock.apifox.com/m1/3754258-0-default/api/account/login",
-          method:"post",
-          params:{
+          myLogin({
             email:loginform.value.email,
             password:loginform.value.password,
-          }
-        }).then((response) => {
-
-          console.log('response',response);
-
-            if(response.data.code=='200'){
-              
-              localStorage.setItem("userInfo", JSON.stringify(response.data.data));
-              localStorage.setItem('accountId', response.data.data[0].accountId);
-              // 跳转页面到首页
-              // router.push(/home');
-              console.log('response.data.data[0].accountId',response.data.data[0].accountId);
-
-              // const accountId = response.data.data[0].accountId;
-
-              // 调用 setAccountId 将 accountId 存储在 Vuex 中
-              // 在这里调用会直接跳转到catch,看不出是setAccountId错了还是接口错了
-              // setAccountId(accountId);
-
-
-              // 在路由跳转时传递 accountId 参数
-              // router.push({ name: 'home', params: { accountId: localStorage.getItem('accountId') } });
-              // router.push({ name: 'home'});
-              router.push('/homepage');
-
-              ElMessage({
-                message: response.data.msg,
-                type: "success",
-              });
-
-              store.commit("setAccountId", response.data.data[0].accountId);
-
-
-            }else{
-              ElMessage.error('账号或密码错误，请重新登录！');
-            }
           })
-          .then(()=>{
-            if (checkPassword.value) {
-              localStorage.setItem("email", loginform.value.email);
-              localStorage.setItem("password", loginform.value.password);
-            } else {
-              localStorage.removeItem("email");
-              localStorage.removeItem("password");
-            }
-          })
-          .catch((error) => {
-            // 处理错误
-            console.error('登录失败', error);
-            ElMessage.error('登录失败');
-          });
-      }else{
+              .then(resp => {
+                    ElMessage.success('登录成功！');
+
+                    chooseAccountId.value = true;
+
+                    let accountList = resp.data.accountList;
+
+                    for (let i = 0; i < accountList.length; i++) {
+                        options.value[i].value = accountList[i].accountId;
+                        options.value[i].label = accountList[i].accountId;
+                    }
+                })
+              .then(()=>{
+                  if (checkPassword.value) {
+                      localStorage.setItem("email", loginform.value.email);
+                      localStorage.setItem("password", loginform.value.password);
+                  } else {
+                      localStorage.removeItem("email");
+                      localStorage.removeItem("password");
+                  }
+              })
+              .catch(resp => {
+                    console.log(resp);
+                    ElMessage.error('登录失败，请刷新重试！');
+                })
+      } else {
         ElMessage.error('用户名或密码为空');
       }
     };
