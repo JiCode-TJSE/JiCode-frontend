@@ -90,7 +90,7 @@
                         <el-select v-model="form.typeEnum" class="hidden-text" placeholder="Select"
                             popper-class="no-border">
                             <template #prefix>
-                                <el-tag :type="getTypeColor(form.typeEnum)">{{ form.typeEnum }}</el-tag>
+                                <el-tag :type="getTypeColor(form.type)">{{ form.type }}</el-tag>
                             </template>
                             <el-option v-for="item in type_options" :key="item.value" :value="item.value">
                                 <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
@@ -102,7 +102,7 @@
                         <el-select v-model="form.sourceEnum" class="hidden-text" placeholder="Select"
                             popper-class="no-border">
                             <template #prefix>
-                                <el-tag :type="getTypeColor(form.sourceEnum)">{{ form.sourceEnum }}</el-tag>
+                                <el-tag :type="getTypeColor(form.source)">{{ form.source }}</el-tag>
                             </template>
                             <el-option v-for="item in source_options" :key="item.value" :value="item.value">
                                 <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
@@ -139,95 +139,209 @@
             <el-tab-pane label="基本信息">
                 <el-form :model="selectedRow" label-width="80px">
                     <el-form-item label="标题">
-                        <el-input v-model="selectedRow.name"></el-input>
+                        <el-input v-model="selectedRow.topic"></el-input>
                     </el-form-item>
                     <el-form-item label="描述">
-                        <el-input v-model="selectedRow.detail" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea"
+                        <el-input v-model="selectedRow.description" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea"
                             placeholder="Please input" />
                     </el-form-item>
                     <el-form-item label="优先级">
-                        <el-select v-model="selectedRow.typeEnum" class="hidden-text" placeholder="Select"
+                        <el-select v-model="selectedRow.priority" class="hidden-text" placeholder="Select"
                             popper-class="no-border">
                             <template #prefix>
-                                <el-tag :type="getTypeColor(selectedRow.typeEnum)">{{ selectedRow.typeEnum }}</el-tag>
+                                <el-tag :type="getTypeColor(selectedRow.priority)">{{ selectedRow.priority }}</el-tag>
                             </template>
-                            <el-option v-for="item in type_options" :key="item.value" :value="item.value">
+                            <el-option v-for="item in priority_options" :key="item.value" :value="item.value">
                                 <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
                             </el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="状态">
-                        <el-select v-model="selectedRow.typeEnum" class="hidden-text" placeholder="Select"
+                        <el-select v-model="selectedRow.status" class="hidden-text" placeholder="Select"
                             popper-class="no-border">
                             <template #prefix>
-                                <el-tag :type="getTypeColor(selectedRow.typeEnum)">{{ selectedRow.typeEnum }}</el-tag>
+                                <el-tag :type="getTypeColor(selectedRow.status)">{{ selectedRow.status }}</el-tag>
                             </template>
-                            <el-option v-for="item in type_options" :key="item.value" :value="item.value">
+                            <el-option v-for="item in state_options" :key="item.value" :value="item.value">
                                 <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
                             </el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="负责人">
-                        <el-select v-model="selectedRow.supervisorName" :options="getfromback">
+                        <el-select v-model="selectedRow.manager_name" :options="getfromback">
                         </el-select>
                     </el-form-item>
                     <el-form-item label="需求类型">
-                        <el-select v-model="selectedRow.typeEnum" class="hidden-text" placeholder="Select"
+                        <!-- <template #default="scope"> -->
+                        <el-select v-model="selectedRow.type" class="hidden-text" placeholder="Select"
                             popper-class="no-border">
                             <template #prefix>
-                                <el-tag :type="getTypeColor(selectedRow.typeEnum)">{{ selectedRow.typeEnum }}</el-tag>
+                                <el-tag :type="getTypeColor(selectedRow.type)">{{ selectedRow.type }}</el-tag>
                             </template>
                             <el-option v-for="item in type_options" :key="item.value" :value="item.value">
                                 <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
                             </el-option>
                         </el-select>
+                        <!-- </template> -->
                     </el-form-item>
                     <el-form-item label="需求来源">
-                        <el-select v-model="selectedRow.sourceEnum" class="hidden-text" placeholder="Select"
+                        <el-select v-model="selectedRow.source" class="hidden-text" placeholder="Select"
                             popper-class="no-border">
                             <template #prefix>
-                                <el-tag :type="getTypeColor(selectedRow.sourceEnum)">{{ selectedRow.sourceEnum }}</el-tag>
+                                <el-tag :type="getTypeColor(selectedRow.source)">{{ selectedRow.source }}</el-tag>
                             </template>
                             <el-option v-for="item in source_options" :key="item.value" :value="item.value">
                                 <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="开始时间">
-                        <el-date-picker v-model="form.start_time" type="date" placeholder="Pick a date" class='date-picker'
-                            style="width: 100%" />
-                    </el-form-item>
-                    <el-form-item label="结束时间">
-                        <el-date-picker v-model="form.end_time" type="date" placeholder="Pick a date" class='date-picker'
-                            style="width: 100%" />
-                    </el-form-item>
-                    <el-form-item label="保存">
-                        <el-button type="primary" :icon="Check" @click="saveDetails" />
-                    </el-form-item>
+                    <el-row>
+                        <el-col :span="11">
+                            <el-form-item label="开始时间">
+                                <el-date-picker v-model="selectedRow.start_time" type="date" placeholder="Pick a date"
+                                    class='date-picker' style="width: 100%" />
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="2" class="text-center">
+                            <span class="text-gray-500"><br><br>-</span>
+                        </el-col>
+                        <el-col :span="11">
+                            <el-form-item label="结束时间">
+                                <el-date-picker v-model="selectedRow.end_time" type="date" placeholder="Pick a date"
+                                    class='date-picker' style="width: 100%" />
+                            </el-form-item>
+                        </el-col>
+
+                    </el-row>
+
+
+                    <el-button type="primary" :icon="Check" @click="saveDetails">保存</el-button>
+
                 </el-form>
             </el-tab-pane>
-            <el-tab-pane label="客户">
-                <el-row>
-                    <el-col :span="6" v-for="client in selectedRow.clientArr" :key="client.clientId">
-                        <el-tag>{{ client.name }}</el-tag>
-                    </el-col>
-                </el-row>
+            <el-tab-pane label="关联">
+                <el-button class="itemheader" type="primary" @click="showRelatedDialog"><el-icon>
+                        <Plus />
+                    </el-icon>&nbsp;&nbsp;添加工作项</el-button>
+                <el-table :data="relatedData" style="width: 100%" @selection-change="handleSelectionChange">
+                    <el-table-column type="selection" width="50"></el-table-column>
+                    <el-table-column prop="id" label="编号" sortable>
+                        <template #default="{ row }">
+                            <span @click="goToSpecificRequirement(row)">{{ row.id }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="topic" label="标题">
+                        <template #default="{ row }">
+                            <span @click="goToSpecificRequirement(row)">{{ row.topic }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="status" label="状态">
+                    </el-table-column>
+                    <el-table-column label="关系">
+                        关联
+                    </el-table-column>
+                    <el-table-column prop="priority" label="优先级">
+                    </el-table-column>
+                    <el-table-column prop="supervisorName" label="负责人">
+                    </el-table-column>
+                    <el-table-column label="操作">
+                        <template v-slot="{ row }">
+                            <el-button type="danger" @click="deleteRequireForRow(row)">解除关联</el-button>
+                        </template>
+                    </el-table-column>
 
+                </el-table>
 
-                <el-select v-model="value1" multiple placeholder="Select" style="width: 240px">
-                    <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
-                </el-select>
             </el-tab-pane>
-            <el-tab-pane label="工作项">
+
+            <el-tab-pane label="版本记录">
+                <el-button class="itemheader" type="primary" @click="showVersionDialog"><el-icon>
+                        <Plus />
+                    </el-icon>&nbsp;&nbsp;创建新版本</el-button>
+                <el-table ref="multipleTableRef" :data="allrequireData" style="width: 100%"
+                    @selection-change="handleSelectionChange">
+                    <el-table-column type="selection" width="50"></el-table-column>
+                    <el-table-column prop="id" label="版本" sortable>
+                        <template #default="{ row }">
+                            <span @click="goToSpecificRequirement(row)">{{ row.id }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="topic" label="备注">
+                        <template #default="{ row }">
+                            <span @click="goToSpecificRequirement(row)">{{ row.topic }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="supervisorName" label="创建人">
+                    </el-table-column>
+                    <el-table-column label="操作">
+                        <template v-slot="{ row }">
+                            <el-button type="danger" @click="deleteRequireForRow(row)" :icon='Edit'></el-button>
+                        </template>
+                    </el-table-column>
+
+                </el-table>
 
             </el-tab-pane>
-            <el-tab-pane label="版本记录">版本记录</el-tab-pane>
+
         </el-tabs>
+    </el-dialog>
+
+    <!--添加关联工作项弹出框-->
+    <el-dialog v-model="relatedDialogVisible">
+
+        <el-table ref="multipleTableRef" :data="allrequireData" style="width: 100%"
+            @selection-change="handleSelectionChange">
+            <el-table-column type="selection" width="50"></el-table-column>
+            <el-table-column prop="id" label="编号" sortable>
+                <template #default="{ row }">
+                    <span @click="goToSpecificRequirement(row)">{{ row.id }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column prop="topic" label="标题">
+                <template #default="{ row }">
+                    <span @click="goToSpecificRequirement(row)">{{ row.topic }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column prop="status" label="状态">
+            </el-table-column>
+            <el-table-column prop="type" label="类型">
+            </el-table-column>
+            <el-table-column prop="priority" label="优先级">
+            </el-table-column>
+            <el-table-column prop="supervisorName" label="负责人">
+            </el-table-column>
+        </el-table>
+        <br>
+        <br>
+        <el-button type="primary" :icon="Check" @click="saveRelated">确定</el-button>
+    </el-dialog>
+
+    <!--创建新版本弹出框-->
+    <el-dialog v-model="versionDialogVisible">
+        <el-form :model="VersionForm" :rules="rules">
+            <el-form-item label="当前版本" :label-width="formLabelWidth" prop="owner">
+                王琳的公司
+            </el-form-item>
+            <el-form-item label="项目名称" :label-width="formLabelWidth" prop="name">
+                <el-input v-model="ProjectForm.name" />
+            </el-form-item>
+            <el-form-item label="项目描述" :label-width="formLabelWidth" prop="desc">
+                <el-input v-model="ProjectForm.desc" autocomplete="off" />
+            </el-form-item>
+        </el-form>
+        <template #footer>
+            <span class="dialog-footer">
+                <el-button @click="handleclose">Cancel</el-button>
+                <el-button type="primary" @click="submit">
+                    Confirm
+                </el-button>
+            </span>
+        </template>
     </el-dialog>
 </template>
 
 <script setup>
-import { Plus, Delete } from '@element-plus/icons-vue';
+import { Plus, Delete, Edit } from '@element-plus/icons-vue';
 import { ref, reactive } from 'vue';
 import { onMounted } from 'vue';
 import {
@@ -340,20 +454,20 @@ const source_options = [
     },
 ]
 
-// const state_options = [
-//     {
-//         value: 'normal',
-//         label: '正常',
-//     },
-//     {
-//         value: 'warning',
-//         label: '预警',
-//     },
-//     {
-//         value: 'postpone',
-//         label: '延期',
-//     },
-// ]
+const state_options = [
+    {
+        value: '未开始',
+        label: '未开始',
+    },
+    {
+        value: '进行中',
+        label: '进行中',
+    },
+    {
+        value: '已完成',
+        label: '已完成',
+    },
+]
 const priority_options = [
     {
         value: '高',
@@ -393,6 +507,12 @@ const getTypeColor = (type) => {
         case '中':
             return 'primary';
         case '低':
+            return 'success';
+        case '未打开':
+            return 'primary';
+        case '进行中':
+            return 'warning';
+        case '已完成':
             return 'success';
         default:
             return '';
@@ -444,10 +564,16 @@ const getManageName = () => {
 
         })
         .catch(resp => {
-            console.log('获取成员name：' + resp);
+            console.log('获取成员name:' + resp);
         })
 }
 
+const relatedDialogVisible = ref(false);
+const showRelatedDialog = () => {
+
+    relatedDialogVisible.value = true;
+
+}
 
 /**
  * 新建需求部分逻辑
@@ -493,7 +619,19 @@ const handleClose = () => {
 /**
  * 需求详情部分逻辑：获取、修改
  */
-const selectedRow = ref(null);
+/**
+ * 需求详情部分逻辑：获取、修改
+ */
+const selectedRow = ref({
+    topic: '',
+    description: '',
+    source: '',
+    type: '',
+    manager_name: '',
+    priority: '',
+    clientArr: [],
+    status: '',
+});
 const detailDialogVisible = ref(false);
 
 const goToSpecificRequirement = (row) => {
@@ -575,6 +713,14 @@ const goToSpecificRequirement = (row) => {
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    background-color: rgb(255, 255, 255);
+}
+
+.itemheader {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
     background-color: rgb(255, 255, 255);
 }
 
