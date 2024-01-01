@@ -3,7 +3,7 @@ import request from '@/utils/request'
 //获取全部项目
 export function getAllProject(data) {
     return request({
-        url: `https://mock.apifox.com/m1/3754258-0-default/api/allproject`,
+        url: `https://mock.apifox.com/m1/3754258-0-default/api/project/allProject`,
         method: "GET",
         data: data,
     });
@@ -18,3 +18,22 @@ export function deleteProject(data) {
         data: data,
     });
 }
+
+//新建项目
+export function addProject(data) {
+    return request({
+        url: `https://mock.apifox.com/m1/3754258-0-default/api/project/addProject`,
+        method: "POST",
+        data: data,
+    });
+}
+
+//获取项目基本信息
+export function getProjectInfo(data) {
+    return request({
+        url: `https://mock.apifox.com/m1/3754258-0-default/api/project/addProject`,
+        method: "GET",
+        data: data,
+    });
+}
+

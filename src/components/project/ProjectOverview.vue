@@ -11,9 +11,9 @@
                     </el-form-item>
                     <el-form-item label="状态">
                         <el-select v-model="form.status" class="hidden-text" popper-class="no-border">
-                            <template #prefix>
+                            <!-- <template #prefix>
                                 <el-tag :type="getStateColor(form.type)">{{ form.label }}</el-tag>
-                            </template>
+                            </template> -->
                             <el-option v-for="item in state_options" :key="item.label" :value="item.label">
                                 <el-tag :type="getStateColor(item.value)">{{ item.label }}</el-tag>
                             </el-option>
@@ -63,13 +63,18 @@
 </template>
 
 <script setup>
-/* eslint-disable */
 import Card from '@/components/CommonCard.vue'
 import { reactive, ref, onMounted } from 'vue'
 import { QuestionFilled } from '@element-plus/icons-vue'
 import * as echarts from "echarts";
+//import { getPrjectInfo } from '@/api/project';
+//import { useRoute } from 'vue-router';
+
 let chartDom = ref(null); //注意变量名 和 ref名字要对应
+
+//组件加载完就绘制图表\获取所有基本信息\获取所有项目成员列表[要设置负责人]
 onMounted(() => {
+    //initProjectInfo();
     initChart();
 });
 
@@ -145,29 +150,29 @@ const initChart = () => {
                     },
                 },
             },
-            {
-                name: "任务",
-                data: [6, 10, 23],
-                type: "bar",
-                barWidth: "25%", //调整柱状图宽度
-                itemStyle: {
-                    normal: {
-                        /*--------设置柱形图圆角 [左上角，右上角，右下角，左下角]-------------*/
-                        borderRadius: [12, 12, 0, 0],
-                        /*--------设置柱形图渐变色 -------------*/
-                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                            {
-                                offset: 0,
-                                color: "rgba(255,204,0,1)",
-                            },
-                            {
-                                offset: 1,
-                                color: "rgba(255,102,0,1)",
-                            },
-                        ]),
-                    },
-                },
-            },
+            // {
+            //     name: "任务",
+            //     data: [6, 10, 23],
+            //     type: "bar",
+            //     barWidth: "25%", //调整柱状图宽度
+            //     itemStyle: {
+            //         normal: {
+            //             /*--------设置柱形图圆角 [左上角，右上角，右下角，左下角]-------------*/
+            //             borderRadius: [12, 12, 0, 0],
+            //             /*--------设置柱形图渐变色 -------------*/
+            //             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            //                 {
+            //                     offset: 0,
+            //                     color: "rgba(255,204,0,1)",
+            //                 },
+            //                 {
+            //                     offset: 1,
+            //                     color: "rgba(255,102,0,1)",
+            //                 },
+            //             ]),
+            //         },
+            //     },
+            // },
         ],
         legend: {
             // 图例配置
@@ -177,21 +182,35 @@ const initChart = () => {
             textStyle: {
                 color: "#333",
             },
-            data: ["用户故事", "任务"], // 图例项名称
+            data: ["用户故事"], // 图例项名称
         },
     };
     option && myChart.setOption(option);
 };
 
-//initChart();
-
+//const route = useRoute();
+//获取基本信息
 const form = reactive({
-    owner: '王琳',
+    owner: '',
     status: '正常',
     start_time: '',
     end_time: '',
 });
+// const initProjectInfo = () => {
+//     getPrjectInfo({
+//         id: route.params.id,
+//     })
+//         .then(resp => {
+//             form.owner = resp.manager_name
+//         })
+//         .catch(resp => {
 
+//         })
+
+
+// }
+
+//状态栏选项
 const state_options = [
     {
         value: 'normal',
@@ -206,7 +225,9 @@ const state_options = [
         label: '延期',
     },
 ]
-const manager_options = []
+
+//负责人选项列表
+const manager_options = ref([]);
 
 const getStateColor = (state) => {
     switch (state) {
@@ -220,6 +241,10 @@ const getStateColor = (state) => {
             return '';
     }
 }
+
+
+//修改项目的状态\负责人\开始时间\结束时间,与设置页面修改项目基本信息不同
+
 
 </script>
 

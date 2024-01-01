@@ -32,6 +32,8 @@ import {
 import { useRoute, useRouter } from 'vue-router'
 import { ref } from 'vue'
 
+
+
 const route = useRoute(); // 获取路由对象
 const router = useRouter();
 // 使用路由参数
