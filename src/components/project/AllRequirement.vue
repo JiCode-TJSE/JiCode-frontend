@@ -135,7 +135,94 @@
     </el-dialog>
     <!--需求详情弹出框-->
     <el-dialog v-model="detailDialogVisible" title="需求详情" @close="handleClose" width="80%">
+        <el-tabs type="border-card">
+            <el-tab-pane label="基本信息">
+                <el-form :model="selectedRow" label-width="80px">
+                    <el-form-item label="标题">
+                        <el-input v-model="selectedRow.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="描述">
+                        <el-input v-model="selectedRow.detail" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea"
+                            placeholder="Please input" />
+                    </el-form-item>
+                    <el-form-item label="优先级">
+                        <el-select v-model="selectedRow.typeEnum" class="hidden-text" placeholder="Select"
+                            popper-class="no-border">
+                            <template #prefix>
+                                <el-tag :type="getTypeColor(selectedRow.typeEnum)">{{ selectedRow.typeEnum }}</el-tag>
+                            </template>
+                            <el-option v-for="item in type_options" :key="item.value" :value="item.value">
+                                <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="状态">
+                        <el-select v-model="selectedRow.typeEnum" class="hidden-text" placeholder="Select"
+                            popper-class="no-border">
+                            <template #prefix>
+                                <el-tag :type="getTypeColor(selectedRow.typeEnum)">{{ selectedRow.typeEnum }}</el-tag>
+                            </template>
+                            <el-option v-for="item in type_options" :key="item.value" :value="item.value">
+                                <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="负责人">
+                        <el-select v-model="selectedRow.supervisorName" :options="getfromback">
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="需求类型">
+                        <el-select v-model="selectedRow.typeEnum" class="hidden-text" placeholder="Select"
+                            popper-class="no-border">
+                            <template #prefix>
+                                <el-tag :type="getTypeColor(selectedRow.typeEnum)">{{ selectedRow.typeEnum }}</el-tag>
+                            </template>
+                            <el-option v-for="item in type_options" :key="item.value" :value="item.value">
+                                <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="需求来源">
+                        <el-select v-model="selectedRow.sourceEnum" class="hidden-text" placeholder="Select"
+                            popper-class="no-border">
+                            <template #prefix>
+                                <el-tag :type="getTypeColor(selectedRow.sourceEnum)">{{ selectedRow.sourceEnum }}</el-tag>
+                            </template>
+                            <el-option v-for="item in source_options" :key="item.value" :value="item.value">
+                                <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="开始时间">
+                        <el-date-picker v-model="form.start_time" type="date" placeholder="Pick a date" class='date-picker'
+                            style="width: 100%" />
+                    </el-form-item>
+                    <el-form-item label="结束时间">
+                        <el-date-picker v-model="form.end_time" type="date" placeholder="Pick a date" class='date-picker'
+                            style="width: 100%" />
+                    </el-form-item>
+                    <el-form-item label="保存">
+                        <el-button type="primary" :icon="Check" @click="saveDetails" />
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
+            <el-tab-pane label="客户">
+                <el-row>
+                    <el-col :span="6" v-for="client in selectedRow.clientArr" :key="client.clientId">
+                        <el-tag>{{ client.name }}</el-tag>
+                    </el-col>
+                </el-row>
 
+
+                <el-select v-model="value1" multiple placeholder="Select" style="width: 240px">
+                    <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
+                </el-select>
+            </el-tab-pane>
+            <el-tab-pane label="工作项">
+
+            </el-tab-pane>
+            <el-tab-pane label="版本记录">版本记录</el-tab-pane>
+        </el-tabs>
     </el-dialog>
 </template>
 
