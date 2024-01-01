@@ -34,11 +34,11 @@
                   <span @click="handleRowClick(row)">{{ row.mark }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="team_name" label="所属">
+            <!-- <el-table-column prop="team_id" label="所属">
               <template #default="{ row }">
-                  <span @click="handleRowClick(row)">{{ row.team_name }}</span>
+                  <span @click="handleRowClick(row)">{{ row.team_id }}</span>
               </template>
-            </el-table-column>
+            </el-table-column> -->
 
             <el-table-column label="操作">
               <template v-slot="{ row }">
@@ -81,13 +81,13 @@
         <el-dialog v-model="editDialogVisible" title="编辑产品" @close="handleEditClose">
           <el-form :model="editForm" label-width="80px">
             <el-form-item label="产品名称">
-              <el-input v-model="editForm.name" style="width: 300px;"></el-input>
+              <el-input v-model="editForm.title" style="width: 300px;"></el-input>
             </el-form-item>
             <el-form-item label="产品标识">
               <el-input v-model="editForm.mark" style="width: 300px;"></el-input>
             </el-form-item>
             <el-form-item label="所属">
-              <el-input v-model="editForm.team_name" style="width: 300px;"></el-input>
+              <el-input v-model="editForm.team_id" style="width: 300px;"></el-input>
             </el-form-item>
             <el-form-item label="产品描述">
               <el-input
@@ -120,7 +120,7 @@
   import { updateProduct } from '@/api/product';
   import { ElMessage } from 'element-plus';
   import { useRouter } from 'vue-router';
-  import store from '@/store';
+  // import store from '@/store';
 
   const router = useRouter(); 
 
@@ -152,16 +152,18 @@
    * 获取产品列表
    */
   const getAllProduct = () => {
-    const accountId = store.state.user.account_id; // 从 Vuex 中获取 account_id
-    console.log('accountId',accountId);
-    getProduct({
-      title: '',
-      mark: '',
-      team_name: '',
-      detail: '',
-      id:'',
+    // const accountId = store.state.user.account_id; // 从 Vuex 中获取 account_id
+    // console.log('accountId',accountId);
+    getProduct(
+      // {
+      // title: '',
+      // mark: '',
+      // team_name: '',
+      // detail: '',
+      // id:'',
       // account_id: accountId, // 将 account_id 作为查询参数传递
-    })
+    // }
+    )
       .then(resp => {
         console.log('resp', resp);
         allproductsData.value = resp.data.records;
@@ -172,7 +174,7 @@
           console.log(resp);
       })
       .catch(err => {
-        console.log(err);
+        console.log('err for pull products',err);
         ElMessage.error('拉取产品失败');
       })
   }
@@ -183,11 +185,12 @@
   const deleteProductForRow = (row) => {
     console.log('Row Object:', row);
     const id = row.id; // 获取要删除的产品的 ID
-    deleteProduct({id}) // 调用删除产品的 API 函数
+    console.log('row.id',row.id)
+    deleteProduct({id:id}) // 调用删除产品的 API 函数
       .then((resp) => {
         console.log('resp for deleteProduct',resp);
         console.log(resp.code);
-        if(resp.code === true){
+        if(resp.code === 200){
           // 更新前端产品列表，移除已删除的产品
           allproductsData.value = allproductsData.value.filter(product => product.id !== id);
           ElMessage.success('产品删除成功');
@@ -207,9 +210,9 @@
   // 添加新的响应式变量用于编辑产品的对话框
   const editDialogVisible = ref(false);
   const editForm = reactive({
-    name: '',
+    title: '',
     mark: '',
-    team_name: '',
+    team_id: '',
     detail: '',
     id: '',
   });
@@ -218,9 +221,9 @@
   const editProductForRow = (row) => {
     // 填充编辑表单的字段
     editForm.id = row.id;
-    editForm.name = row.title;
+    editForm.title = row.title;
     editForm.mark = row.mark;
-    editForm.team_name = row.team_name;
+    editForm.team_id = 'test_team';
     editForm.detail = row.detail;
 
     editDialogVisible.value = true;
@@ -236,7 +239,7 @@
     updateProduct(editForm)
       .then(resp => {
         console.log('resp for updateProduct', resp);
-        if (resp.code === true) {
+        if (resp.code === 200) {
           // 更新前端产品列表或重新拉取产品列表以刷新数据
           getAllProduct();
           ElMessage.success('产品更新成功');
@@ -270,18 +273,27 @@
     allproductsData.value.push({
       title: form.title,
       mark: form.mark,
-      team_name: form.team_name,
+      team_id: 'test_team',
       detail: form.detail,
+      id: ''
     });
-    addProduct(form.value)
+    addProduct({
+      title: form.title,
+      mark: form.mark,
+      team_id: 'test_team',
+      detail: form.detail,
+      id: ''
+    })
       .then(resp => {
         console.log('resp');
         console.log(resp);
         ElMessage({
-            message: '添加产品成功',
-            type: 'success',
-          })
-          console.log(resp);
+          message: '添加产品成功',
+          type: 'success',
+        })
+        console.log(resp);
+
+        getAllProduct();
       })
       .catch(err => {
         console.log(err);

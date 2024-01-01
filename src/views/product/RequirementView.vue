@@ -49,6 +49,7 @@
           </el-table>
         </el-main>
 
+        <!--  -->
         <el-dialog v-model="dialogVisible" title="需求详情" @close="handleClose">
           <el-tabs type="border-card">
             <el-tab-pane label="基本信息">
@@ -92,32 +93,36 @@
                       </el-option>
                   </el-select>
                 </el-form-item>   
+                
+                <el-form-item label="客户">
+                    <el-row>
+                    <el-col :span="6" v-for="client in selectedRow.clientArr" :key="client.clientId">
+                      <el-tag>{{ client.name }}</el-tag>
+                    </el-col>
+                  </el-row>
+
+                  <el-select
+                    v-model="value1"
+                    multiple
+                    placeholder="Select"
+                    style="width: 240px"
+                  >
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    />
+                  </el-select>
+                </el-form-item>
+
                 <el-form-item label="保存">
                   <el-button type="primary" :icon="Check" @click="saveDetails" />
                 </el-form-item>
               </el-form>
             </el-tab-pane>
             <el-tab-pane label="客户">
-              <el-row>
-                <el-col :span="6" v-for="client in selectedRow.clientArr" :key="client.clientId">
-                  <el-tag>{{ client.name }}</el-tag>
-                </el-col>
-              </el-row>
-
               
-              <el-select
-                v-model="value1"
-                multiple
-                placeholder="Select"
-                style="width: 240px"
-              >
-                <el-option
-                  v-for="item in options"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                />
-              </el-select>
             </el-tab-pane>
             <el-tab-pane label="工作项">
               
@@ -310,14 +315,15 @@ const total = ref(1);
 const getPageDataFromServer = () => {
   getRequireInPage({
     pageSize: pageSize,
-    currentPage: currentPage.value,
-    requirementId: null,
-    name: null,
-    supervisorName: null,
-    typeEnum: null,
+    pageNo: currentPage.value,
+    productId:'test',
+    // requirementId: null,
+    // name: null,
+    // supervisorName: null,
+    // typeEnum: null,
   })
     .then(resp => {
-      console.log('getRequireInPage', resp);
+      console.log('getRequireInPage: ', resp);
 
       // 添加需求数据到 allrequireData 数组
       allrequireData.value = resp.data.records; // 假设响应中的需求数据在 records 字段中
@@ -329,7 +335,7 @@ const getPageDataFromServer = () => {
       });
     })
     .catch(err => {
-      console.log(err);
+      console.log('getRequire err',err);
       ElMessage.error('拉取需求失败');
     })
 }
@@ -356,7 +362,7 @@ onMounted(() => {
   const deleteRequireForRow = (row) => {
   console.log('Row Object:', row);
   const id = row.requirementId; // 获取要删除的产品的 ID
-  deleteRequire({id}) // 调用删除产品的 API 函数
+  deleteRequire({requirementId:id}) // 调用删除产品的 API 函数
     .then((resp) => {
       console.log('resp for deleteRequire',resp);
       console.log(resp.code);
@@ -391,12 +397,14 @@ const handleTableClose = () => {
 const submitForm = () => {
   const submitData = {
     name: form.name,
-    supervisorId: form.supervisorId,
+    // supervisorId: form.supervisorId,
+    supervisorId: '1',
     moduleEnum: form.moduleEnum,
     sourceEnum: form.sourceEnum,
     typeEnum: form.typeEnum,
     detail: form.detail,
-    belongProductId:form.belongProductId,
+    // belongProductId:form.belongProductId,
+    belongProductId:'test',
   };
   addRequire(submitData)
     .then(resp => {    
@@ -428,6 +436,8 @@ const selectedRow = ref({
   supervisorName: '',
   supervisorId: '',
   clientArr: [],
+  backlogItemName: '',
+  backlogItemId:'',
 });
 
 const dialogVisible = ref(false); 
@@ -435,12 +445,15 @@ const handleClose = () => {
   dialogVisible.value = false;
 };
 
+const requirementid = ref();
+
 const handleRowClick = (row) => {
+  requirementid.value = row.requirementId;
   // 基本信息
-  getRequireDetail({ id: row.requirementId }) 
+  getRequireDetail({ requirementId: row.requirementId }) 
     .then((response) => {
       console.log('row.requirementId',row.requirementId)
-      console.log('response',response);
+      console.log('response require detail',response);
       // if (response.code === true) {
         ElMessage({
           message: '获取需求详情成功',
@@ -460,6 +473,14 @@ const handleRowClick = (row) => {
         } else {
           selectedRow.value.supervisorName = '';
           selectedRow.value.supervisorId = '';
+        }
+
+        if (response.data.backlogItemArr) {
+          selectedRow.value.backlogItemName = response.data.backlogItemArr.name;
+          selectedRow.value.backlogItemId = response.data.backlogItemArr.backlogItemId;
+        } else {
+          selectedRow.value.backlogItemName = '';
+          selectedRow.value.backlogItemId = '';
         }
 
         selectedRow.value.clientArr = response.data.clientArr;
@@ -491,8 +512,13 @@ const saveDetails = () => {
     moduleEnum: selectedRow.value.moduleEnum,
     sourceEnum: selectedRow.value.sourceEnum,
     typeEnum: selectedRow.value.typeEnum,
-    supervisorId: selectedRow.value.supervisorId,
+    // supervisorId: selectedRow.value.supervisorId,
+    supervisorId: '1',
+    requirementId: requirementid.value,
+    clientArr: null,
+    backlogItemArr:null,
   };
+  console.log('requestData',requestData)
 
   updateRequire(requestData)
     .then((response) => {

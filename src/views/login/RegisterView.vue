@@ -11,7 +11,7 @@
         <el-col :span="12">
           <div class="input-info-1">
             <div class="label">用户名：</div>
-            <el-input v-model="registerform.username" placeholder="请设置用户名" style="width: 150px;"></el-input>
+            <el-input v-model="registerform.uname" placeholder="请设置用户名" style="width: 150px;"></el-input>
           </div>
         </el-col>
         <el-col :span="12">
@@ -38,7 +38,7 @@
   let registerform = ref({
     email: "",
     code: "",
-    username:"",
+    uname:"",
     password:"",
     teamname: "王琳的公司"
   });
@@ -73,7 +73,7 @@
     console.log('表单信息：', registerform.value);
     if (!registerform.value.email) {
       ElMessage.error('邮箱不能为空');
-    } else if (!registerform.value.username) {
+    } else if (!registerform.value.uname) {
       ElMessage.error('用户名不能为空');
     } else if (!registerform.value.password) {
       ElMessage.error('密码不能为空');

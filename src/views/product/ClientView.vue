@@ -210,14 +210,15 @@ const getPageDataFromServer = () => {
   console.log('productIdFromUrl',productIdFromUrl);
   getClientInPage({
     pageSize: pageSize,
-    currentPage: currentPage.value,
-    name: '', 
-    type: '', 
-    rank: '', 
-    size: '', 
-    detail: '', 
-    id:'',
-    product_id: productIdFromUrl,
+    pageNo: currentPage.value,
+    // name: '', 
+    // type: '', 
+    // rank: '', 
+    // size: '', 
+    // detail: '', 
+    // id:'',
+    // product_id: productIdFromUrl,
+    productId:'test',
   })
     .then(resp => {
       console.log('getClientInPage', resp);
@@ -230,7 +231,7 @@ const getPageDataFromServer = () => {
       });
     })
     .catch(err => {
-      console.log(err);
+      console.log('拉取客户失败',err);
       ElMessage.error('拉取客户失败');
     })
 }
@@ -263,13 +264,13 @@ const submitForm = () => {
     type: form.type,
     rank: form.rank,
     size: form.size,
-    id: form.id,
+    id: '',
     detail: form.detail,
-    product_id:form.product_id,
+    product_id: 'test',
   };
   addClient(submitData)
     .then(resp => {    
-        console.log(resp);
+        console.log('add client', resp);
         ElMessage({
           message: '添加需求成功',
           type: 'success',
@@ -279,7 +280,7 @@ const submitForm = () => {
         handleTableClose();
     })
     .catch(err => {
-      console.log(err);
+      console.log('add client error',err);
       ElMessage.error('添加需求失败');
     })
   
@@ -291,7 +292,7 @@ const submitForm = () => {
 const deleteClientForRow = (row) => {
   console.log('Row Object:', row);
   const id = row.id; // 获取要删除的客户的 ID
-  deleteClient({id})
+  deleteClient({id: id})
     .then((resp) => {
       console.log('resp for deleteClient',resp);
       console.log(resp.code);
@@ -325,7 +326,7 @@ const handleRowClick = (row) => {
   
   getClientDetail({ id: row.id }) // 传递选中行的ID作为查询参数
     .then((response) => {
-      console.log('response',response);
+      console.log('get client response',response);
       // if (response.code === true) {
         ElMessage({
           message: '获得客户详情成功',
@@ -333,6 +334,7 @@ const handleRowClick = (row) => {
         })
         selectedClient.value = { ...response.data };
         dialogVisible.value = true;
+        
       // } else {
       //   ElMessage.error('获得客户详情失败');
       //   console.error(response.msg);
@@ -356,6 +358,8 @@ const handleSubmit = () => {
           message: '更新客户详情成功',
           type: 'success',
         })
+
+        getPageDataFromServer();
         console.log('更新成功');
         dialogVisible.value = false;
       // } else {
