@@ -19,6 +19,8 @@ import ProductManageView from '@/views/product/ProductManageView.vue'
 import AccountSetView from '@/views/account/AccountSetView.vue'
 import AccountBoard from '@/views/account/AccountBoard.vue'
 import AccountInfo from '@/views/account/AccountInfo.vue'
+import ClientView from '@/views/product/ClientView.vue'
+
 const routes = [
   {
     path: '/',
@@ -138,6 +140,11 @@ const routes = [
     path: '/requirement',
     name: 'requirement',
     component: RequirementView
+  },
+  {
+    path: '/client',
+    name: 'client',
+    component: ClientView
   },
 
 ]

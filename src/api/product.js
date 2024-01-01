@@ -1,36 +1,36 @@
 import request from '@/utils/request'
+import store from '@/store'
+
+const accountId = store.state.user.account_id;
+console.log(`accountId`,accountId)
 
 export function deleteProduct(data) {
     return request({
-        url: "https://mock.apifox.com/m1/3754258-0-default/api/product/item",
+        url: "http://101.37.116.97:8080/api/product/item",
         method: "DELETE",
-        data: data
+        params: data
     })
 }
-export function getProduct(data) {
+export function getProduct() {
     return request({
-        url: "https://mock.apifox.com/m1/3754258-0-default/api/product/itmes",
+        url: "http://101.37.116.97:8080/api/product/items",
         method: "GET",
         headers: {
-            Authorization: "Bearer " + localStorage.getItem("jwtToken")
+            Authorization: '2',
         },
-        data: data
     })
 }
 export function addProduct(data) {
     return request({
-        url: "https://mock.apifox.com/m1/3754258-0-default/api/product/item",
+        url: "http://101.37.116.97:8080/api/product/item",
         method: "POST",
-        headers: {
-            Authorization: "Bearer " + localStorage.getItem("jwtToken")
-        },
         data: data
     })
 }
 
 export function updateProduct(data) {
     return request({
-        url: "https://mock.apifox.com/m1/3754258-0-default/api/product/item",
+        url: "http://101.37.116.97:8080/api/product/item",
         method: "PUT",
         data: data
     })
