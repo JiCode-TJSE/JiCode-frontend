@@ -71,7 +71,7 @@ onMounted(() => {
 const allProjectsData = ref([]);
 const getMyProject = () => {
     getAllProject({
-        accountID: store.state.account_id,
+        organization_id: localStorage.getItem("organizationId"),
     })
         .then(resp => {
             allProjectsData.value = resp.data.projectList;
