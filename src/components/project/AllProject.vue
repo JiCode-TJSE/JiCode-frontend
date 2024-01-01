@@ -90,7 +90,7 @@ const getMyProject = () => {
 //点击具体项目跳转到该项目的详情页面
 const router = useRouter();
 const goToSpecificProject = (row) => {
-    router.push({ name: 'specificProject', params: { id: row.id } });
+    router.push({ name: 'specificProject', params: { id: row.id, name: row.name } });
 
 };
 
@@ -160,8 +160,6 @@ const handleclose = () => {
     ProjectForm.name = '';
     ProjectForm.desc = '';
 }
-
-
 
 
 </script>
