@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-/* eslint-disable */
+
 import ProjectTopBar from "@/components/project/ProjectTopBar.vue"
 import {
     SwitchFilled,
