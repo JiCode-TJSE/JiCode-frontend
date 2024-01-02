@@ -3,7 +3,7 @@ import request from '@/utils/request'
 //获取全部项目
 export function getAllProject(data) {
     return request({
-        url: `http://101.37.116.97:8082/Project/all`,
+        url: `http://101.37.116.97:8082/api/productdev/projects`,
         method: "GET",
         params: data,
     });
@@ -13,7 +13,7 @@ export function getAllProject(data) {
 //删除项目
 export function deleteProject(data) {
     return request({
-        url: `https://mock.apifox.com/m1/3754258-0-default/api/project/deleteProject`,
+        url: `http://101.37.116.97:8082/api/productdev/project`,
         method: "DELETE",
         data: data,
     });
@@ -22,7 +22,7 @@ export function deleteProject(data) {
 //新建项目
 export function addProject(data) {
     return request({
-        url: `https://mock.apifox.com/m1/3754258-0-default/api/project/addProject`,
+        url: `http://101.37.116.97:8082/api/project/addProject`,
         method: "POST",
         data: data,
     });
@@ -31,7 +31,7 @@ export function addProject(data) {
 //获取项目基本信息
 export function getProjectInfo(data) {
     return request({
-        url: `http://101.37.116.97:8082/Project/get`,
+        url: `http://101.37.116.97:8082/api/projectdev/project`,
         method: "GET",
         params: data,
     });
@@ -40,7 +40,8 @@ export function getProjectInfo(data) {
 //修改项目基本信息
 export function updateProject(data) {
     return request({
-        url: `https://mock.apifox.com/m1/3754258-0-default/api/project/updateProject`,
+        url: `
+        http://101.37.116.97:8082/api/productdev/project`,
         method: "PUT",
         data: data,
     });

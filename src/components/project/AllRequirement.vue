@@ -335,20 +335,13 @@ const handleSelectionChange = (val) => {
 
 // 分页查询获取需求列表
 const allrequireData = ref([]);
-const currentPage = ref(1);//当前页数,默认为第一页
-const pageSize = 10; //每页放10条需求
-const total = ref(1); //总共需求条数
 const route = useRoute();
 const getPageDataFromServer = () => {
     getAllBacklogItems({
         id: route.params.id,
-        currentPage: currentPage.value,
-        pageSize: pageSize,
-
     })
         .then(resp => {
-            console.log('getRequireInPage', resp);
-
+            console.log(resp);
             // 添加需求数据到 allrequireData 数组
             allrequireData.value = resp.data.backlogList;
             total.value = resp.data.total;
@@ -360,11 +353,6 @@ const getPageDataFromServer = () => {
         })
 }
 
-// 分页请求
-const handlePageChange = (newPage) => {
-    currentPage.value = newPage;
-    getPageDataFromServer();
-};
 const allRelatedData = ref([]);
 // 初始调用
 onMounted(() => {
@@ -630,16 +618,6 @@ const showRelatedDialog = () => {
 const goToSpecificRequirement = (row) => {
     selectedRow.value = row;
     detailDialogVisible.value = true;
-    // //获取需求详情
-    // getRelatedItem({
-    //     id: row.id,
-    // })
-    //     .then({
-
-    //     })
-    //     .catch({
-
-    //     })
 
 
 };

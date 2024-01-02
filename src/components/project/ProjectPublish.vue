@@ -12,16 +12,16 @@
 
         </el-header>
         <el-main class="main">
-            <el-table ref="multipleTableRef" :data="sprintData" style="width: 100%"
-                @selection-change="handleSelectionChange" @row-click="handleRowClick">
+            <el-table ref="multipleTableRef" :data="releaseData" style="width: 100%"
+                @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="50"></el-table-column>
-                <el-table-column prop="topic" label="迭代名称" sortable>
+                <el-table-column prop="topic" label="发布名称" sortable>
                 </el-table-column>
                 <el-table-column prop="status" label="阶段">
                 </el-table-column>
                 <el-table-column prop="type" label="类型">
                 </el-table-column>
-                <el-table-column prop="supervisorName" label="负责人">
+                <el-table-column prop="managerName" label="负责人">
                 </el-table-column>
                 <el-table-column prop="start_time" label="开始时间">
                 </el-table-column>
@@ -37,7 +37,7 @@
             </el-table>
         </el-main>
     </el-container>
-    <!-- 新建迭代\修改迭代 -->
+    <!-- 新建发布\修改发布 -->
     <el-dialog v-model="dialogTableVisible" title="新建发布" @close="handleClose" width="60%">
         <el-form :model="form" label-width="80px">
             <el-form-item label="名称">
@@ -78,7 +78,7 @@
             </el-row>
         </el-form>
         <el-row class="button-container">
-            <el-button type="primary" @click="submitForm">提交</el-button>
+            <el-button type="primary" @click="addPublish">提交</el-button>
         </el-row>
     </el-dialog>
 </template>
@@ -86,7 +86,11 @@
 <script setup>
 
 import { Plus, Delete, Edit } from '@element-plus/icons-vue'
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
+import { getAllRelease, addRelease } from '@/api/release';
+import { getUserInfo, getUserName } from '@/api/user';
+import { useRoute } from 'vue-router';
+import { ElMessage } from 'element-plus';
 const dialogTableVisible = ref(false);
 const showDialog = () => {
     dialogTableVisible.value = true;
@@ -94,16 +98,23 @@ const showDialog = () => {
 const handleClose = () => {
     dialogTableVisible.value = false;
 };
-const sprintData = [
-    {
-        topic: 'Tom',
-        status: '未开始',
-        type: '正常迭代',
-        supervisorName: '王琳',
-        start_time: '2016-05-03',
-        end_time: '2016-05-03',
-    },
-]
+onMounted(() => {
+    getReleaseList();
+})
+
+const releaseData = ref([
+    // {
+    //     topic: 'Tom',
+    //     status: '未开始',
+    //     type: '正常迭代',
+    //     supervisorName: '王琳',
+    //     start_time: '2016-05-03',
+    //     end_time: '2016-05-03',
+    // },
+]);
+
+const managerIdList = ref([])
+
 
 const form = reactive({
     topic: '',
@@ -135,6 +146,59 @@ const getTypeColor = (type) => {
             return '';
     }
 };
+
+//to check userinfo
+const getReleaseList = () => {
+    getAllRelease({
+        organizationId: localStorage.getItem("organizationId"),
+    })
+        .then(resp => {
+            releaseData.value = resp.data;
+            for (let i = 0; i < resp.data.length; i++) {
+                managerIdList.value.push(resp.data[i].managerId);
+            }
+            getUserName({
+                accountIdArr: managerIdList.value
+            })
+                .then(resp => {
+                    for (let i = 0; i < resp.data.length; i++) {
+                        releaseData.value[i] = {
+                            ...releaseData.value[i],
+                            "managerName": resp.data[i].userName
+                        };
+                    }
+                })
+                .catch(resp => {
+                    console.log(resp);
+                })
+        })
+        .catch(resp => {
+            console.error(resp);
+        })
+}
+
+//新建发布 to check resp的格式
+const route = useRoute();
+const addPublish = () => {
+    addRelease({
+        startTime: form.start_time,
+        endTime: form.end_time,
+        type: form.type,
+        projectId: route.params.id,
+        managerId: form.supervisorId,
+        topic: form.topic,
+        stageId: '未开始',
+        organizationId: localStorage.getItem("organizationId"),
+    })
+        .then(resp => {
+            ElMessage.success('新建发布成功！');
+        })
+        .catch(resp => {
+            console.error(resp);
+        })
+
+}
+
 
 </script>
 
