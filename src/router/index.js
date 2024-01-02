@@ -20,7 +20,9 @@ import AccountSetView from '@/views/account/AccountSetView.vue'
 import AccountBoard from '@/views/account/AccountBoard.vue'
 import AccountInfo from '@/views/account/AccountInfo.vue'
 import ClientView from '@/views/product/ClientView.vue'
-
+import WorkSpace from '@/views/workspace/WorkSpace.vue'
+import WorkHour from '@/views/workspace/WorkHour.vue'
+import HomePageView from '@/views/workspace/HomePage.vue'
 const routes = [
   {
     path: '/',
@@ -117,6 +119,24 @@ const routes = [
           },
         ]
       },
+      {
+        path: '/workspace',
+        name: 'workBench',
+        redirect: '/workspace/homepage', // 添加重定向
+        component: WorkSpace,
+        children: [
+          {
+            path: '/workspace/homepage',
+            name: 'homepage',
+            component: HomePageView,
+          },
+          {
+            path: 'workhour',
+            component: WorkHour,
+          },
+        ]
+      },
+      
     ],
     props: true,
   },
