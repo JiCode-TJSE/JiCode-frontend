@@ -3,9 +3,9 @@ import request from '@/utils/request'
 //获取全部项目
 export function getAllProject(data) {
     return request({
-        url: `https://mock.apifox.com/m1/3754258-0-default/api/project/allProject`,
+        url: `http://101.37.116.97:8082/Project/all`,
         method: "GET",
-        data: data,
+        params: data,
     });
 }
 
@@ -31,9 +31,9 @@ export function addProject(data) {
 //获取项目基本信息
 export function getProjectInfo(data) {
     return request({
-        url: `https://mock.apifox.com/m1/3754258-0-default/api/project/getProjectInfo`,
+        url: `http://101.37.116.97:8081/Project/get`,
         method: "GET",
-        data: data,
+        params: data,
     });
 }
 

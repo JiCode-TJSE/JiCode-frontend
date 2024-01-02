@@ -223,7 +223,7 @@
                 <el-button class="itemheader" type="primary" @click="showRelatedDialog"><el-icon>
                         <Plus />
                     </el-icon>&nbsp;&nbsp;添加工作项</el-button>
-                <el-table :data="relatedData" style="width: 100%" @selection-change="handleSelectionChange">
+                <el-table :data="allRelatedData" style="width: 100%" @selection-change="handleSelectionChange">
                     <el-table-column type="selection" width="50"></el-table-column>
                     <el-table-column prop="id" label="编号" sortable>
                         <template #default="{ row }">
@@ -246,36 +246,7 @@
                     </el-table-column>
                     <el-table-column label="操作">
                         <template v-slot="{ row }">
-                            <el-button type="danger" @click="deleteRequireForRow(row)">解除关联</el-button>
-                        </template>
-                    </el-table-column>
-
-                </el-table>
-
-            </el-tab-pane>
-
-            <el-tab-pane label="版本记录">
-                <el-button class="itemheader" type="primary" @click="showVersionDialog"><el-icon>
-                        <Plus />
-                    </el-icon>&nbsp;&nbsp;创建新版本</el-button>
-                <el-table ref="multipleTableRef" :data="allrequireData" style="width: 100%"
-                    @selection-change="handleSelectionChange">
-                    <el-table-column type="selection" width="50"></el-table-column>
-                    <el-table-column prop="id" label="版本" sortable>
-                        <template #default="{ row }">
-                            <span @click="goToSpecificRequirement(row)">{{ row.id }}</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="topic" label="备注">
-                        <template #default="{ row }">
-                            <span @click="goToSpecificRequirement(row)">{{ row.topic }}</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="supervisorName" label="创建人">
-                    </el-table-column>
-                    <el-table-column label="操作">
-                        <template v-slot="{ row }">
-                            <el-button type="danger" @click="deleteRequireForRow(row)" :icon='Edit'></el-button>
+                            <el-button type="danger" @click="deleteRelatedForRow(row)">解除关联</el-button>
                         </template>
                     </el-table-column>
 
@@ -341,15 +312,16 @@
 </template>
 
 <script setup>
-import { Plus, Delete, Edit } from '@element-plus/icons-vue';
+import { Plus, Delete } from '@element-plus/icons-vue';
 import { ref, reactive } from 'vue';
 import { onMounted } from 'vue';
 import {
-    getAllBacklogItems, deleteRequirement
+    getAllBacklogItems, deleteRequirement, deleteRelatedItem
 } from '@/api/backlogItem';
 import {
     getProjectInfo,
 } from '@/api/project';
+
 import { getUserName } from '@/api/user';
 import { ElMessage } from 'element-plus';
 import { useRoute } from 'vue-router';
@@ -393,10 +365,11 @@ const handlePageChange = (newPage) => {
     currentPage.value = newPage;
     getPageDataFromServer();
 };
-
+const allRelatedData = ref([]);
 // 初始调用
 onMounted(() => {
     getPageDataFromServer();
+
 })
 
 //新建需求时的表单信息
@@ -538,6 +511,29 @@ const deleteRequireForRow = (row) => {
         })
 }
 
+const deleteRelatedForRow = (row) => {
+    deleteRelatedItem({
+        backlogitemId1: row.id,
+        backlogitemId2: '',
+
+    })
+        .then((resp) => {
+            if (resp.code === 200) {
+                console.log(row.id);
+                allrequireData.value = allrequireData.value.filter(requirement => requirement.id !== row.id);
+                ElMessage.success('关联工作项删除成功');
+            }
+            else {
+                ElMessage.error(resp.message);
+            }
+        })
+        .catch(resp => {
+            console.log(resp);
+            //ElMessage.error('项目删除失败，请重试！');
+        })
+
+}
+
 const memberList = ref([]);
 const getMemberList = () => {
     getProjectInfo({
@@ -566,13 +562,6 @@ const getManageName = () => {
         .catch(resp => {
             console.log('获取成员name:' + resp);
         })
-}
-
-const relatedDialogVisible = ref(false);
-const showRelatedDialog = () => {
-
-    relatedDialogVisible.value = true;
-
 }
 
 /**
@@ -634,65 +623,27 @@ const selectedRow = ref({
 });
 const detailDialogVisible = ref(false);
 
+const relatedDialogVisible = ref(false);
+const showRelatedDialog = () => {
+    relatedDialogVisible.value = true;
+}
 const goToSpecificRequirement = (row) => {
     selectedRow.value = row;
     detailDialogVisible.value = true;
+    // //获取需求详情
+    // getRelatedItem({
+    //     id: row.id,
+    // })
+    //     .then({
+
+    //     })
+    //     .catch({
+
+    //     })
+
+
 };
 
-
-// const router = useRouter();
-// const goToSpecificRequirement = (row) => {
-
-// }
-// const detailform = {
-//   name: "示例需求",
-//   detail: "这是一个示例需求的描述。",
-//   moduleEnum: "模块A",
-//   sourceEnum: "用户反馈",
-//   typeEnum: "功能需求",
-//   supervisorName: "负责人A",
-//   belongProductId: "产品ID",
-//   clientArr: [
-//     {
-//       clientId: "clientID1",
-//       name: "客户A",
-//     },
-//     {
-//       clientId: "clientID2",
-//       name: "客户B",
-//     },
-//   ],
-//   supervisor: [
-//     {
-//       supervisorId: "string",
-//       supervisorName: "string"
-//     },
-//   ],
-//   backlogItemArr: [
-//     {
-//       backlogItemId: "backlogItemID1",
-//       name: "工作项A",
-//     },
-//     {
-//       backlogItemId: "backlogItemID2",
-//       name: "工作项B",
-//     },
-//   ],
-//   versionArr: [
-//     {
-//       id: "versionID1",
-//       name: "版本A",
-//       detail: "版本A详情",
-//       createTime: "创建时间"
-//     },
-//     {
-//       id: "versionID2",
-//       name: "版本B",
-//       detail: "版本B详情",
-//       createTime: "创建时间"
-//     },
-//   ],
-// };
 
 
 

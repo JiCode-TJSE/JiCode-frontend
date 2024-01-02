@@ -74,7 +74,7 @@ let chartDom = ref(null); //注意变量名 和 ref名字要对应
 
 //组件加载完就绘制图表\获取所有基本信息\获取所有项目成员列表[要设置负责人]
 onMounted(() => {
-    //initProjectInfo();
+    initProjectInfo();
     initChart();
 });
 
@@ -195,20 +195,32 @@ const form = reactive({
     status: '正常',
     start_time: '',
     end_time: '',
+    progress: '',
 });
-// const initProjectInfo = () => {
-//     getPrjectInfo({
-//         id: route.params.id,
-//     })
-//         .then(resp => {
-//             form.owner = resp.manager_name
-//         })
-//         .catch(resp => {
+const manager_name = ref();
+const initProjectInfo = () => {
+    getPrjectInfo({
+        projectId: route.params.id,
+    })
+        .then(resp => {
+            getUserName({
+                accountIdArr: [resp.manager_id],
+            })
+                .then(resp => {
+                    manager_name.value = resp.data[0].userName;
+                })
+                .catch(resp => {
+                    console.log('获取组织名称' + resp);
+                })
+            form.owner = manager_name.value;
+        })
+        .catch(resp => {
+            console.error('获取项目基本信息：' + resp);
+        })
+}
 
-//         })
 
 
-// }
 
 //状态栏选项
 const state_options = [
@@ -228,6 +240,12 @@ const state_options = [
 
 //负责人选项列表
 const manager_options = ref([]);
+const getMemberList = () => {
+
+
+
+}
+
 
 const getStateColor = (state) => {
     switch (state) {

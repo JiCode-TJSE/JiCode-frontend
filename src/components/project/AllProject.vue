@@ -11,12 +11,13 @@
         <el-main class="main">
             <el-table :data="allProjectsData" style="width: 100%" :default-sort="{ prop: 'date', order: 'descending' }">
 
-                <el-table-column prop="name" label="项目" sortable>
+                <el-table-column prop="topic" label="项目" sortable>
                     <template #default="{ row }">
-                        <span @click="goToSpecificProject(row)">{{ row.name }}</span>
+                        <span @click="goToSpecificProject(row)">{{ row.topic }}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="organization_name" label="所属">
+                <el-table-column label="所属">
+                    organization_name
                 </el-table-column>
 
                 <el-table-column label="操作">
@@ -61,20 +62,38 @@ import { useRouter } from 'vue-router';
 import { ref, reactive, onMounted } from 'vue';
 import { getAllProject, deleteProject, addProject } from '@/api/project';
 import store from "@/store";
+import { getOrganization } from '@/api/user';
 //import { defineEmits, defineProps } from 'vue';
 
 onMounted(() => {
     getMyProject();
+    getOrgnizationName();
+    console.log(localStorage.getItem("organizationId"));
 })
+//获取项目所属组织
+const organization_name = ref();
+const getOrgnizationName = () => {
+    getOrganization({
+        organization_id: localStorage.getItem("organizationId"),
+    })
+        .then(resp => {
+            organization_name.value = resp.data.organization_name;
+        })
+        .catch(resp => {
+            console.error(resp);
+        })
+}
 
-//获取全部项目列表
+
+//获取全部项目列表 ok
 const allProjectsData = ref([]);
 const getMyProject = () => {
     getAllProject({
-        accountID: store.state.account_id,
+        organization_id: localStorage.getItem("organizationId"),
     })
         .then(resp => {
-            allProjectsData.value = resp.data.projectList;
+
+            allProjectsData.value = resp.data;
             console.log(resp);
             console.log(allProjectsData);
             ElMessage.success('拉取全部项目成功！');
@@ -86,17 +105,19 @@ const getMyProject = () => {
         })
 }
 
-//点击具体项目跳转到该项目的详情页面
+//点击具体项目跳转到该项目的详情页面 ok
 const router = useRouter();
 const goToSpecificProject = (row) => {
-    router.push({ name: 'specificProject', params: { id: row.id, name: row.name } });
+    router.push({ name: 'specificProject', params: { id: row.id, name: row.topic } });
 
 };
 
 
 //删除项目
 const deleteProjectForRow = (row) => {
-    deleteProject(row.id)
+    deleteProject({
+        projectId: row.id
+    })
         .then((resp) => {
             if (resp.code === 200) {
                 console.log(row.id);
@@ -136,9 +157,9 @@ const rules = reactive({
 //新建项目
 const submit = () => {
     addProject({
-        account_id: store.state.account_id,
-        name: ProjectForm.name,
-        desc: ProjectForm.desc,
+        organizationId: localStorage.getItem("organizationId"),
+        topic: ProjectForm.name,
+        description: ProjectForm.desc,
     })
         .then(resp => {
             console.log(resp);
@@ -147,9 +168,6 @@ const submit = () => {
         .catch(resp => {
             console.error(resp);
         })
-
-
-
     dialogFormVisible.value = false;
 }
 
