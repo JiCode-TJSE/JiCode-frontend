@@ -3,8 +3,8 @@ import request from '@/utils/request'
 //获取username
 export function getUserName(data) {
     return request({
-        url: `https://mock.apifox.com/m1/3754258-0-default/api/user/multiuserInfo`,
-        method: "GET",
+        url: `http://101.37.116.97:8081/api/user/multiuserInfo`,
+        method: "POST",
         data: data,
     });
 }
@@ -19,3 +19,10 @@ export function getOrganization(data) {
     });
 }
 
+export function getUserInfo(data) {
+    return request({
+        url: `http://101.37.116.97:8081/api/user/userinfo`,
+        method: "GET",
+        params: data,
+    });
+}

@@ -5,8 +5,10 @@
                 基本信息
                 <el-form :model="form" label-position="top">
                     <el-form-item label="负责人" class="hidden-text" popper-class="no-border">
-                        <el-select v-model="form.owner" :options="manager_options">
-
+                        <el-select v-model="form.owner" @change="handleSelectChange">
+                            <el-option v-for="item in manager_options" :key="item.value" :value="item.label">
+                                <el-tag>{{ item.label }}</el-tag>
+                            </el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="状态">
@@ -51,7 +53,7 @@
                     </el-tooltip>
                 </el-row>
 
-                <el-progress :percentage="50" :stroke-width="15" striped />
+                <el-progress :percentage="form.progress * 100" :stroke-width="15" striped />
             </Card>
         </el-col>
         <el-col :span="17" class="chart">
@@ -67,8 +69,9 @@ import Card from '@/components/CommonCard.vue'
 import { reactive, ref, onMounted } from 'vue'
 import { QuestionFilled } from '@element-plus/icons-vue'
 import * as echarts from "echarts";
-//import { getPrjectInfo } from '@/api/project';
-//import { useRoute } from 'vue-router';
+import {getProjectInfo} from "@/api/project";
+import {getUserInfo, getUserName} from "@/api/user";
+import { useRoute } from 'vue-router';
 
 let chartDom = ref(null); //注意变量名 和 ref名字要对应
 
@@ -188,7 +191,7 @@ const initChart = () => {
     option && myChart.setOption(option);
 };
 
-//const route = useRoute();
+const route = useRoute();
 //获取基本信息
 const form = reactive({
     owner: '',
@@ -197,22 +200,62 @@ const form = reactive({
     end_time: '',
     progress: '',
 });
-const manager_name = ref();
-const initProjectInfo = () => {
-    getPrjectInfo({
+let manager_name = ref();
+
+//负责人选项列表
+const manager_options = ref([]);
+// const getMemberList = () => {
+//
+//
+//
+// }
+
+const handleSelectChange = () => {
+
+};
+
+function initProjectInfo() {
+    getProjectInfo({
         projectId: route.params.id,
     })
-        .then(resp => {
+        .then(async resp => {
+
             getUserName({
-                accountIdArr: [resp.manager_id],
+                accountIdArr: [resp.data.projectAggregation.managerId],
             })
                 .then(resp => {
+                    console.log(resp)
                     manager_name.value = resp.data[0].userName;
+                    form.owner = manager_name.value;
                 })
                 .catch(resp => {
                     console.log('获取组织名称' + resp);
                 })
-            form.owner = manager_name.value;
+
+            form.status = resp.data.projectAggregation.status;
+            form.end_time = resp.data.projectAggregation.endTime;
+            form.start_time = resp.data.projectAggregation.startTime;
+            form.progress = resp.data.projectAggregation.progress;
+
+            for (let i = 0; i < resp.data.projectAggregation.member.length; i++) {
+
+                manager_options.value.push({
+                    value: 'init',
+                    label: 'init'
+                })
+
+                let response = await getUserInfo({
+                    accountId: resp.data.projectAggregation.member[i]
+                })
+
+                let userName = response.data.userName;
+
+                manager_options.value[i].value = resp.data.projectAggregation.member[i];
+                manager_options.value[i].label = userName;
+                console.log(manager_options.value)
+            }
+
+
         })
         .catch(resp => {
             console.error('获取项目基本信息：' + resp);
@@ -238,13 +281,7 @@ const state_options = [
     },
 ]
 
-//负责人选项列表
-const manager_options = ref([]);
-const getMemberList = () => {
 
-
-
-}
 
 
 const getStateColor = (state) => {

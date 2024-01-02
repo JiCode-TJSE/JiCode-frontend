@@ -31,7 +31,7 @@ export function addProject(data) {
 //获取项目基本信息
 export function getProjectInfo(data) {
     return request({
-        url: `http://101.37.116.97:8081/Project/get`,
+        url: `http://101.37.116.97:8082/Project/get`,
         method: "GET",
         params: data,
     });
