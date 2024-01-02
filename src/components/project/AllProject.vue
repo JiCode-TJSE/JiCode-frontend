@@ -74,12 +74,14 @@ onMounted(() => {
 const organization_name = ref();
 const getOrgnizationName = () => {
     getOrganization({
-        organization_id: localStorage.getItem("organizationId"),
+        organizationId: localStorage.getItem("organizationId"),
     })
         .then(resp => {
+
             organization_name.value = resp.data.organization_name;
         })
         .catch(resp => {
+            console.log(localStorage.getItem("organizationId"))
             console.error(resp);
         })
 }

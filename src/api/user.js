@@ -13,9 +13,9 @@ export function getUserName(data) {
 //获取组织详情
 export function getOrganization(data) {
     return request({
-        url: `https://mock.apifox.com/m1/3754258-0-default/api/user/multiuserInfo`,
+        url: `http://101.37.116.97:8081/api/organization/organizationinfo`,
         method: "GET",
-        data: data,
+        params: data,
     });
 }
 

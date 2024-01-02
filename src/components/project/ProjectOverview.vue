@@ -5,7 +5,7 @@
                 基本信息
                 <el-form :model="form" label-position="top">
                     <el-form-item label="负责人" class="hidden-text" popper-class="no-border">
-                        <el-select v-model="form.owner" @change="handleSelectChange">
+                        <el-select v-model="form.owner">
                             <el-option v-for="item in manager_options" :key="item.value" :value="item.label">
                                 <el-tag>{{ item.label }}</el-tag>
                             </el-option>
@@ -66,10 +66,10 @@
 
 <script setup>
 import Card from '@/components/CommonCard.vue'
-import { reactive, ref, onMounted } from 'vue'
+import {reactive, ref, onMounted, watch} from 'vue'
 import { QuestionFilled } from '@element-plus/icons-vue'
 import * as echarts from "echarts";
-import {getProjectInfo} from "@/api/project";
+import {getProjectInfo, updateProject} from "@/api/project";
 import {getUserInfo, getUserName} from "@/api/user";
 import { useRoute } from 'vue-router';
 
@@ -81,9 +81,11 @@ onMounted(() => {
     initChart();
 });
 
+let chartoption = ref();
+
 const initChart = () => {
     var myChart = echarts.init(chartDom.value);
-    var option = {
+    chartoption.value = {
         tooltip: {
             // 鼠标悬浮提示数据
             trigger: "axis",
@@ -188,12 +190,12 @@ const initChart = () => {
             data: ["用户故事"], // 图例项名称
         },
     };
-    option && myChart.setOption(option);
+    chartoption.value && myChart.setOption(chartoption.value);
 };
 
 const route = useRoute();
 //获取基本信息
-const form = reactive({
+const form = ref({
     owner: '',
     status: '正常',
     start_time: '',
@@ -210,32 +212,71 @@ const manager_options = ref([]);
 //
 // }
 
-const handleSelectChange = () => {
+let currentManagerId = ref('');
 
-};
+let projectAggregation = ref();
+
+
+watch(() => form.value.owner, (newValue) => {
+    // 首先检查 newValue.owner 是否存在
+    if (newValue) {
+        const item = manager_options.value.find(option => option.label === newValue);
+        console.log(item)
+        if (item) {
+            currentManagerId.value = item.value;
+        } else {
+            currentManagerId.value = null;
+        }
+    } else {
+        currentManagerId.value = null;
+    }
+    console.log(projectAggregation.value);
+    updateProject({
+        ...projectAggregation.value,
+        managerId: currentManagerId.value,
+    })
+        .then(resp => {
+            console.log(resp);
+        })
+        .catch(resp => {
+            console.error('修改项目负责人：' + resp);
+        })
+});
+
+watch(() => form.value.status, (newValue) => {
+    console.log(newValue);
+});
+
+
 
 function initProjectInfo() {
     getProjectInfo({
         projectId: route.params.id,
     })
         .then(async resp => {
-
+            console.log(resp)
+            projectAggregation.value = resp.data.projectAggregation;
             getUserName({
                 accountIdArr: [resp.data.projectAggregation.managerId],
             })
                 .then(resp => {
                     console.log(resp)
                     manager_name.value = resp.data[0].userName;
-                    form.owner = manager_name.value;
+                    form.value.owner = manager_name.value;
                 })
                 .catch(resp => {
                     console.log('获取组织名称' + resp);
                 })
 
-            form.status = resp.data.projectAggregation.status;
-            form.end_time = resp.data.projectAggregation.endTime;
-            form.start_time = resp.data.projectAggregation.startTime;
-            form.progress = resp.data.projectAggregation.progress;
+            form.value.status = resp.data.projectAggregation.status;
+            form.value.end_time = resp.data.projectAggregation.endTime;
+            form.value.start_time = resp.data.projectAggregation.startTime;
+            form.value.progress = resp.data.projectAggregation.progress;
+
+            // todo
+            console.log(chartoption.value.series[0].data)
+            chartoption.value.series[0].data = [resp.data.not_begin, resp.data.in_progress, resp.data.finished]
+            console.log(chartoption.value.series[0].data)
 
             for (let i = 0; i < resp.data.projectAggregation.member.length; i++) {
 
