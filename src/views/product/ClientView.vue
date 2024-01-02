@@ -17,8 +17,8 @@
 
                 <el-table-column prop="name" label="客户名" sortable>
                   <template #default="{ row }">
-                  <span @click="handleRowClick(row)">{{ row.name }}</span>
-              </template>
+                    <span @click="handleRowClick(row)">{{ row.name }}</span>
+                </template>
                 </el-table-column>
 
                 <!-- 等级选择器 -->
@@ -31,9 +31,9 @@
                 <!-- 类型选择器 -->
                 <el-table-column prop="type" label="类别">
                     <template #default="scope">
-                        <el-select v-model="scope.row.typeEnum" class="hidden-text" placeholder="Select" popper-class="no-border">
+                        <el-select v-model="scope.row.type" class="hidden-text" placeholder="Select" popper-class="no-border">
                             <template #prefix>
-                                <el-tag :type="getTypeColor(scope.row.state)">{{scope.row.typeEnum}}</el-tag>
+                                <el-tag :type="getTypeColor(scope.row.type)">{{scope.row.type}}</el-tag>
                             </template>
                             <el-option v-for="item in type_options" :key="item.value" :value="item.value">
                                 <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
@@ -155,6 +155,16 @@ import {onMounted} from 'vue';
 import { getClientInPage, addClient, deleteClient, updateClient, getClientDetail } from '@/api/client';
 import { ElMessage } from 'element-plus';
 
+/**
+ * 获取产品id
+ */
+// 获取当前页面 URL
+const currentUrl = window.location.href;
+// 提取产品 ID
+const productId = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);
+console.log('productId', productId); 
+
+
 // 获取需求列表
 const clientData = ref([]);
 // 用于储存被选中的行的数据
@@ -218,7 +228,7 @@ const getPageDataFromServer = () => {
     // detail: '', 
     // id:'',
     // product_id: productIdFromUrl,
-    productId:'test',
+    productId:productId,
   })
     .then(resp => {
       console.log('getClientInPage', resp);
@@ -266,7 +276,7 @@ const submitForm = () => {
     size: form.size,
     id: '',
     detail: form.detail,
-    product_id: 'test',
+    product_id: productId,
   };
   addClient(submitData)
     .then(resp => {    

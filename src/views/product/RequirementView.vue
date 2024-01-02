@@ -3,7 +3,7 @@
         <el-header class="header">
           <h1 class="title" style="color: black;">全部需求</h1>
           <div class="buttons-container">
-          <el-button type="danger" :icon="Delete" class="deleterequire" @click="deleteSelectedRequirements"/>
+          <!-- <el-button type="danger" :icon="Delete" class="deleterequire" @click="deleteSelectedRequirements"/> -->
           <el-button class="addrequire" type="primary" @click="showTableDialog"><el-icon><Plus /></el-icon>&nbsp;&nbsp;新建需求</el-button>
           </div>
         </el-header>
@@ -27,7 +27,7 @@
                 <template #default="scope">
                     <el-select v-model="scope.row.typeEnum" class="hidden-text" placeholder="Select" popper-class="no-border">
                         <template #prefix>
-                            <el-tag :type="getTypeColor(scope.row.state)">{{scope.row.typeEnum}}</el-tag>
+                            <el-tag :type="getTypeColor(scope.row.typeEnum)">{{scope.row.typeEnum}}</el-tag>
                         </template>
                         <el-option v-for="item in type_options" :key="item.value" :value="item.value">
                             <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
@@ -65,13 +65,23 @@
                         placeholder="Please input"
                     />
                 </el-form-item>
-                <el-form-item label="模块">
+                <!-- <el-form-item label="模块">
                     <el-select v-model="selectedRow.moduleEnum" :options="getfromback">
                     </el-select>
+                </el-form-item> -->
+
+                <el-form-item label="模块">
+                    <el-row>
+                    <el-col :span="6">
+                      <el-tag>{{ selectedRow.moduleEnum }}</el-tag>
+                    </el-col>
+                  </el-row>
                 </el-form-item>
+
                 <el-form-item label="负责人">
-                    <el-select v-model="selectedRow.supervisorName" :options="getfromback">
-                    </el-select>
+                    <!-- <el-select v-model="selectedRow.supervisorName" :options="getfromback">
+                    </el-select> -->
+                    <el-input v-model="selectedRow.supervisorName"></el-input>
                 </el-form-item>
                 <el-form-item label="需求类型">
                   <el-select v-model="selectedRow.typeEnum" class="hidden-text" placeholder="Select" popper-class="no-border">
@@ -100,20 +110,22 @@
                       <el-tag>{{ client.name }}</el-tag>
                     </el-col>
                   </el-row>
+                </el-form-item>
 
-                  <el-select
-                    v-model="value1"
-                    multiple
-                    placeholder="Select"
-                    style="width: 240px"
-                  >
-                    <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    />
-                  </el-select>
+                <el-form-item label="工作项">
+                    <el-row>
+                    <el-col :span="6" v-for="backlogItem in selectedRow.backlogItemArr" :key="backlogItem.backlogItemId">
+                      <el-tag>{{ backlogItem.name }}</el-tag>
+                    </el-col>
+                  </el-row>
+                </el-form-item>
+
+                <el-form-item label="版本">
+                    <el-row>
+                    <el-col :span="6" v-for="version in selectedRow.versionArr" :key="version.id">
+                      <el-tag>{{ version.name }}</el-tag>
+                    </el-col>
+                  </el-row>
                 </el-form-item>
 
                 <el-form-item label="保存">
@@ -121,13 +133,13 @@
                 </el-form-item>
               </el-form>
             </el-tab-pane>
-            <el-tab-pane label="客户">
+            <!-- <el-tab-pane label="客户">
               
             </el-tab-pane>
             <el-tab-pane label="工作项">
               
             </el-tab-pane>
-            <el-tab-pane label="版本记录">版本记录</el-tab-pane>
+            <el-tab-pane label="版本记录">版本记录</el-tab-pane> -->
           </el-tabs>
         </el-dialog>
 
@@ -158,8 +170,16 @@
 
             <el-col :span="10">
                 <el-form :model="form" label-width="80px">
+
+                  <!-- TODO!!! -->
                     <el-form-item label="所属产品">
-                        <el-select v-model="form.belongProductId" :options="getfromback">
+                        <el-select v-model="form.belongProductId">
+                          <el-option
+                            v-for="product in products"
+                            :key="product.id"
+                            :label="product.title"
+                            :value="product.id"
+                          ></el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="模块">
@@ -167,8 +187,9 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="负责人">
-                        <el-select v-model="form.supervisorId" :options="getfromback">
-                        </el-select>
+                        <!-- <el-select v-model="form.supervisorName" :options="getfromback">
+                        </el-select> -->
+                        <el-input v-model="form.supervisorName"></el-input>
                     </el-form-item>
                     <el-form-item label="需求类型">
                         <!-- <template #default="scope"> -->
@@ -216,6 +237,20 @@ import {ref,  reactive} from 'vue';
 import {onMounted} from 'vue';
 import { getRequireInPage, addRequire ,deleteRequire, updateRequire, getRequireDetail} from '@/api/require';
 import { ElMessage } from 'element-plus';
+
+/**
+ * 获取产品id
+ */
+// 获取当前页面 URL
+const currentUrl = window.location.href;
+// 提取产品 ID
+const productId = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);
+console.log('productId', productId); 
+
+/**
+ * 获取所有产品
+ */
+
 
 // 获取需求列表
 const allrequireData = ref([]);
@@ -316,7 +351,8 @@ const getPageDataFromServer = () => {
   getRequireInPage({
     pageSize: pageSize,
     pageNo: currentPage.value,
-    productId:'test',
+    // productId:'test',
+    productId: productId,
     // requirementId: null,
     // name: null,
     // supervisorName: null,
@@ -370,6 +406,7 @@ onMounted(() => {
         // 更新前端产品列表，移除已删除的产品
         allrequireData.value = allrequireData.value.filter(require => require.requirementId !== id);
         ElMessage.success('产品删除成功');
+        getPageDataFromServer();
       // } else {
       //   ElMessage.error('产品删除失败');
       // }
@@ -404,7 +441,7 @@ const submitForm = () => {
     typeEnum: form.typeEnum,
     detail: form.detail,
     // belongProductId:form.belongProductId,
-    belongProductId:'test',
+    belongProductId: productId,
   };
   addRequire(submitData)
     .then(resp => {    
@@ -436,8 +473,8 @@ const selectedRow = ref({
   supervisorName: '',
   supervisorId: '',
   clientArr: [],
-  backlogItemName: '',
-  backlogItemId:'',
+  backlogItemArr: [],
+  versionArr:[],
 });
 
 const dialogVisible = ref(false); 
@@ -449,6 +486,8 @@ const requirementid = ref();
 
 const handleRowClick = (row) => {
   requirementid.value = row.requirementId;
+
+  console.log('requirement row:', row)
   // 基本信息
   getRequireDetail({ requirementId: row.requirementId }) 
     .then((response) => {
@@ -475,17 +514,12 @@ const handleRowClick = (row) => {
           selectedRow.value.supervisorId = '';
         }
 
-        if (response.data.backlogItemArr) {
-          selectedRow.value.backlogItemName = response.data.backlogItemArr.name;
-          selectedRow.value.backlogItemId = response.data.backlogItemArr.backlogItemId;
-        } else {
-          selectedRow.value.backlogItemName = '';
-          selectedRow.value.backlogItemId = '';
-        }
-
         selectedRow.value.clientArr = response.data.clientArr;
         console.log('response.data.clientArr',response.data.clientArr);
-        console.log('selectedRow.value.clientArr',selectedRow.value.clientArr);
+
+        selectedRow.value.backlogItemArr = response.data.backlogItemArr;
+        selectedRow.value.versionArr = response.data.versionArr;
+
 
         dialogVisible.value = true;
 
