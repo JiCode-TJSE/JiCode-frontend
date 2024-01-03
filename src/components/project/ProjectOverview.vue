@@ -66,7 +66,7 @@
 
 <script setup>
 import Card from '@/components/CommonCard.vue'
-import {reactive, ref, onMounted, watch} from 'vue'
+import { ref, onMounted, watch} from 'vue'
 import { QuestionFilled } from '@element-plus/icons-vue'
 import * as echarts from "echarts";
 import {getProjectInfo, updateProject} from "@/api/project";
@@ -82,9 +82,10 @@ onMounted(() => {
 });
 
 let chartoption = ref();
+let myChart = null;
 
 const initChart = () => {
-    var myChart = echarts.init(chartDom.value);
+    myChart = echarts.init(chartDom.value);
     chartoption.value = {
         tooltip: {
             // 鼠标悬浮提示数据
@@ -206,11 +207,6 @@ let manager_name = ref();
 
 //负责人选项列表
 const manager_options = ref([]);
-// const getMemberList = () => {
-//
-//
-//
-// }
 
 let currentManagerId = ref('');
 
@@ -221,7 +217,7 @@ watch(() => form.value.owner, (newValue) => {
     // 首先检查 newValue.owner 是否存在
     if (newValue) {
         const item = manager_options.value.find(option => option.label === newValue);
-        console.log(item)
+        console.log(newValue)
         if (item) {
             currentManagerId.value = item.value;
         } else {
@@ -244,10 +240,49 @@ watch(() => form.value.owner, (newValue) => {
 });
 
 watch(() => form.value.status, (newValue) => {
-    console.log(newValue);
+    if (newValue) {
+        updateProject({
+            ...projectAggregation.value,
+            status: newValue,
+        })
+            .then(resp => {
+                console.log(resp);
+            })
+            .catch(resp => {
+                console.error('修改项目状态：' + resp);
+            })
+    }
 });
 
+watch(() => form.value.start_time, (newValue) => {
+    if (newValue) {
+        updateProject({
+            ...projectAggregation.value,
+            startTime: newValue,
+        })
+            .then(resp => {
+                console.log(resp);
+            })
+            .catch(resp => {
+                console.error('修改项目开始时间：' + resp);
+            })
+    }
+});
 
+watch(() => form.value.end_time, (newValue) => {
+    if (newValue) {
+        updateProject({
+            ...projectAggregation.value,
+            endTime: newValue,
+        })
+            .then(resp => {
+                console.log(resp);
+            })
+            .catch(resp => {
+                console.error('修改项目开始时间：' + resp);
+            })
+    }
+});
 
 function initProjectInfo() {
     getProjectInfo({
@@ -273,11 +308,20 @@ function initProjectInfo() {
             form.value.start_time = resp.data.projectAggregation.startTime;
             form.value.progress = resp.data.projectAggregation.progress;
 
-            // todo
-            console.log(chartoption.value.series[0].data)
-            chartoption.value.series[0].data = [resp.data.not_begin, resp.data.in_progress, resp.data.finished]
-            console.log(chartoption.value.series[0].data)
+            // 项目进度
+            const newSeries = {
+                ...chartoption.value.series[0],
+                data: [resp.data.not_begin, resp.data.in_progress, resp.data.finished]
+            };
 
+            chartoption.value = {
+                ...chartoption.value,
+                series: [newSeries]
+            };
+
+            myChart.setOption(chartoption.value);
+
+            // 负责人选项列表
             for (let i = 0; i < resp.data.projectAggregation.member.length; i++) {
 
                 manager_options.value.push({

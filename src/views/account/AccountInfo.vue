@@ -42,6 +42,9 @@
     <el-row class="mb-4">
       <el-button type="success" class="custom-button" @click="saveUserData">确定</el-button>
     </el-row>
+      <el-row class="mb-4">
+          <el-button type="success" class="custom-button" @click="exitLog">退出登录</el-button>
+      </el-row>
   </div>
 </template>
 
@@ -51,6 +54,7 @@ import { getUserInfoRequest, updateUserInfoRequest } from '@/api/account.js'
 import { ElMessage } from 'element-plus';
 import { computed } from 'vue';
 import { useStore } from 'vuex';
+import router from "@/router";
 
 // 获取 Vuex store 实例
 const store = useStore();
@@ -125,6 +129,17 @@ async function saveUserData() {
     });
     console.error('Update Error:', error);
   }
+}
+
+function exitLog() {
+    if (localStorage.getItem("accountId")) {
+        localStorage.removeItem("accountId");
+        localStorage.removeItem("organizationId");
+        ElMessage.success('退出登录成功！');
+    } else {
+        ElMessage.error('本地账号信息已不存在，请重试登录！');
+    }
+    router.push('/login');
 }
 </script>
 
