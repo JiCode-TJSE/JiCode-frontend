@@ -60,13 +60,13 @@
             <el-col :span="15">
                 <el-form :model="form" label-width="80px">
                     <el-form-item label="所属项目">
-                        <el-select v-model="form.belongProjectId" :options="getfromback">
-                        </el-select>
+                        <el-input v-model="form.belongProjectId" :options="getfromback">
+                        </el-input>
                     </el-form-item>
 
                     <el-form-item label="负责人">
-                        <el-select v-model="form.supervisorId" :options="getfromback">
-                        </el-select>
+                        <el-input v-model="form.supervisorId" :options="getfromback">
+                        </el-input>
                     </el-form-item>
                     <el-form-item label="类型">
                         <!-- <template #default="scope"> -->
@@ -111,9 +111,16 @@
 
 import { Plus, Delete, Edit } from '@element-plus/icons-vue'
 import { ref, reactive, onMounted } from 'vue';
-import { getAllSprint, addSprint } from '@/api/sprint';
+import { getAllSprint, addSprint,deleteSprint } from '@/api/sprint';
 import { useRoute } from 'vue-router';
+import { ElMessage } from 'element-plus';
+import { computed } from 'vue';
+import { useStore } from 'vuex';
+// 获取 Vuex store 实例
+const store = useStore();
 
+// 计算属性，用来获取 account_id
+const organizationId = computed(() => store.state.user.organizationId);
 const dialogTableVisible = ref(false);
 const showDialog = () => {
     dialogTableVisible.value = true;
@@ -121,7 +128,7 @@ const showDialog = () => {
 const handleClose = () => {
     dialogTableVisible.value = false;
 };
-onMounted(() => {
+onMounted(async () => {
     getSprint();
 })
 
@@ -176,6 +183,7 @@ const getSprint = () => {
 
 const route = useRoute();
 //新建迭代
+/*
 const add = () => {
     addSprint({
         organizationId: '1',
@@ -193,8 +201,81 @@ const add = () => {
         .catch(resp => {
             console.error(resp);
         })
+}*/
+
+//新建项目
+async function add() {
+  try {
+    const updatedData = {
+        /*
+    "startTime":null,
+    "endTime":null,
+    "goal":"final goal",
+    "type":"正常迭代",
+    "projectId":"2",
+    "managerId":"1",
+    "organizationId":"1",
+    "topic":"昂",*/
+    organizationId: organizationId.value,//"1",//form.organizationId, // 确保在表单中有这个字段
+      projectId: "2",//form.belongProjectId, // 或者 form.projectId，取决于您的表单字段名
+      topic: form.topic,
+      goal: form.goal,
+      managerId: "1",//form.supervisorId, // 确保在表单中有这个字段
+      type: form.type,
+      startTime: form.start_time,
+      endTime:form.end_time,
+    };
+
+    const response = await addSprint(updatedData);
+    if (response.code==200) {
+        await getSprint();
+      ElMessage({
+        type: 'success',
+        message: '新建迭代成功！',
+      });
+    } else {
+      ElMessage({
+        type: 'error',
+        message: updatedData,//.msg,
+      });
+    }
+  } catch (error) {
+    ElMessage({
+      type: 'error',
+      message: 'An error occurred during user data update',
+    });
+    console.error('Update Error:', error);
+  }
+  dialogFormVisible.value = false;
 }
 
+//删除迭代
+async function deleteRequireForRow(row) {
+  try {
+    const response = await deleteSprint(row.id);
+
+    if (response.code==200) {
+        await getSprint(); 
+        console.log(row.id);
+        //allProjectsData.value = allProjectsData.value.filter(project => project.id !== row.id);
+      ElMessage({
+        type: 'success',
+        message: '项目删除成功',
+      });
+    } else {
+      ElMessage({
+        type: 'error',
+        message: response.msg,
+      });
+    }
+  } catch (error) {
+    ElMessage({
+      type: 'error',
+      message: 'An error occurred during user data update',
+    });
+    console.error('Update Error:', error);
+  }
+}
 
 
 
