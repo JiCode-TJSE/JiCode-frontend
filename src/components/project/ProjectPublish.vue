@@ -9,7 +9,6 @@
                         <Plus />
                     </el-icon>&nbsp;&nbsp;新建发布</el-button>
             </div>
-
         </el-header>
         <el-main class="main">
             <el-table ref="multipleTableRef" :data="releaseData" style="width: 100%"
@@ -91,13 +90,20 @@ import { getAllRelease, addRelease } from '@/api/release';
 import { getUserInfo, getUserName } from '@/api/user';
 import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
+import store from '@/store';
+
+const route = useRoute();
+const projectId = route.params.id;
+
 const dialogTableVisible = ref(false);
 const showDialog = () => {
     dialogTableVisible.value = true;
 };
+
 const handleClose = () => {
     dialogTableVisible.value = false;
 };
+
 onMounted(() => {
     getReleaseList();
 })
@@ -150,27 +156,34 @@ const getTypeColor = (type) => {
 //to check userinfo
 const getReleaseList = () => {
     getAllRelease({
-        organizationId: localStorage.getItem("organizationId"),
+        projectId: projectId,
+        organizationId: store.state.user.organization_id,
     })
         .then(resp => {
             releaseData.value = resp.data;
-            for (let i = 0; i < resp.data.length; i++) {
-                managerIdList.value.push(resp.data[i].managerId);
-            }
-            getUserName({
-                accountIdArr: managerIdList.value
-            })
-                .then(resp => {
-                    for (let i = 0; i < resp.data.length; i++) {
-                        releaseData.value[i] = {
-                            ...releaseData.value[i],
-                            "managerName": resp.data[i].userName
-                        };
-                    }
-                })
-                .catch(resp => {
-                    console.log(resp);
-                })
+            console.log("项目发布",resp.data);
+            console.log("project_id",projectId)
+            console.log("organizaiton_id",store.state.organization_id)
+        
+            // for (let i = 0; i < resp.data.length; i++) {
+            //     managerIdList.value.push(resp.data[i].managerId);
+            // }
+            // getUserName({
+            //     accountIdArr: managerIdList.value
+            // })
+            //     .then(resp => {
+            //         if(resp.data.length!=null){
+            //             for (let i = 0; i < resp.data.length; i++) {
+            //             releaseData.value[i] = {
+            //                 ...releaseData.value[i],
+            //                 "managerName": resp.data[i].userName
+            //             };
+            //         }
+            //         }
+            //     })
+            //     .catch(resp => {
+            //         console.log(resp);
+            //     })
         })
         .catch(resp => {
             console.error(resp);
@@ -178,7 +191,6 @@ const getReleaseList = () => {
 }
 
 //新建发布 to check resp的格式
-const route = useRoute();
 const addPublish = () => {
     addRelease({
         startTime: form.start_time,

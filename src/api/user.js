@@ -3,7 +3,7 @@ import request from '@/utils/request'
 //获取username
 export function getUserName(data) {
     return request({
-        url: `http://101.37.116.97:8081/api/user/multiuserInfo`,
+        url: "http://101.37.116.97:8081/api/user/multiuserInfo",
         method: "POST",
         data: data,
     });
