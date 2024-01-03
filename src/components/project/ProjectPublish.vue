@@ -122,8 +122,8 @@ const form = reactive({
     sourceEnum: '', //需求来源
     type: '',
     belongProjectId: '',
-    start_time: '2016-05-03',
-    end_time: '2016-05-03',
+    start_time: '',
+    end_time: '',
 });
 const type_options = [
     {

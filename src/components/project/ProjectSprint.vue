@@ -46,7 +46,7 @@
                         <el-input v-model="form.topic"></el-input>
                     </el-form-item>
                     <el-form-item label="迭代目标">
-                        <el-input v-model="form.detail" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea"
+                        <el-input v-model="form.goal" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea"
                             placeholder="Please input" />
                     </el-form-item>
                 </el-form>
@@ -102,7 +102,7 @@
             </el-col>
         </el-row>
         <el-row class="button-container">
-            <el-button type="primary" @click="submitForm">提交</el-button>
+            <el-button type="primary" @click="add">提交</el-button>
         </el-row>
     </el-dialog>
 </template>
@@ -110,7 +110,10 @@
 <script setup>
 
 import { Plus, Delete, Edit } from '@element-plus/icons-vue'
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
+import { getAllSprint, addSprint } from '@/api/sprint';
+import { useRoute } from 'vue-router';
+
 const dialogTableVisible = ref(false);
 const showDialog = () => {
     dialogTableVisible.value = true;
@@ -118,25 +121,21 @@ const showDialog = () => {
 const handleClose = () => {
     dialogTableVisible.value = false;
 };
-const sprintData = [
-    {
-        topic: 'Tom',
-        status: '未开始',
-        type: '正常迭代',
-        supervisorName: '王琳',
-        start_time: '2016-05-03',
-        end_time: '2016-05-03',
-    },
-]
+onMounted(() => {
+    getSprint();
+})
+
+
+const sprintData = ref([]);
 
 const form = reactive({
     topic: '',
-    supervisorId: '', //负责人
-    sourceEnum: '', //需求来源
+    managerId: '', //负责人
+    goal: '', //需求来源
     type: '',
     belongProjectId: '',
-    start_time: '2016-05-03',
-    end_time: '2016-05-03',
+    start_time: '',
+    end_time: ' ',
 });
 const type_options = [
     {
@@ -159,6 +158,45 @@ const getTypeColor = (type) => {
             return '';
     }
 };
+
+//获取所有迭代列表
+const getSprint = () => {
+    getAllSprint({
+        organizationId: localStorage.getItem("organizationId"),
+    })
+        .then(resp => {
+            console.log(resp);
+            sprintData.value = resp.data;
+
+        })
+        .catch(resp => {
+
+        })
+}
+
+const route = useRoute();
+//新建迭代
+const add = () => {
+    addSprint({
+        organizationId: '1',
+        projectId: '84277b74-2562-45ce-953e-6e44be0c4bb2',
+        topic: '123',
+        goal: 'form.goal',
+        manager_id: '1',
+        type: 'good project',
+        start_time: null,
+        end_time: null,
+    })
+        .then(resp => {
+            console.log(resp);
+        })
+        .catch(resp => {
+            console.error(resp);
+        })
+}
+
+
+
 
 </script>
 
