@@ -54,7 +54,7 @@
                         <el-input v-model="form.topic"></el-input>
                     </el-form-item>
                     <el-form-item label="描述">
-                        <el-input v-model="form.detail" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea"
+                        <el-input v-model="form.description" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea"
                             placeholder="Please input" />
                     </el-form-item>
                 </el-form>
@@ -87,8 +87,7 @@
                     </el-form-item>
                     <el-form-item label="需求类型">
                         <!-- <template #default="scope"> -->
-                        <el-select v-model="form.typeEnum" class="hidden-text" placeholder="Select"
-                            popper-class="no-border">
+                        <el-select v-model="form.type" class="hidden-text" placeholder="Select" popper-class="no-border">
                             <template #prefix>
                                 <el-tag :type="getTypeColor(form.type)">{{ form.type }}</el-tag>
                             </template>
@@ -99,8 +98,7 @@
                         <!-- </template> -->
                     </el-form-item>
                     <el-form-item label="需求来源">
-                        <el-select v-model="form.sourceEnum" class="hidden-text" placeholder="Select"
-                            popper-class="no-border">
+                        <el-select v-model="form.source" class="hidden-text" placeholder="Select" popper-class="no-border">
                             <template #prefix>
                                 <el-tag :type="getTypeColor(form.source)">{{ form.source }}</el-tag>
                             </template>
@@ -112,7 +110,7 @@
                     <el-row>
                         <el-col :span="11">
                             <el-form-item label="开始时间">
-                                <el-date-picker v-model="form.start_time" type="date" placeholder="Pick a date"
+                                <el-date-picker v-model="form.startTime" type="date" placeholder="Pick a date"
                                     class='date-picker' style="width: 100%" />
                             </el-form-item>
                         </el-col>
@@ -121,7 +119,7 @@
                         </el-col>
                         <el-col :span="11">
                             <el-form-item label="结束时间">
-                                <el-date-picker v-model="form.end_time" type="date" placeholder="Pick a date"
+                                <el-date-picker v-model="form.endTime" type="date" placeholder="Pick a date"
                                     class='date-picker' style="width: 100%" />
                             </el-form-item>
                         </el-col>
@@ -321,6 +319,9 @@ import {
 import {
     getProjectInfo,
 } from '@/api/project';
+import {
+    addRequire,
+} from '@/api/require';
 
 import { getUserName } from '@/api/user';
 import { ElMessage } from 'element-plus';
@@ -358,7 +359,6 @@ const allRelatedData = ref([]);
 // 初始调用
 onMounted(() => {
     getPageDataFromServer();
-
 })
 
 //新建需求时的表单信息
@@ -370,8 +370,8 @@ const form = reactive({
     belongProjectId: '',
     priority: '',
     source: '',
-    start_time: '',
-    end_time: '',
+    startTime: '',
+    endTime: '',
     project_topic: '',
     manager_id: '',
 
@@ -483,7 +483,7 @@ const getTypeColor = (type) => {
 
 //删除需求/工作项
 const deleteRequireForRow = (row) => {
-    deleteRequirement(row.id)
+    deleteRequirement({ id: row.id })
         .then((resp) => {
             if (resp.code === 200) {
                 console.log(row.id);
@@ -526,7 +526,7 @@ const deleteRelatedForRow = (row) => {
 const memberList = ref([]);
 const getMemberList = () => {
     getProjectInfo({
-        id: route.params.id,
+        projectId: route.params.id,
     })
         .then(resp => {
             memberList.value = resp.MemeberList;
@@ -559,40 +559,55 @@ const getManageName = () => {
 const dialogTableVisible = ref(false);
 const showDialog = () => {
     dialogTableVisible.value = true;
-    getMemberList();
-    getManageName();
+    // getMemberList();
+    // getManageName();
 };
 const handleClose = () => {
     dialogTableVisible.value = false;
 };
 
-// const submitForm = () => {
-//     const submitData = {
-//         name: form.name,
-//         supervisorId: form.supervisorId,
-//         moduleEnum: form.moduleEnum,
-//         sourceEnum: form.sourceEnum,
-//         typeEnum: form.typeEnum,
-//         detail: form.detail,
-//         belongProductId: form.belongProductId,
-//     };
-//     addRequire(submitData)
-//         .then(resp => {
-//             console.log(resp);
-//             ElMessage({
-//                 message: '添加需求成功',
-//                 type: 'success',
-//             })
-//             // 从后端重新获取当前页的数据，确保新添加的项目能够出现在表格中
-//             getPageDataFromServer();
-//             handleClose();
-//         })
-//         .catch(err => {
-//             console.log(err);
-//             ElMessage.error('添加需求失败');
-//         })
+const submitForm = () => {
+    const submitData = {
+        priority: form.priority,
+        startTime: `${form.startTime.getFullYear()}-${(form.startTime.getMonth() + 1).toString().padStart(2, '0')}-${form.startTime.getDate().toString().padStart(2, '0')}`,
+        endTime: `${form.endTime.getFullYear()}-${(form.endTime.getMonth() + 1).toString().padStart(2, '0')}-${form.endTime.getDate().toString().padStart(2, '0')}`,
+        source: form.source,
+        type: form.type,
+        description: form.description,
+        projectId: route.params.id,
+        organizationId: "2",
+        topic: form.topic,
+        status: "status"
+    };
+    // const submitData = {
+    //     priority: "最低级",
+    //     startTime:"2024-01-02",
+    //     endTime: "2024-01-02",
+    //     source: "sorce",
+    //     type: "type",
+    //     description: "test",
+    //     projectId: "2",
+    //     organizationId: "1",
+    //     topic: "test",
+    //     status: "status"
+    // };
+    console.log(submitData);
+    addRequire(submitData)
+        .then(resp => {
+            ElMessage({
+                message: '添加需求成功',
+                type: 'success',
+            })
+            // 从后端重新获取当前页的数据，确保新添加的项目能够出现在表格中
+            getPageDataFromServer();
+            handleClose();
+        })
+        .catch(err => {
+            console.log(err);
+            ElMessage.error('添加需求失败');
+        })
 
-// }
+}
 
 /**
  * 需求详情部分逻辑：获取、修改
@@ -617,10 +632,11 @@ const showRelatedDialog = () => {
     relatedDialogVisible.value = true;
 }
 const goToSpecificRequirement = (row) => {
+    row.start_time = new Date(row.startTime);
+    row.end_time = new Date(row.endTime);
     selectedRow.value = row;
+    console.log(selectedRow.value);
     detailDialogVisible.value = true;
-
-
 };
 
 

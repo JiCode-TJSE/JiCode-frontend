@@ -16,7 +16,7 @@ export function deleteRequirement(data) {
     return request({
         url: `http://101.37.116.97:8082/api/productdev/backlogitem`,
         method: "DELETE",
-        data: data,
+        params: data,
     });
 }
 
