@@ -2,10 +2,11 @@ import request from '@/utils/request'
 
 //获取全部工作项
 export function getAllBacklogItems(data) {
+    console.log(data)
     return request({
         url: `http://101.37.116.97:8082/api/productdev/backlogitems`,
         method: "GET",
-        data: data,
+        params: data,
     });
 }
 

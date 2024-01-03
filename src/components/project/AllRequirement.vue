@@ -336,15 +336,16 @@ const handleSelectionChange = (val) => {
 // 分页查询获取需求列表
 const allrequireData = ref([]);
 const route = useRoute();
+let total = ref(0);
 const getPageDataFromServer = () => {
     getAllBacklogItems({
-        id: route.params.id,
+        organizationId: route.params.id,
     })
         .then(resp => {
-            console.log(resp);
-            // 添加需求数据到 allrequireData 数组
-            allrequireData.value = resp.data.backlogList;
-            total.value = resp.data.total;
+            // 添加需求数据到 allrequireData 数组 
+            // TODO 这边等 wh 接口改好
+            allrequireData.value = resp.data;
+            total.value = resp.data.length;
             ElMessage.success('拉取需求成功');
         })
         .catch(err => {

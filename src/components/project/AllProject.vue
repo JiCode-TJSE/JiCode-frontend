@@ -71,7 +71,7 @@ onMounted(() => {
     console.log(localStorage.getItem("organizationId"));
 })
 //获取项目所属组织
-const organization_name = ref();
+const organization_name = ref('1');
 const getOrgnizationName = () => {
     getOrganization({
         organizationId: localStorage.getItem("organizationId"),
@@ -91,7 +91,7 @@ const getOrgnizationName = () => {
 const allProjectsData = ref([]);
 const getMyProject = () => {
     getAllProject({
-        organization_id: localStorage.getItem("organizationId"),
+        organization_id: "1"//localStorage.getItem("organizationId"),
     })
         .then(resp => {
 
