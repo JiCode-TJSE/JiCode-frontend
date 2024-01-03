@@ -11,18 +11,18 @@ export function getAllProject(data) {
 
 
 //删除项目
-export function deleteProject(data) {
+export function deleteProject(account_id) {
     return request({
-        url: `http://101.37.116.97:8082/api/productdev/project`,
+        url: `http://101.37.116.97:8082/api/productdev/project?projectId=${encodeURIComponent(account_id)}`,
         method: "DELETE",
-        data: data,
-    });
+        data: {},
+    })
 }
 
 //新建项目
 export function addProject(data) {
     return request({
-        url: `http://101.37.116.97:8082/api/project/addProject`,
+        url: `http://101.37.116.97:8082/api/productdev/project`,
         method: "POST",
         data: data,
     });

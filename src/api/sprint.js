@@ -18,3 +18,12 @@ export function addSprint(data) {
     });
 }
 
+//删除迭代
+export function deleteSprint(id) {
+    return request({
+        url: `http://101.37.116.97:8082/api/productdev/sprint?sprintId=${encodeURIComponent(id)}`,
+        method: "DELETE",
+        data: {},
+    });
+}
+
