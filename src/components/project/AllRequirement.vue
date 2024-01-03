@@ -312,7 +312,7 @@
 <script setup>
 import { Plus, Delete } from '@element-plus/icons-vue';
 import { ref, reactive } from 'vue';
-import { onMounted } from 'vue';
+import { onMounted, toRaw } from 'vue';
 import {
     getAllBacklogItems, deleteRequirement, deleteRelatedItem
 } from '@/api/backlogItem';
@@ -320,7 +320,7 @@ import {
     getProjectInfo,
 } from '@/api/project';
 import {
-    addRequire,
+    addRequire, updateRequire
 } from '@/api/require';
 
 import { getUserName } from '@/api/user';
@@ -332,6 +332,29 @@ const multipleSelection = ref([]);
 // 选择改变时更新被选中的行
 const handleSelectionChange = (val) => {
     multipleSelection.value = val;
+}
+
+const saveDetails = () => {
+    let data = { ...selectedRow.value };
+    delete data.start_time
+    delete data.end_time
+    delete data.projectTopic
+    delete data.organizationId
+    delete data.scheduleId
+    data.startTime = data.startTime.split('T')[0];
+    data.endTime = data.endTime.split('T')[0];
+    data.memberIds = toRaw(selectedRow.value.memberIds);
+    data.releaseIds = toRaw(selectedRow.value.releaseIds);
+    data.sprintIds = toRaw(selectedRow.value.sprintIds);
+    updateRequire(
+        data
+    )
+        .then(resp => {
+            ElMessage.success('更新成功');
+        })
+        .catch(err => {
+            ElMessage.error('更新失败');
+        })
 }
 
 // 分页查询获取需求列表
@@ -575,6 +598,7 @@ const submitForm = () => {
         type: form.type,
         description: form.description,
         projectId: route.params.id,
+        // TODO 这边看看要不要动态
         organizationId: "2",
         topic: form.topic,
         status: "status"
