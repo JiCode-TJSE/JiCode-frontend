@@ -30,7 +30,7 @@
                 <el-table-column label="操作">
                     <template v-slot="{ row }">
                         <el-button type="danger" @click="deleteRequireForRow(row)" :icon="Delete"></el-button>
-                        <el-button type="primary" @click="editRequireForRow(row)" :icon="Edit"></el-button>
+                        <el-button type="primary" :icon="Edit"></el-button><!-- @click="editRequireForRow(row)"-->
                     </template>
                 </el-table-column>
 
@@ -233,6 +233,7 @@ async function add() {
         type: 'success',
         message: '新建迭代成功！',
       });
+      dialogTableVisible.value = false;
     } else {
       ElMessage({
         type: 'error',
@@ -246,7 +247,7 @@ async function add() {
     });
     console.error('Update Error:', error);
   }
-  dialogFormVisible.value = false;
+  
 }
 
 //删除迭代

@@ -11,12 +11,12 @@ export function deleteProduct(data) {
         params: data
     })
 }
-export function getProduct() {
+export function getProduct(data) {
     return request({
         url: "http://101.37.116.97:8080/api/product/items",
         method: "GET",
         headers: {
-            Authorization: '2',
+            Authorization: data,
         },
     })
 }

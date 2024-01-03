@@ -70,7 +70,7 @@
     const fetchItems = async () => {
         try {
     // 获取第一个接口的数据
-    const response = await getProductInfoRequest('2');//account_id.value
+    const response = await getProductInfoRequest('1');//account_id.value
     let allItems = []; // 用于存储合并后的数据
 
     if (response.code === 200 && Array.isArray(response.data.showingDatas)) {
@@ -84,7 +84,7 @@
       allItems = allItems.concat(itemsFromResponse); // 合并数据
       ElMessage({
         type: 'success',
-        message: response.msg,//'成功获取产品信息',
+        message: response,//response.msg,//'成功获取产品信息',
       });
     } else {
       ElMessage({

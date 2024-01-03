@@ -121,7 +121,15 @@
   import { ElMessage } from 'element-plus';
   import { useRouter } from 'vue-router';
   // import store from '@/store';
+  import { computed } from 'vue';
+import { useStore } from 'vuex';
 
+
+// 获取 Vuex store 实例
+const store = useStore();
+
+// 计算属性，用来获取 account_id
+const account_id = computed(() => store.state.user.account_id);
   const router = useRouter(); 
 
   const allproductsData = ref([]);
@@ -155,6 +163,7 @@
     // const accountId = store.state.user.account_id; // 从 Vuex 中获取 account_id
     // console.log('accountId',accountId);
     getProduct(
+      account_id.value
       // {
       // title: '',
       // mark: '',
