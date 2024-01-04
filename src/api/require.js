@@ -41,3 +41,49 @@ export function updateRequire(data) {
         data: data
     })
 }
+
+
+// ====================================================产品需求
+
+export function deleteProductRequire(data) {
+    return request({
+        url: "http://101.37.116.97:8080/api/product/requirement",
+        method: "DELETE",
+        params: data
+    })
+}
+export function getProductRequireInPage(data) {
+    return request({
+        url: "http://101.37.116.97:8080/api/product/requirments",
+        method: "GET",
+        params: data
+    })
+}
+
+// 新建需求
+export function addProductRequire(data) {
+    console.log("!!!!!", data)
+    return request({
+        url: "http://101.37.116.97:8080/api/product/requirement",
+        method: "POST",
+        data: data
+    })
+}
+
+export function getProductRequireDetail(data) {
+    return request({
+        url: "http://101.37.116.97:8080/api/product/requirement",
+        method: "GET",
+        params: data
+    })
+}
+
+export function updateProductRequire(data) {
+    return request({
+        url: "http://101.37.116.97:8080/api/product/requirement",
+        method: "PUT",
+        data: data
+    })
+}
+
+

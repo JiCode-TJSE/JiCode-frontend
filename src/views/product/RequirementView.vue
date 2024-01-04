@@ -81,7 +81,7 @@
                 <el-form-item label="负责人">
                     <!-- <el-select v-model="selectedRow.supervisorName" :options="getfromback">
                     </el-select> -->
-                    <el-input v-model="selectedRow.supervisorName"></el-input>
+                    <el-input v-model="selectedRow.supervisorName" disabled></el-input>
                 </el-form-item>
                 <el-form-item label="需求类型">
                   <el-select v-model="selectedRow.typeEnum" class="hidden-text" placeholder="Select" popper-class="no-border">
@@ -104,21 +104,21 @@
                   </el-select>
                 </el-form-item>   
                 
-                <el-form-item label="客户">
+                <!-- <el-form-item label="客户">
                     <el-row>
                     <el-col :span="6" v-for="client in selectedRow.clientArr" :key="client.clientId">
                       <el-tag>{{ client.name }}</el-tag>
                     </el-col>
                   </el-row>
-                </el-form-item>
+                </el-form-item> -->
 
-                <el-form-item label="工作项">
+                <!-- <el-form-item label="工作项">
                     <el-row>
                     <el-col :span="6" v-for="backlogItem in selectedRow.backlogItemArr" :key="backlogItem.backlogItemId">
                       <el-tag>{{ backlogItem.name }}</el-tag>
                     </el-col>
                   </el-row>
-                </el-form-item>
+                </el-form-item> -->
 
                 <el-form-item label="版本">
                     <el-row>
@@ -172,7 +172,7 @@
                 <el-form :model="form" label-width="80px">
 
                   <!-- TODO!!! -->
-                    <el-form-item label="所属产品">
+                    <!-- <el-form-item label="所属产品">
                         <el-select v-model="form.belongProductId">
                           <el-option
                             v-for="product in products"
@@ -181,15 +181,14 @@
                             :value="product.id"
                           ></el-option>
                         </el-select>
-                    </el-form-item>
+                    </el-form-item> -->
                     <el-form-item label="模块">
-                        <el-select v-model="form.moduleEnum" :options="getfromback">
-                        </el-select>
+                        <el-input v-model="form.moduleEnum" placeholder="请输入模块名称"></el-input>
                     </el-form-item>
                     <el-form-item label="负责人">
                         <!-- <el-select v-model="form.supervisorName" :options="getfromback">
                         </el-select> -->
-                        <el-input v-model="form.supervisorName"></el-input>
+                        <el-input placeholder="ZJK" disabled></el-input>
                     </el-form-item>
                     <el-form-item label="需求类型">
                         <!-- <template #default="scope"> -->
@@ -235,7 +234,7 @@ import {Plus, Delete} from '@element-plus/icons-vue';
 import { Check } from '@element-plus/icons-vue'
 import {ref,  reactive} from 'vue';
 import {onMounted} from 'vue';
-import { getRequireInPage, addRequire ,deleteRequire, updateRequire, getRequireDetail} from '@/api/require';
+import { getProductRequireInPage, addProductRequire ,deleteProductRequire, updateProductRequire, getProductRequireDetail} from '@/api/require';
 import { ElMessage } from 'element-plus';
 
 /**
@@ -246,6 +245,8 @@ const currentUrl = window.location.href;
 // 提取产品 ID
 const productId = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);
 console.log('productId', productId); 
+
+
 
 /**
  * 获取所有产品
@@ -344,25 +345,28 @@ const getfromback = Array.from({ length: 10000 }).map((_, idx) => ({
  * 分页部分逻辑
  */
 const currentPage = ref(1);
-const pageSize = 8;
+const pageSize = 10;
 const total = ref(1);
 
 const getPageDataFromServer = () => {
-  getRequireInPage({
+  getProductRequireInPage({
     pageSize: pageSize,
     pageNo: currentPage.value,
-    // productId:'test',
     productId: productId,
-    // requirementId: null,
-    // name: null,
-    // supervisorName: null,
-    // typeEnum: null,
   })
     .then(resp => {
       console.log('getRequireInPage: ', resp);
 
       // 添加需求数据到 allrequireData 数组
       allrequireData.value = resp.data.records; // 假设响应中的需求数据在 records 字段中
+      if(resp.data.records.total != 0){
+        for (let i = 0; i < resp.data.records.length; i++) {
+          allrequireData.value[i] = {
+              ...allrequireData.value[i],
+              "supervisorName":"ZJK"
+          };
+        }
+      }
 
       total.value = resp.data.total;
       ElMessage({
@@ -398,7 +402,7 @@ onMounted(() => {
   const deleteRequireForRow = (row) => {
   console.log('Row Object:', row);
   const id = row.requirementId; // 获取要删除的产品的 ID
-  deleteRequire({requirementId:id}) // 调用删除产品的 API 函数
+  deleteProductRequire({requirementId:id}) // 调用删除产品的 API 函数
     .then((resp) => {
       console.log('resp for deleteRequire',resp);
       console.log(resp.code);
@@ -443,7 +447,7 @@ const submitForm = () => {
     // belongProductId:form.belongProductId,
     belongProductId: productId,
   };
-  addRequire(submitData)
+  addProductRequire(submitData)
     .then(resp => {    
         console.log(resp);
         ElMessage({
@@ -451,14 +455,14 @@ const submitForm = () => {
           type: 'success',
         })
         // 从后端重新获取当前页的数据，确保新添加的项目能够出现在表格中
+        dialogVisible.value = false;
         getPageDataFromServer();
-        handleTableClose();
     })
     .catch(err => {
       console.log(err);
       ElMessage.error('添加需求失败');
     })
-  
+
 }
 
 /**
@@ -489,21 +493,23 @@ const handleRowClick = (row) => {
 
   console.log('requirement row:', row)
   // 基本信息
-  getRequireDetail({ requirementId: row.requirementId }) 
+  getProductRequireDetail({ requirementId: row.requirementId }) 
     .then((response) => {
       console.log('row.requirementId',row.requirementId)
-      console.log('response require detail',response);
+      console.log('response require detail',response.data);
       // if (response.code === true) {
         ElMessage({
           message: '获取需求详情成功',
           type: 'success',
         })
         const data = response.data;
-        selectedRow.value.name = data.name;
-        selectedRow.value.detail = data.detail;
-        selectedRow.value.moduleEnum = data.moduleEnum;
-        selectedRow.value.sourceEnum = data.sourceEnum;
-        selectedRow.value.typeEnum = data.typeEnum;
+        selectedRow.value = response.data;
+        
+        // selectedRow.value.name = data.name;
+        // selectedRow.value.detail = data.detail;
+        // selectedRow.value.moduleEnum = data.moduleEnum;
+        // selectedRow.value.sourceEnum = data.sourceEnum;
+        // selectedRow.value.typeEnum = data.typeEnum;
         
         // 设置负责人的 ID 和姓名
         if (response.data.supervisor) {
@@ -533,8 +539,6 @@ const handleRowClick = (row) => {
       console.error(error);
     });
 
-
-    dialogVisible.value = true;
 };
 
 // 基本信息
@@ -554,13 +558,15 @@ const saveDetails = () => {
   };
   console.log('requestData',requestData)
 
-  updateRequire(requestData)
+  updateProductRequire(requestData)
     .then((response) => {
       console.log('保存成功', response.data);
       ElMessage({
         message: '保存需求详情成功',
         type: 'success',
       })
+      dialogVisible.value = false;
+
     })
     .catch((error) => {
       console.error('保存失败', error);
