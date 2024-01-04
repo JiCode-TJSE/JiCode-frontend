@@ -50,6 +50,13 @@ export function deleteAccountRequest(account_id) {
     })
 }
 
-
+//获取账号信息
+export function getProjectInfoRequest(organizationId) {
+    return request({
+        url: `http://101.37.116.97:8082/api/productdev/backlogitems?organizationId=${encodeURIComponent(organizationId)}`,
+        method: "GET",
+        data: {}
+    });
+}
 
 

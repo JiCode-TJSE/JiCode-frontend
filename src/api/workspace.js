@@ -59,11 +59,13 @@ export function getProductInfoRequest(token) {
 }
 
 //获取项目需求
-export function getProjectInfoRequest(token) {
-    return request(`/api/project/backlog`, 'GET', {}, {
-       Authorization: `Bearer ${token}` // 假设token已经是一个有效的令牌
+export function getProjectInfoRequest(organizationId) {
+    return request(`/api/productdev/backlogitems?organizationId=${encodeURIComponent(organizationId)}`, 'GET', {}, {
+       
     });
 }
+
+
 
 export function postWorkHourRequest(params) {
     return request(`/api/project/workhours`, 'POST', params,  {

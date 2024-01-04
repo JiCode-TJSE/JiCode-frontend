@@ -45,7 +45,7 @@
   
   <script>
   import { ref, onMounted, computed } from 'vue'
-  import { getUserInfoRequest } from '@/api/account.js'
+  import { getUserInfoRequest ,getProjectInfoRequest} from '@/api/account.js'
   //import { getProjectInfoRequest} from '@/api/request1.js'
   import { getProductInfoRequest} from '@/api/workspace.js'
   import { ElMessage } from 'element-plus';
@@ -60,6 +60,7 @@
 
     // 计算属性，用来获取 account_id
     const account_id = computed(() => store.state.user.account_id);
+    const organizationId = computed(() => store.state.user.organizationId);
     const username = ref('');
     const currentDate = ref(getCurrentDate());
     const searchText = ref('');
@@ -70,7 +71,7 @@
     const fetchItems = async () => {
         try {
     // 获取第一个接口的数据
-    const response = await getProductInfoRequest('1');//account_id.value
+    const response = await getProductInfoRequest(account_id.value);//account_id.value
     let allItems = []; // 用于存储合并后的数据
 
     if (response.code === 200 && Array.isArray(response.data.showingDatas)) {
@@ -94,15 +95,15 @@
     }
 
     // 获取第二个接口的数据
-   /* const response1 = await getProjectInfoRequest(account_id.value);
+    const response1 = await getProjectInfoRequest(organizationId.value);
 
     if (response1.code === 200 && Array.isArray(response1.data)) {
       const itemsFromResponse1 = response1.data.map(item => ({
         type: item.type,
         typeColor: getTypeColor(item.type),
         prefix: getTypeCode(item.type),
-        name: item.item_name,
-        product_name: item.project_name
+        name: item.topic,
+        product_name: item.projectTopic
       }));
       allItems = allItems.concat(itemsFromResponse1); // 继续合并数据
       ElMessage({
@@ -114,7 +115,7 @@
         type: 'error',
         message: '获取项目信息失败',
       });
-    }*/
+    }
 
     items.value = allItems; // 设置最终的合并后的数据
   } catch (error) {
@@ -170,7 +171,7 @@
     
 
       onMounted(async () => {
-        fetchItems
+        //fetchItems
         try {
           const response = await getUserInfoRequest(account_id.value);
           if (response.code == 200) {
@@ -227,7 +228,7 @@
         selectedFilter,
         filteredItems,
         items,
-      fetchItems // 如果你想要在模板中手动触发更新
+      //fetchItems // 如果你想要在模板中手动触发更新
       };
       
     },
