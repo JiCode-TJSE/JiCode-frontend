@@ -227,7 +227,7 @@
                 <el-button class="itemheader" type="primary" @click="showRelatedDialog"><el-icon>
                         <Plus />
                     </el-icon>&nbsp;&nbsp;添加工作项</el-button>
-                <el-table :data="allRelatedData" style="width: 100%" @selection-change="handleSelectionChange">
+                <el-table :data="allRelatedData.ralations" style="width: 100%" @selection-change="handleSelectionChange">
                     <el-table-column type="selection" width="50"></el-table-column>
                     <el-table-column prop="id" label="编号" sortable>
                         <template #default="{ row }">
@@ -320,7 +320,7 @@ import { Plus, Delete } from '@element-plus/icons-vue';
 import { ref, reactive } from 'vue';
 import { onMounted, toRaw } from 'vue';
 import {
-    getAllBacklogItems, deleteRequirement, deleteRelatedItem
+    getAllBacklogItems, deleteRequirement, deleteRelatedItem, addRelatedItems, getRelatedItemById
 } from '@/api/backlogItem';
 import {
     getProjectInfo,
@@ -343,14 +343,29 @@ const handleManagerChange = (newManagerName) => {
 }
 
 const saveRelated = () => {
-
+    // 这里的数据传一下
+    for (let i = 0; i < multipleSelection.value.length; i++) {
+        addRelatedItems({ id1: multipleSelection.value[i], type1: "Backlogitem", id2: selectedRow.value.id, type2: "Backlogitem" }).then((resp) => {
+            if (resp.code === 200) {
+                ElMessage.success('需求关联成功');
+            }
+            else {
+                ElMessage.error(resp.message);
+            }
+        })
+            .catch(resp => {
+                console.log(resp);
+                //ElMessage.error('项目删除失败，请重试！');
+            })
+    }
 }
 
 // 用于储存被选中的行的数据
 const multipleSelection = ref([]);
 // 选择改变时更新被选中的行
-const handleSelectionChange = (val) => {
-    multipleSelection.value = val;
+const handleSelectionChange = (selectedRows) => {
+    multipleSelection.value = selectedRows.map(row => row.id);
+    // 在这里添加你的代码，这些代码会使用 multipleSelection.value
 }
 
 const saveDetails = () => {
@@ -701,10 +716,24 @@ const goToSpecificRequirement = (row) => {
     row.end_time = new Date(row.endTime);
     selectedRow.value = row;
     selectedRow.value.manager_name = row.supervisorName;
-    console.log(selectedRow.value);
+    console.log("row", row);
+    allRelatedData.value.ralations = [];
     getMemberList();
+    getRelatedItem(row.id);
     detailDialogVisible.value = true;
 };
+
+const getRelatedItem = (id) => {
+    console.log("关联工作项", id);
+    getRelatedItemById({ id: id })
+        .then(resp => {
+            allRelatedData.value.ralations = resp.data.backlogitemIds.map(id => ({ id: id }));
+            console.log("关联工作项", allRelatedData.value.ralations);
+        })
+        .catch(resp => {
+            console.log('获取关联工作项失败：' + resp);
+        })
+}
 
 
 
