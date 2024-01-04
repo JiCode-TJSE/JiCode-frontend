@@ -227,7 +227,7 @@
                 <el-button class="itemheader" type="primary" @click="showRelatedDialog"><el-icon>
                         <Plus />
                     </el-icon>&nbsp;&nbsp;添加工作项</el-button>
-                <el-table :data="allRelatedData.ralations" style="width: 100%" @selection-change="handleSelectionChange">
+                <el-table :data="needData" style="width: 100%" @selection-change="handleSelectionChange">
                     <el-table-column type="selection" width="50"></el-table-column>
                     <el-table-column prop="id" label="编号" sortable>
                         <template #default="{ row }">
@@ -723,12 +723,24 @@ const goToSpecificRequirement = (row) => {
     detailDialogVisible.value = true;
 };
 
+const needData = ref([]);
 const getRelatedItem = (id) => {
     console.log("关联工作项", id);
+    needData.value = [];
     getRelatedItemById({ id: id })
         .then(resp => {
             allRelatedData.value.ralations = resp.data.backlogitemIds.map(id => ({ id: id }));
-            console.log("关联工作项", allRelatedData.value.ralations);
+            for (let i = 0; i < allRelatedData.value.ralations.length; i++) {
+
+                getRelatedItemById({ id: allRelatedData.value.ralations[i].id }).then(resp => {
+                    allRelatedData.value.ralations[i] = resp.data;
+                    needData.value.push({ id: resp.data.id, topic: resp.data.topic, status: resp.data.status, priority: resp.data.priority, supervisorName: resp.data.managerId });
+                    console.log('wwwwwwwwww' + JSON.stringify(allRelatedData.value.ralations[i]));
+                }).catch(resp => {
+                    console.log('获取关联工作项，，失败：' + resp);
+                })
+            }
+            console.log("关联工作项&&&&&&&&&", allRelatedData.value.ralations);
         })
         .catch(resp => {
             console.log('获取关联工作项失败：' + resp);
