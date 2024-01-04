@@ -162,11 +162,15 @@ const getTypeColor = (type) => {
 
 //to check userinfo
 const getReleaseList = () => {
+    console.log(projectId)
+    console.log(store.state.user.organizationId)
+
     getAllRelease({
         projectId: projectId,
-        organizationId: store.state.user.organization_id,
+        organizationId: store.state.user.organizationId,
     })
         .then(resp => {
+            console.log(resp)
             if(resp.code == 500){
                 ElMessage.error(resp.msg)
             }
@@ -174,7 +178,6 @@ const getReleaseList = () => {
                 releaseData.value = resp.data;
                 console.log("项目发布",resp.data);
 
-                console.log(resp)
                 if(resp.data.length!=null){
                     for (let i = 0; i < resp.data.length; i++) {
                     managerIdList.value.push(resp.data[i].managerId);
@@ -197,7 +200,6 @@ const getReleaseList = () => {
                         })
                 }
             }
-
         })
         .catch(resp => {
             console.error(resp);
