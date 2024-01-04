@@ -57,6 +57,7 @@ const handleChange = () => {
   })
     .then(resp => {
       localStorage.setItem("organizationId", resp.data.organizationId);
+      console.log(resp);
     })
     .catch(resp => {
       console.log(resp);

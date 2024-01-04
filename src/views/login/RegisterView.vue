@@ -37,10 +37,10 @@
 
   let registerform = ref({
     email: "",
-    code: "",
+    verifiedCode: "",
     uname:"",
     password:"",
-    teamname: "王琳的公司"
+    //teamname: "王琳的公司"
   });
 
   // let verifiedCode = '';
@@ -96,7 +96,7 @@
           }else{
 
             ElMessage({
-              message: '注册失败',
+              message: resp,//'注册失败',
               type: 'warning',
             })
           }
@@ -104,7 +104,7 @@
         })
         .catch(resp => {
           ElMessage({
-            message: '注册失败',
+            message: '注册失败,连接失败',
             type: 'warning',
           })
           console.log(resp);
