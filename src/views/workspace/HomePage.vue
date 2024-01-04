@@ -140,7 +140,7 @@
           return 'green';
         // 添加更多的类型和颜色对应
         default:
-          return 'white';
+          return 'blue';
       }
     };
 
@@ -160,7 +160,7 @@
           
         // 添加更多的类型和颜色对应
         default:
-          return '无';
+          return '工作项';
       }
     };
 
@@ -214,7 +214,8 @@
         // 如果选中“用户需求”，则过滤出以下四类项
         return ['功能需求', '体验优化', '安全需求', '技术需求'].includes(item.type);
      } else {
-        return item.type === selectedFilter.value; // 其他情况按照选中的类型过滤
+        return !['功能需求', '体验优化', '安全需求', '技术需求'].includes(item.type)
+        //return 1;//item.type === selectedFilter.value; // 其他情况按照选中的类型过滤
       }
     });
 });
