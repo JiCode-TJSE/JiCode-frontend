@@ -221,13 +221,6 @@ const getPageDataFromServer = () => {
   getClientInPage({
     pageSize: pageSize,
     pageNo: currentPage.value,
-    // name: '', 
-    // type: '', 
-    // rank: '', 
-    // size: '', 
-    // detail: '', 
-    // id:'',
-    // product_id: productIdFromUrl,
     productId:productId,
   })
     .then(resp => {
@@ -235,10 +228,6 @@ const getPageDataFromServer = () => {
 
       clientData.value = resp.data.records; 
       total.value = resp.data.total;
-      ElMessage({
-        message: '拉取客户成功',
-        type: 'success',
-      });
     })
     .catch(err => {
       console.log('拉取客户失败',err);
