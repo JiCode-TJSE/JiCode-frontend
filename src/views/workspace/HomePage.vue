@@ -84,7 +84,7 @@
       allItems = allItems.concat(itemsFromResponse); // 合并数据
       ElMessage({
         type: 'success',
-        message: response,//response.msg,//'成功获取产品信息',
+        message: response.msg,//response.msg,//'成功获取产品信息',
       });
     } else {
       ElMessage({

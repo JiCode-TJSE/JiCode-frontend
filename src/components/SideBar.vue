@@ -44,7 +44,7 @@
                     </el-icon>
                     <span>账号设置</span>
                 </el-menu-item>
-                <el-menu-item index="appMarket">
+                <el-menu-item ><!--index="appMarket"-->
                     <el-icon>
                         <Shop />
                     </el-icon>
