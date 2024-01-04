@@ -18,3 +18,11 @@ export function addRelease(data) {
     });
 }
 
+//删除迭代
+export function deleteRelease(id) {
+    return request({
+        url: `http://101.37.116.97:8082/api/productdev/release?releaseId=${encodeURIComponent(id)}`,
+        method: "DELETE",
+    });
+}
+
