@@ -72,7 +72,8 @@ const avatar = ref('');
 
 onMounted(async () => {
   try {
-    const response = await getUserInfoRequest(account_id.value);
+    // const response = await getUserInfoRequest(account_id.value);
+    const response = await getUserInfoRequest(localStorage.getItem("accountId"));
     //console.log(JSON.stringify(userIdJSON));
     if (response.code==200) {
       const userData = response.data;
@@ -87,7 +88,7 @@ onMounted(async () => {
     } else {
       ElMessage({
         type: 'error',
-        message: response.msg,
+        message: account_id.value,//response.msg,
       });
     }
   } catch (error) {
@@ -102,7 +103,7 @@ onMounted(async () => {
 async function saveUserData() {
   try {
     const updatedData = {
-      accountId:account_id.value,
+      accountId:localStorage.getItem("accountId"),
       gender: gender.value,
       name: name.value,
       userName: username.value,

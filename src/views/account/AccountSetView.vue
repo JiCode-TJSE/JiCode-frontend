@@ -82,7 +82,7 @@ const old_password = ref('')
 
 onMounted(async () => {
   try {
-    const response = await getAccountInfoRequest(account_id.value)
+    const response = await getAccountInfoRequest(localStorage.getItem("accountId"))
     if (response.code == 200) {
       const userData = response.data;
       email_now.value = userData.email
@@ -126,7 +126,7 @@ async function saveUserData() {
       phone.value = phone_now.value;
     }
     const updatedData = {
-      account_id: account_id.value,
+      account_id: localStorage.getItem("accountId"),//account_id.value,
       password: new_password.value,
       email: email.value,
       phone_Number: phone.value,
@@ -157,7 +157,7 @@ async function saveUserData() {
 
 async function deleteAccountData() {
   try {
-      const response = await deleteAccountRequest('5')
+      const response = await deleteAccountRequest(localStorage.getItem("accountId"))
     if (response.data) {
       ElMessage({
         type: 'success',
