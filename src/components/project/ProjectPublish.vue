@@ -35,7 +35,7 @@
                 <el-table-column label="操作">
                     <template v-slot="{ row }">
                         <el-button type="danger" @click="deleteReleaseForRow(row)" :icon="Delete"></el-button>
-                        <el-button type="primary" :icon="Edit"></el-button>
+                        <!-- <el-button type="primary" :icon="Edit"></el-button> -->
                     </template>
                 </el-table-column>
 
@@ -49,7 +49,13 @@
                 <el-input v-model="form.topic"></el-input>
             </el-form-item>
             <el-form-item label="负责人">
-                <el-select v-model="form.supervisorId" :options="getfromback">
+                <el-select v-model="form.supervisorId">
+                    <el-option
+                    v-for="member in memberList"
+                    :key="member.accountId"
+                    :label="member.name"
+                    :value="member.accountId"
+                    ></el-option>
                 </el-select>
             </el-form-item>
             <el-form-item label="类型">
@@ -93,6 +99,7 @@
 import { Plus, Delete, Edit } from '@element-plus/icons-vue'
 import { ref, reactive, onMounted } from 'vue';
 import { getAllRelease, addRelease, deleteRelease } from '@/api/release';
+import { getProjectInfo} from '@/api/project'
 import { getUserInfo, getUserName } from '@/api/user';
 import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
@@ -128,6 +135,42 @@ const releaseData = ref([
 
 const managerIdList = ref([])
 
+const memberList = ref([])
+
+
+// 获取项目成员列表
+const getMemberList = () => {
+  return new Promise((resolve, reject) => {
+    getProjectInfo({ projectId: projectId })
+      .then(resp => {
+        memberList.value = resp.data.projectAggregation.member;
+        // console.log("获取project成员列表", memberList.value);
+        resolve(); // 表示异步操作成功
+      })
+      .catch(error => {
+        console.log(error);
+        reject(error); // 表示异步操作失败
+      });
+  });
+};
+
+async function getSupervisors() {
+  try {
+    // 获取所有 memberList
+    await getMemberList();
+
+    // 获取成员姓名
+    const getUserNameResponse = await getUserName({
+      accountIdArr: memberList.value,
+    });
+    memberList.value = getUserNameResponse.data;
+
+  } catch (error) {
+    console.log(error);
+    ElMessage.error("获取成员信息失败！");
+  }
+}
+
 
 const form = reactive({
     topic: '',
@@ -160,27 +203,34 @@ const getTypeColor = (type) => {
     }
 };
 
+
+
+
 //to check userinfo
 const getReleaseList = () => {
-    console.log(projectId)
-    console.log(store.state.user.organizationId)
 
+    console.log("原releaseData",releaseData.value)
     getAllRelease({
         projectId: projectId,
         organizationId: store.state.user.organizationId,
     })
         .then(resp => {
-            console.log(resp)
+            console.log("重新获取resp.data",resp)
+
             if(resp.code == 500){
                 ElMessage.error(resp.msg)
             }
             else{
                 releaseData.value = resp.data;
-                console.log("项目发布",resp.data);
 
                 if(resp.data.length!=null){
+                    managerIdList.value = []; //要先清空，不然会保留上一次的！！！
                     for (let i = 0; i < resp.data.length; i++) {
-                    managerIdList.value.push(resp.data[i].managerId);
+                        managerIdList.value.push(resp.data[i].managerId);
+                        const start = new Date(resp.data[i].startTime);
+                        const end = new Date(resp.data[i].endTime);
+                        releaseData.value[i].startTime = start.toISOString().split("T")[0];
+                        releaseData.value[i].endTime = end.toISOString().split("T")[0];
                     }
                     getUserName({
                         accountIdArr: managerIdList.value
@@ -204,12 +254,14 @@ const getReleaseList = () => {
         .catch(resp => {
             console.error(resp);
         })
+
+    // 获取所有候选负责人列表
+    getSupervisors();
+
 }
 
 //新建发布 to check resp的格式
 const addPublish = () => {
-    console.log(form)
-    // 获取所有memberList
     addRelease({
         startTime: form.start_time,
         endTime: form.end_time,
@@ -221,11 +273,15 @@ const addPublish = () => {
     })
         .then(resp => {
             ElMessage.success('新建发布成功！');
-                getReleaseList()
+            getReleaseList()
         })
         .catch(resp => {
             console.error(resp);
         })
+    
+    dialogTableVisible.value = false;
+
+    
 }
 
 
@@ -238,7 +294,6 @@ const deleteReleaseForRow = (row) =>{
         }
         else{
             ElMessage.success('删除发布成功！')
-            console.log(resp);
             getReleaseList();
         }
 
