@@ -65,7 +65,7 @@
                     </el-form-item>
 
                     <el-form-item label="负责人">
-                        <el-input v-model="form.supervisorId" :options="getfromback">
+                      <el-input v-model="form.supervisorId" :options="getfromback">
                         </el-input>
                     </el-form-item>
                     <el-form-item label="类型">
@@ -111,28 +111,46 @@
 
 import { Plus, Delete, Edit } from '@element-plus/icons-vue'
 import { ref, reactive, onMounted } from 'vue';
-import { getAllSprint, addSprint,deleteSprint } from '@/api/sprint';
+import { getAllSprint, addSprint, deleteSprint,} from '@/api/sprint';
+import {  getUserName } from '@/api/user';
+import { getProjectInfo,getProjectINFO } from '@/api/project';
+
 import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { computed } from 'vue';
 import { useStore } from 'vuex';
+
 // 获取 Vuex store 实例
 const store = useStore();
 
-// 计算属性，用来获取 account_id
+// 计算属性，用来获取组织ID和项目ID
 const organizationId = computed(() => store.state.user.organizationId);
 const project_id = computed(() => store.state.user.project_id);
 const dialogTableVisible = ref(false);
+
+
+
+// 显示对话框
 const showDialog = () => {
     dialogTableVisible.value = true;
+    //getSupervisors(); // 打开对话框时获取成员列表
 };
+
+// 关闭对话框
 const handleClose = () => {
     dialogTableVisible.value = false;
 };
 onMounted(async () => {
     
+    
     getSprint();
+    //getSupervisors(members)
+    
 })
+
+
+const memberList = ref([])
+
 
 
 const sprintData = ref([]);
@@ -181,6 +199,7 @@ const getSprint = () => {
         .catch(resp => {
 
         })
+
 }
 
 const route = useRoute();

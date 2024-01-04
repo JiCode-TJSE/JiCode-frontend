@@ -47,3 +47,11 @@ export function updateProject(data) {
     });
 }
 
+//删除项目
+export function getProjectINFO(project_id) {
+    return request({
+        url: `http://101.37.116.97:8082/api/productdev/project?projectId=${encodeURIComponent(project_id)}`,
+        method: "GET",
+        data: {},
+    })
+}

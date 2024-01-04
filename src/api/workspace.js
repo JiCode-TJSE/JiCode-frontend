@@ -74,20 +74,13 @@ export function postWorkHourRequest(params) {
 }
 
 //显示工时日志
-// 显示工时日志
-export function getWorkHourRequest(accountId, startTime, endTime) {
-    // 设置GET请求的查询参数
-    const params = new URLSearchParams({
-        account_id: accountId,
-        start_time: startTime,
-        end_time: endTime
-    }).toString();
 
-    // 设置请求头部，假设需要Bearer token认证
-    const headers = {
-        //Authorization: `Bearer ${token}`
-    };
 
-    // 调用统一的请求方法
-    return request(`/api/project/log?${params}`, 'GET', {}, headers);
+//获取全部迭代
+export function getWorkHourRequest() {
+    return request({
+        url: `http://101.37.116.97:8082/api/productdev/workhours`,
+        method: "GET",
+        params: {},
+    });
 }

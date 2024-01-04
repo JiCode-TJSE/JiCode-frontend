@@ -28,7 +28,7 @@
             placeholder="筛选"
             class="filter-select">
             <el-option label="全部" value="all"></el-option>
-            <el-option label="工作项" value="工作项"></el-option>
+            <el-option label="工作项" value="用户故事"></el-option>
             <el-option label="用户需求" value="用户需求"></el-option>
           </el-select>
         </el-col>
@@ -51,22 +51,20 @@
   import { ElMessage } from 'element-plus';
   import { useStore } from 'vuex';
 
-  
-  
   export default {
     setup() {
-    // 获取 Vuex store 实例
+       // 获取 Vuex store 实例
     const store = useStore();
 
-    // 计算属性，用来获取 account_id
-    const account_id = computed(() => store.state.user.account_id);
+// 计算属性，用来获取 account_id
+      const account_id = computed(() => store.state.user.account_id);
     const organizationId = computed(() => store.state.user.organizationId);
     const username = ref('');
     const currentDate = ref(getCurrentDate());
     const searchText = ref('');
     const selectedFilter = ref('all');
     const items = ref([]); // 初始化为空数组
-
+    
     // 从后端API获取数据的函数
     const fetchItems = async () => {
         try {
@@ -93,7 +91,7 @@
         message: response.msg,//'获取产品信息失败',
       });
     }
-
+  
     // 获取第二个接口的数据
     const response1 = await getProjectInfoRequest(organizationId.value);
 
@@ -130,7 +128,7 @@
     // 根据项目类型获取颜色的函数
     const getTypeColor = (type) => {
       switch (type) {
-        case '工作项':
+        case '用户故事':
           return 'blue';
         case '功能需求':
           return 'yellow';
@@ -149,7 +147,7 @@
     // 根据项目类型获取颜色的函数
     const getTypeCode = (type) => {
       switch (type) {
-        case '工作项':
+        case '用户故事':
           return '工作项';
         case '功能需求':
           return '功能需求';
@@ -167,11 +165,11 @@
     };
 
     onMounted(fetchItems); // 在组件挂载时调用fetchItems
-
+  
     
 
       onMounted(async () => {
-        //fetchItems
+        fetchItems
         try {
           const response = await getUserInfoRequest(account_id.value);
           if (response.code == 200) {
