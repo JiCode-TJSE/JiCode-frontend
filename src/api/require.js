@@ -34,8 +34,9 @@ export function getRequireDetail(data) {
 }
 
 export function updateRequire(data) {
+    console.log("update？？？？？", data)
     return request({
-        url: "http://101.37.116.97:8080/api/product/requirement",
+        url: "http://101.37.116.97:8082/api/productdev/requirement",
         method: "PUT",
         data: data
     })
