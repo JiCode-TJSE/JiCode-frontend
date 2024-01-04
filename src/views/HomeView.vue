@@ -26,7 +26,7 @@ const router = useRouter();
 // 使用路由参数
 const selectedMenu = ref(route.params.selected || 'projectManage');
 //默认打开页面改成工作台
-router.push({ name: 'projectManage' });
+router.push({ name: 'login' });
 //点击菜单项事件：
 const handleSelect = (val) => {
   selectedMenu.value = val.item;

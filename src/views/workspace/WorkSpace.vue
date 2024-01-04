@@ -9,7 +9,7 @@
         @select="handleSelect"
       >
       <el-menu-item disabled>工作台</el-menu-item>
-        <el-menu-item index="/workspace/homepage">产品</el-menu-item>
+        <el-menu-item index="/workspace/homepage">首页</el-menu-item>
         <el-menu-item index="/workspace/workhour">工时</el-menu-item>
       </el-menu>
       <div class="main-content">

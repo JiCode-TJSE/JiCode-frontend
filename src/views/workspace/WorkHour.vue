@@ -87,7 +87,7 @@ export default {
           
           ElMessage({
               type: 'success',
-              message: end,//'成功获取用户需求',
+              message: '成功获取用户需求',
             });
         } else {
           ElMessage({
