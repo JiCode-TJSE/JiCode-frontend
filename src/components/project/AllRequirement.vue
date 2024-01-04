@@ -358,7 +358,10 @@ const saveRelated = () => {
                 //ElMessage.error('项目删除失败，请重试！');
             })
     }
+    // 刷新页面
+    location.reload();
 }
+
 
 // 用于储存被选中的行的数据
 const multipleSelection = ref([]);
@@ -408,15 +411,15 @@ const getPageDataFromServer = async () => {
         for (let i = 0; i < allrequireData.value.length; i++) {
             list.push(allrequireData.value[i].managerId);
         }
+        console.log("@@@@@", list)
         let nameList = await getSupervisorNames(list);
-        console.log("@@@@@", nameList)
         for (let i = 0; i < allrequireData.value.length; i++) {
             allrequireData.value[i].supervisorName = nameList[i].name;
         }
         total.value = resp.data.length;
         ElMessage.success('拉取需求成功');
     } catch (err) {
-        console.log(err);
+        console.log("拉去失败！！！！！", err);
         ElMessage.error('拉取需求失败');
     }
 }
@@ -730,6 +733,7 @@ const getRelatedItem = (id) => {
     getRelatedItemById({ id: id })
         .then(resp => {
             allRelatedData.value.ralations = resp.data.backlogitemIds.map(id => ({ id: id }));
+
             for (let i = 0; i < allRelatedData.value.ralations.length; i++) {
 
                 getRelatedItemById({ id: allRelatedData.value.ralations[i].id }).then(resp => {
