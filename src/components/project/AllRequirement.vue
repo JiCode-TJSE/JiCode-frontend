@@ -82,7 +82,10 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="负责人">
-                        <el-select v-model="form.manager_name" :options="getfromback">
+                        <el-select v-model="form.manager_name" @change="handleManagerChange">
+                            <el-option v-for="(item, index) in getfromback" :key="index" :label="item.name"
+                                :value="item.name">
+                            </el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="需求类型">
@@ -327,6 +330,19 @@ import { getUserName } from '@/api/user';
 import { ElMessage } from 'element-plus';
 import { useRoute } from 'vue-router';
 
+const handleManagerChange = (newManagerName) => {
+    let selectedManager = getfromback.value.find(item => item.name === newManagerName);
+    console.log("******", selectedManager);
+    if (selectedManager) {
+        form.managerId = selectedManager.accountId;
+        console.log("******", form.managerId);
+    }
+}
+
+const saveRelated = () => {
+
+}
+
 // 用于储存被选中的行的数据
 const multipleSelection = ref([]);
 // 选择改变时更新被选中的行
@@ -361,21 +377,30 @@ const saveDetails = () => {
 const allrequireData = ref([]);
 const route = useRoute();
 let total = ref(0);
-const getPageDataFromServer = () => {
-    getAllBacklogItems({
-        organizationId: route.params.id,
-    })
-        .then(resp => {
-            // 添加需求数据到 allrequireData 数组 
-            // TODO 这边等 wh 接口改好
-            allrequireData.value = resp.data;
-            total.value = resp.data.length;
-            ElMessage.success('拉取需求成功');
-        })
-        .catch(err => {
-            console.log(err);
-            ElMessage.error('拉取需求失败');
-        })
+const getPageDataFromServer = async () => {
+    try {
+        const resp = await getAllBacklogItems({
+            organizationId: route.params.id,
+        });
+
+        // 添加需求数据到 allrequireData 数组 
+        // TODO 这边等 wh 接口改好
+        allrequireData.value = resp.data;
+        let list = [];
+        for (let i = 0; i < allrequireData.value.length; i++) {
+            list.push(allrequireData.value[i].managerId);
+        }
+        let nameList = await getSupervisorNames(list);
+        console.log("@@@@@", nameList)
+        for (let i = 0; i < allrequireData.value.length; i++) {
+            allrequireData.value[i].supervisorName = nameList[i].name;
+        }
+        total.value = resp.data.length;
+        ElMessage.success('拉取需求成功');
+    } catch (err) {
+        console.log(err);
+        ElMessage.error('拉取需求失败');
+    }
 }
 
 const allRelatedData = ref([]);
@@ -552,7 +577,8 @@ const getMemberList = () => {
         projectId: route.params.id,
     })
         .then(resp => {
-            memberList.value = resp.MemeberList;
+            memberList.value = resp.data.projectAggregation.member;
+            getManageName();
 
         })
         .catch(resp => {
@@ -564,16 +590,30 @@ const getMemberList = () => {
 const getfromback = ref([]);
 const getManageName = () => {
 
+    console.log("!!??!", arr);
+
     getUserName({
-        accountIdArr: memberList.value,
+        accountIdArr: arr,
     })
         .then(resp => {
-            getfromback.value = resp.userNameArr;
-
+            getfromback.value = resp.data;
         })
         .catch(resp => {
             console.log('获取成员name:' + resp);
         })
+}
+
+//获取负责人列表喵 TODO
+const getSupervisorNames = async (arr) => {
+    try {
+        const resp = await getUserName({
+            accountIdArr: arr,
+        });
+        return resp.data;
+    } catch (error) {
+        console.log('获取成员name:' + error);
+        throw error; // 如果需要，你可以在这里抛出错误
+    }
 }
 
 /**
@@ -582,8 +622,7 @@ const getManageName = () => {
 const dialogTableVisible = ref(false);
 const showDialog = () => {
     dialogTableVisible.value = true;
-    // getMemberList();
-    // getManageName();
+    getMemberList();
 };
 const handleClose = () => {
     dialogTableVisible.value = false;
@@ -601,7 +640,8 @@ const submitForm = () => {
         // TODO 这边看看要不要动态
         organizationId: "2",
         topic: form.topic,
-        status: "status"
+        status: "status",
+        managerId: form.managerId,
     };
     // const submitData = {
     //     priority: "最低级",
