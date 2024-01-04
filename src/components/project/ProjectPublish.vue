@@ -9,7 +9,6 @@
                         <Plus />
                     </el-icon>&nbsp;&nbsp;新建发布</el-button>
             </div>
-
         </el-header>
         <el-main class="main">
             <el-table ref="multipleTableRef" :data="releaseData" style="width: 100%"
@@ -17,20 +16,26 @@
                 <el-table-column type="selection" width="50"></el-table-column>
                 <el-table-column prop="topic" label="发布名称" sortable>
                 </el-table-column>
-                <el-table-column prop="status" label="阶段">
+                <el-table-column prop="stageStatus" label="阶段">
+                    <template v-slot="{ row }">
+                        {{ row.stageStatus ? row.stageStatus : '暂无' }}
+                    </template>
                 </el-table-column>
                 <el-table-column prop="type" label="类型">
+                    <template v-slot="{ row }">
+                        {{ row.type ? row.type : '暂无' }}
+                    </template>
                 </el-table-column>
                 <el-table-column prop="managerName" label="负责人">
                 </el-table-column>
-                <el-table-column prop="start_time" label="开始时间">
+                <el-table-column prop="startTime" label="开始时间">
                 </el-table-column>
-                <el-table-column prop="end_time" label="发布时间">
+                <el-table-column prop="endTime" label="发布时间">
                 </el-table-column>
                 <el-table-column label="操作">
                     <template v-slot="{ row }">
-                        <el-button type="danger" @click="deleteRequireForRow(row)" :icon="Delete"></el-button>
-                        <el-button type="primary" @click="editRequireForRow(row)" :icon="Edit"></el-button>
+                        <el-button type="danger" @click="deleteReleaseForRow(row)" :icon="Delete"></el-button>
+                        <el-button type="primary" :icon="Edit"></el-button>
                     </template>
                 </el-table-column>
 
@@ -38,7 +43,7 @@
         </el-main>
     </el-container>
     <!-- 新建发布\修改发布 -->
-    <el-dialog v-model="dialogTableVisible" title="新建发布" @close="handleClose" width="60%">
+    <el-dialog v-model="dialogTableVisible" :title="formOperate" @close="handleClose" width="60%">
         <el-form :model="form" label-width="80px">
             <el-form-item label="名称">
                 <el-input v-model="form.topic"></el-input>
@@ -87,17 +92,25 @@
 
 import { Plus, Delete, Edit } from '@element-plus/icons-vue'
 import { ref, reactive, onMounted } from 'vue';
-import { getAllRelease, addRelease } from '@/api/release';
+import { getAllRelease, addRelease, deleteRelease } from '@/api/release';
 import { getUserInfo, getUserName } from '@/api/user';
 import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
+import store from '@/store';
+
+const route = useRoute();
+const projectId = route.params.id;
+let formOperate = reactive('新建发布')
+
 const dialogTableVisible = ref(false);
 const showDialog = () => {
     dialogTableVisible.value = true;
 };
+
 const handleClose = () => {
     dialogTableVisible.value = false;
 };
+
 onMounted(() => {
     getReleaseList();
 })
@@ -149,28 +162,44 @@ const getTypeColor = (type) => {
 
 //to check userinfo
 const getReleaseList = () => {
+    console.log(projectId)
+    console.log(store.state.user.organizationId)
+
     getAllRelease({
-        organizationId: localStorage.getItem("organizationId"),
+        projectId: projectId,
+        organizationId: store.state.user.organizationId,
     })
         .then(resp => {
-            releaseData.value = resp.data;
-            for (let i = 0; i < resp.data.length; i++) {
-                managerIdList.value.push(resp.data[i].managerId);
+            console.log(resp)
+            if(resp.code == 500){
+                ElMessage.error(resp.msg)
             }
-            getUserName({
-                accountIdArr: managerIdList.value
-            })
-                .then(resp => {
+            else{
+                releaseData.value = resp.data;
+                console.log("项目发布",resp.data);
+
+                if(resp.data.length!=null){
                     for (let i = 0; i < resp.data.length; i++) {
-                        releaseData.value[i] = {
-                            ...releaseData.value[i],
-                            "managerName": resp.data[i].userName
-                        };
+                    managerIdList.value.push(resp.data[i].managerId);
                     }
-                })
-                .catch(resp => {
-                    console.log(resp);
-                })
+                    getUserName({
+                        accountIdArr: managerIdList.value
+                    })
+                        .then(resp => {
+                            if(resp.data.length!=null){
+                                for (let i = 0; i < resp.data.length; i++) {
+                                releaseData.value[i] = {
+                                    ...releaseData.value[i],
+                                    "managerName": resp.data[i].userName
+                                };
+                            }
+                            }
+                        })
+                        .catch(resp => {
+                            console.log(resp);
+                        })
+                }
+            }
         })
         .catch(resp => {
             console.error(resp);
@@ -178,8 +207,9 @@ const getReleaseList = () => {
 }
 
 //新建发布 to check resp的格式
-const route = useRoute();
 const addPublish = () => {
+    console.log(form)
+    // 获取所有memberList
     addRelease({
         startTime: form.start_time,
         endTime: form.end_time,
@@ -187,18 +217,54 @@ const addPublish = () => {
         projectId: route.params.id,
         managerId: form.supervisorId,
         topic: form.topic,
-        stageId: '未开始',
-        organizationId: localStorage.getItem("organizationId"),
+        organizationId: store.state.user.organizationId,
     })
         .then(resp => {
             ElMessage.success('新建发布成功！');
+                getReleaseList()
         })
         .catch(resp => {
             console.error(resp);
         })
-
 }
 
+
+// 删除发布
+const deleteReleaseForRow = (row) =>{
+    deleteRelease(row.id)
+    .then(resp => {
+        if(resp.code === 500){
+            ElMessage.error('删除发布失败', resp.msg)
+        }
+        else{
+            ElMessage.success('删除发布成功！')
+            console.log(resp);
+            getReleaseList();
+        }
+
+    })
+    .catch(error =>{
+        ElMessage.error('删除发布失败，请重试！');
+        console.log(error)
+    })
+    
+}
+
+// 不做了
+// const editReleaseForRow = (row) =>{
+//     formOperate = "修改发布"
+//     console.log('edit');
+//     dialogTableVisible.value = true;
+    
+//     form.topic = row.topic;
+//     form.supervisorId = row.managerName;
+//     form.start_time = row.startTime;
+//     form.end_time = row.endTime;
+//     form.type = row.type;
+//     console.log(form)
+//     console.log(row.startTime)
+
+// }
 
 </script>
 

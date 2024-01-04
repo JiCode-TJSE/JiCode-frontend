@@ -121,6 +121,7 @@ const store = useStore();
 
 // 计算属性，用来获取 account_id
 const organizationId = computed(() => store.state.user.organizationId);
+const project_id = computed(() => store.state.user.project_id);
 const dialogTableVisible = ref(false);
 const showDialog = () => {
     dialogTableVisible.value = true;
@@ -129,6 +130,7 @@ const handleClose = () => {
     dialogTableVisible.value = false;
 };
 onMounted(async () => {
+    
     getSprint();
 })
 
@@ -217,7 +219,7 @@ async function add() {
     "organizationId":"1",
     "topic":"昂",*/
     organizationId: organizationId.value,//"1",//form.organizationId, // 确保在表单中有这个字段
-      projectId: "2",//form.belongProjectId, // 或者 form.projectId，取决于您的表单字段名
+      projectId: project_id.value,//"2",//form.belongProjectId, // 或者 form.projectId，取决于您的表单字段名
       topic: form.topic,
       goal: form.goal,
       managerId: "1",//form.supervisorId, // 确保在表单中有这个字段
