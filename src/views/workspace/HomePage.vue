@@ -69,7 +69,7 @@
     const fetchItems = async () => {
         try {
     // 获取第一个接口的数据
-    const response = await getProductInfoRequest(account_id.value);//account_id.value
+    const response = await getProductInfoRequest(localStorage.getItem("accountId"));//account_id.value
     let allItems = []; // 用于存储合并后的数据
 
     if (response.code === 200 && Array.isArray(response.data.showingDatas)) {
@@ -171,7 +171,7 @@
       onMounted(async () => {
         fetchItems
         try {
-          const response = await getUserInfoRequest(account_id.value);
+          const response = await getUserInfoRequest(localStorage.getItem("accountId"));
           if (response.code == 200) {
             const userData = response.data;
             username.value = userData.userName;

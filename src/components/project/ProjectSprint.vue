@@ -237,11 +237,11 @@ async function add() {
     "managerId":"1",
     "organizationId":"1",
     "topic":"昂",*/
-    organizationId: organizationId.value,//"1",//form.organizationId, // 确保在表单中有这个字段
-      projectId: project_id.value,//"2",//form.belongProjectId, // 或者 form.projectId，取决于您的表单字段名
+    organizationId: "1",//organizationId.value,//"1",//form.organizationId, // 确保在表单中有这个字段
+      projectId: "6e0326ca-5f75-41d4-82fb-b585c6788138",//project_id.value,//"2",//form.belongProjectId, // 或者 form.projectId，取决于您的表单字段名
       topic: form.topic,
       goal: form.goal,
-      managerId: "1",//form.supervisorId, // 确保在表单中有这个字段
+      managerId: "0eed0085-e741-45ee-8e72-310f7f3d6618",//form.supervisorId, // 确保在表单中有这个字段
       type: form.type,
       startTime: form.start_time,
       endTime:form.end_time,

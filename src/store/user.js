@@ -18,11 +18,17 @@ export default {
         SET_PROJECT_ID(state, payload) {
             state.project_id = payload;
           },
+        setUserName(state, username) {
+            state.username = username;
+        },
     },
     actions: {
         setProjectId({ commit }, project_id) {
             commit('SET_PROJECT_ID', project_id);
           },
+        setUserNameId({ commit }, username) {
+            commit('SET_USERNAME_ID', username);
+        },
     },
     modules: {
     }
