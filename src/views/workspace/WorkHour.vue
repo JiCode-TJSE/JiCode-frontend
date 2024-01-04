@@ -65,22 +65,22 @@ export default {
     const fetchItems = async () => {
       try {
         // 格式化日期为YYYY-MM-DD，调整回本地时区
-       const formatDate = (date) => {
+       /*const formatDate = (date) => {
        const tzOffset = date.getTimezoneOffset() * 60000; // 时区偏移量（分钟）转换为毫秒
        const localDate = new Date(date - tzOffset);
        return localDate.toISOString().split('T')[0];
        };
         // 格式化日期为YYYY-MM-DD
-        const [start, end] = dateRange.value.map(formatDate);
-        const response = await getWorkHourRequest(account_id.value, start, end); // 使用日期范围调用API
-        if (response.code === 200 && Array.isArray(response.data)) {
+        const [start, end] = dateRange.value.map(formatDate);*/
+        const response = await getWorkHourRequest(); // 使用日期范围调用API
+        if (response.code === 200 ) {
             items.value = response.data.map((item) => ({
-            name: item.name,
+            name: item.id,
             hours: item.hours,
             date: item.date,
-            item_number: item.item_number,
-            item_name: item.item_name,
-            type:item.type
+            item_number: "Jcode-1",
+            item_name: "Jcode",
+            type:"用户故事",//item.type
             // 根据实际返回的数据结构映射其他属性
             
           }));

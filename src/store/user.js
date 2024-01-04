@@ -7,7 +7,7 @@ export default {
         usePhoto: '',
         account_id: "1",//"f41b48b9-64cc-4271-92fd-f59ac5f2efe8",
         organizationId:"1",
-        project_id:"1",
+        project_id:"2",
     },
     getters: {
     },
