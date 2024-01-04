@@ -169,7 +169,10 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="负责人">
-                        <el-select v-model="selectedRow.manager_name" :options="getfromback">
+                        <el-select v-model="selectedRow.manager_name">
+                            <el-option v-for="(item, index) in getfromback" :key="index" :label="item.name"
+                                :value="item.name">
+                            </el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="需求类型">
@@ -590,10 +593,8 @@ const getMemberList = () => {
 const getfromback = ref([]);
 const getManageName = () => {
 
-    console.log("!!??!", arr);
-
     getUserName({
-        accountIdArr: arr,
+        accountIdArr: memberList.value,
     })
         .then(resp => {
             getfromback.value = resp.data;
@@ -699,7 +700,9 @@ const goToSpecificRequirement = (row) => {
     row.start_time = new Date(row.startTime);
     row.end_time = new Date(row.endTime);
     selectedRow.value = row;
+    selectedRow.value.manager_name = row.supervisorName;
     console.log(selectedRow.value);
+    getMemberList();
     detailDialogVisible.value = true;
 };
 
