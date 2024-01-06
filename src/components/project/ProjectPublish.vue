@@ -53,7 +53,7 @@
                     <el-option
                     v-for="member in memberList"
                     :key="member.accountId"
-                    :label="member.name"
+                    :label="member.userName"
                     :value="member.accountId"
                     ></el-option>
                 </el-select>

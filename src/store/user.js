@@ -2,12 +2,12 @@
 
 export default {
     state: {
-        username: "王琳的公司",
+        username: "JiCode",
         role: null, //orgnazationer、member
         usePhoto: '',
         account_id: "2",//"f41b48b9-64cc-4271-92fd-f59ac5f2efe8",
-        organizationId:"1",
-        project_id:"2",
+        organizationId: "1",
+        project_id: "2",
     },
     getters: {
     },
@@ -17,17 +17,11 @@ export default {
         },
         SET_PROJECT_ID(state, payload) {
             state.project_id = payload;
-          },
-        setUserName(state, username) {
-            state.username = username;
         },
     },
     actions: {
         setProjectId({ commit }, project_id) {
             commit('SET_PROJECT_ID', project_id);
-          },
-        setUserNameId({ commit }, username) {
-            commit('SET_USERNAME_ID', username);
         },
     },
     modules: {

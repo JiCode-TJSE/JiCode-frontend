@@ -1,110 +1,105 @@
 <template>
-    <el-container class="container" id="allrequire">
-        <el-header class="header">
-          <h1 class="title" style="color: black;">全部需求</h1>
-          <div class="buttons-container">
-          <!-- <el-button type="danger" :icon="Delete" class="deleterequire" @click="deleteSelectedRequirements"/> -->
-          <el-button class="addrequire" type="primary" @click="showTableDialog"><el-icon><Plus /></el-icon>&nbsp;&nbsp;新建需求</el-button>
-          </div>
-        </el-header>
-        <el-main class="main">
-          <el-table
-          ref="multipleTableRef"
-          :data="allrequireData"
-          style="width: 100%"
-          @selection-change="handleSelectionChange"
-          >
-            <el-table-column type="selection" width="50"></el-table-column>
+  <el-container class="container" id="allrequire">
+    <el-header class="header">
+      <h1 class="title" style="color: black;">全部需求</h1>
+      <div class="buttons-container">
+        <!-- <el-button type="danger" :icon="Delete" class="deleterequire" @click="deleteSelectedRequirements"/> -->
+        <el-button class="addrequire" type="primary" @click="showTableDialog"><el-icon>
+            <Plus />
+          </el-icon>&nbsp;&nbsp;新建需求</el-button>
+      </div>
+    </el-header>
+    <el-main class="main">
+      <el-table ref="multipleTableRef" :data="allrequireData" style="width: 100%"
+        @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="50"></el-table-column>
 
-            <el-table-column prop="name" label="标题" sortable>
-              <template #default="{ row }">
-                  <span @click="handleRowClick(row)">{{ row.name }}</span>
+        <el-table-column prop="name" label="标题" sortable>
+          <template #default="{ row }">
+            <span @click="handleRowClick(row)">{{ row.name }}</span>
+          </template>
+        </el-table-column>
+
+        <!-- 类型选择器 -->
+        <el-table-column prop="typeEnum" label="类型">
+          <template #default="scope">
+            <el-select v-model="scope.row.typeEnum" class="hidden-text" placeholder="Select" popper-class="no-border">
+              <template #prefix>
+                <el-tag :type="getTypeColor(scope.row.typeEnum)">{{ scope.row.typeEnum }}</el-tag>
               </template>
-            </el-table-column>
+              <el-option v-for="item in type_options" :key="item.value" :value="item.value">
+                <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+              </el-option>
+            </el-select>
+          </template>
+        </el-table-column>
 
-            <!-- 类型选择器 -->
-            <el-table-column prop="typeEnum" label="类型">
-                <template #default="scope">
-                    <el-select v-model="scope.row.typeEnum" class="hidden-text" placeholder="Select" popper-class="no-border">
-                        <template #prefix>
-                            <el-tag :type="getTypeColor(scope.row.typeEnum)">{{scope.row.typeEnum}}</el-tag>
-                        </template>
-                        <el-option v-for="item in type_options" :key="item.value" :value="item.value">
-                            <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
-                        </el-option>
-                    </el-select>
-                </template>
-            </el-table-column>
+        <el-table-column prop="supervisorName" label="负责人">
+        </el-table-column>
 
-            <el-table-column prop="supervisorName" label="负责人">
-            </el-table-column> 
+        <el-table-column label="操作">
+          <template v-slot="{ row }">
+            <el-button type="danger" @click="deleteRequireForRow(row)" :icon="Delete"></el-button>
+            <!-- <el-button type="primary" @click="editRequireForRow(row)" :icon="Edit" ></el-button> -->
+          </template>
+        </el-table-column>
 
-            <el-table-column label="操作">
-              <template v-slot="{ row }">
-                <el-button type="danger" @click="deleteRequireForRow(row)" :icon="Delete" ></el-button>
-                <!-- <el-button type="primary" @click="editRequireForRow(row)" :icon="Edit" ></el-button> -->
-              </template>
-            </el-table-column>
+      </el-table>
+    </el-main>
 
-          </el-table>
-        </el-main>
-
-        <!--  -->
-        <el-dialog v-model="dialogVisible" title="需求详情" @close="handleClose">
-          <el-tabs type="border-card">
-            <el-tab-pane label="基本信息">
-              <el-form :model="selectedRow" label-width="80px">
-                <el-form-item label="标题">
-                <el-input v-model="selectedRow.name"></el-input>
-                </el-form-item>
-                <el-form-item label="描述">
-                    <el-input
-                        v-model="selectedRow.detail"
-                        :autosize="{ minRows: 4, maxRows: 8 }"
-                        type="textarea"
-                        placeholder="Please input"
-                    />
-                </el-form-item>
-                <!-- <el-form-item label="模块">
+    <!--  -->
+    <el-dialog v-model="dialogVisible" title="需求详情" @close="handleClose">
+      <el-tabs type="border-card">
+        <el-tab-pane label="基本信息">
+          <el-form :model="selectedRow" label-width="80px">
+            <el-form-item label="标题">
+              <el-input v-model="selectedRow.name"></el-input>
+            </el-form-item>
+            <el-form-item label="描述">
+              <el-input v-model="selectedRow.detail" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea"
+                placeholder="Please input" />
+            </el-form-item>
+            <!-- <el-form-item label="模块">
                     <el-select v-model="selectedRow.moduleEnum" :options="getfromback">
                     </el-select>
                 </el-form-item> -->
 
-                <el-form-item label="模块">
-                    <el-row>
-                    <el-col :span="6">
-                      <el-tag>{{ selectedRow.moduleEnum }}</el-tag>
-                    </el-col>
-                  </el-row>
-                </el-form-item>
+            <el-form-item label="模块">
+              <el-row>
+                <el-col :span="6">
+                  <el-tag>{{ selectedRow.moduleEnum }}</el-tag>
+                </el-col>
+              </el-row>
+            </el-form-item>
 
-                <el-form-item label="负责人">
-                    <!-- <el-select v-model="selectedRow.supervisorName" :options="getfromback">
+            <el-form-item label="负责人">
+              <!-- <el-select v-model="selectedRow.supervisorName" :options="getfromback">
                     </el-select> -->
-                    <el-input v-model="selectedRow.supervisorName" disabled></el-input>
-                </el-form-item>
-                <el-form-item label="需求类型">
-                  <el-select v-model="selectedRow.typeEnum" class="hidden-text" placeholder="Select" popper-class="no-border">
-                      <template #prefix>
-                          <el-tag :type="getTypeColor(selectedRow.typeEnum)">{{selectedRow.typeEnum}}</el-tag>
-                      </template>
-                      <el-option v-for="item in type_options" :key="item.value" :value="item.value">
-                          <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
-                      </el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="需求来源">
-                  <el-select v-model="selectedRow.sourceEnum" class="hidden-text" placeholder="Select" popper-class="no-border">
-                      <template #prefix>
-                          <el-tag :type="getTypeColor(selectedRow.sourceEnum)">{{selectedRow.sourceEnum}}</el-tag>
-                      </template>
-                      <el-option v-for="item in source_options" :key="item.value" :value="item.value">
-                          <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
-                      </el-option>
-                  </el-select>
-                </el-form-item>   
-                
-                <!-- <el-form-item label="客户">
+              <el-input v-model="selectedRow.supervisorName" disabled></el-input>
+            </el-form-item>
+            <el-form-item label="需求类型">
+              <el-select v-model="selectedRow.typeEnum" class="hidden-text" placeholder="Select" popper-class="no-border">
+                <template #prefix>
+                  <el-tag :type="getTypeColor(selectedRow.typeEnum)">{{ selectedRow.typeEnum }}</el-tag>
+                </template>
+                <el-option v-for="item in type_options" :key="item.value" :value="item.value">
+                  <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="需求来源">
+              <el-select v-model="selectedRow.sourceEnum" class="hidden-text" placeholder="Select"
+                popper-class="no-border">
+                <template #prefix>
+                  <el-tag :type="getTypeColor(selectedRow.sourceEnum)">{{ selectedRow.sourceEnum }}</el-tag>
+                </template>
+                <el-option v-for="item in source_options" :key="item.value" :value="item.value">
+                  <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                </el-option>
+              </el-select>
+            </el-form-item>
+
+            <!-- <el-form-item label="客户">
                     <el-row>
                     <el-col :span="6" v-for="client in selectedRow.clientArr" :key="client.clientId">
                       <el-tag>{{ client.name }}</el-tag>
@@ -112,7 +107,7 @@
                   </el-row>
                 </el-form-item> -->
 
-                <!-- <el-form-item label="工作项">
+            <!-- <el-form-item label="工作项">
                     <el-row>
                     <el-col :span="6" v-for="backlogItem in selectedRow.backlogItemArr" :key="backlogItem.backlogItemId">
                       <el-tag>{{ backlogItem.name }}</el-tag>
@@ -120,59 +115,55 @@
                   </el-row>
                 </el-form-item> -->
 
-                <el-form-item label="版本">
-                    <el-row>
-                    <el-col :span="6" v-for="version in selectedRow.versionArr" :key="version.id">
-                      <el-tag>{{ version.name }}</el-tag>
-                    </el-col>
-                  </el-row>
-                </el-form-item>
+            <el-form-item label="版本">
+              <el-row>
+                <el-col :span="6" v-for="version in selectedRow.versionArr" :key="version.id">
+                  <el-tag>{{ version.name }}</el-tag>
+                </el-col>
+              </el-row>
+            </el-form-item>
 
-                <el-form-item label="保存">
-                  <el-button type="primary" :icon="Check" @click="saveDetails" />
-                </el-form-item>
-              </el-form>
-            </el-tab-pane>
-            <!-- <el-tab-pane label="客户">
+            <el-form-item label="保存">
+              <el-button type="primary" :icon="Check" @click="saveDetails" />
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+        <!-- <el-tab-pane label="客户">
               
             </el-tab-pane>
             <el-tab-pane label="工作项">
               
             </el-tab-pane>
             <el-tab-pane label="版本记录">版本记录</el-tab-pane> -->
-          </el-tabs>
-        </el-dialog>
+      </el-tabs>
+    </el-dialog>
 
-        
-        <!-- 新建需求 -->
-        <el-dialog v-model="dialogTableVisible" title="新建需求" @close="handleTableClose">
-          <el-row :gutter="20">
-            <el-col :span="13">
-                <el-form :model="form" label-width="80px">
-                    <el-form-item label="标题">
-                    <el-input v-model="form.name"></el-input>
-                    </el-form-item>
-                    <el-form-item label="描述">
-                        <el-input
-                            v-model="form.detail"
-                            :autosize="{ minRows: 4, maxRows: 8 }"
-                            type="textarea"
-                            placeholder="Please input"
-                        />
-                    </el-form-item>
-                </el-form>
-            </el-col>
-            
-            <!-- 分割线 -->
-            <el-col :span="1">
-                <el-divider direction="vertical" style="height: 90%;"></el-divider>
-            </el-col>
 
-            <el-col :span="10">
-                <el-form :model="form" label-width="80px">
+    <!-- 新建需求 -->
+    <el-dialog v-model="dialogTableVisible" title="新建需求" @close="handleTableClose">
+      <el-row :gutter="20">
+        <el-col :span="13">
+          <el-form :model="form" label-width="80px">
+            <el-form-item label="标题">
+              <el-input v-model="form.name"></el-input>
+            </el-form-item>
+            <el-form-item label="描述">
+              <el-input v-model="form.detail" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea"
+                placeholder="Please input" />
+            </el-form-item>
+          </el-form>
+        </el-col>
 
-                  <!-- TODO!!! -->
-                    <!-- <el-form-item label="所属产品">
+        <!-- 分割线 -->
+        <el-col :span="1">
+          <el-divider direction="vertical" style="height: 90%;"></el-divider>
+        </el-col>
+
+        <el-col :span="10">
+          <el-form :model="form" label-width="80px">
+
+            <!-- TODO!!! -->
+            <!-- <el-form-item label="所属产品">
                         <el-select v-model="form.belongProductId">
                           <el-option
                             v-for="product in products"
@@ -182,59 +173,59 @@
                           ></el-option>
                         </el-select>
                     </el-form-item> -->
-                    <el-form-item label="模块">
-                        <el-input v-model="form.moduleEnum" placeholder="请输入模块名称"></el-input>
-                    </el-form-item>
-                    <el-form-item label="负责人">
-                        <!-- <el-select v-model="form.supervisorName" :options="getfromback">
+            <el-form-item label="模块">
+              <el-input v-model="form.moduleEnum" placeholder="请输入模块名称"></el-input>
+            </el-form-item>
+            <el-form-item label="负责人">
+              <!-- <el-select v-model="form.supervisorName" :options="getfromback">
                         </el-select> -->
-                        <el-input placeholder="ZJK" disabled></el-input>
-                    </el-form-item>
-                    <el-form-item label="需求类型">
-                        <!-- <template #default="scope"> -->
-                            <el-select v-model="form.typeEnum" class="hidden-text" placeholder="Select" popper-class="no-border">
-                                <template #prefix>
-                                    <el-tag :type="getTypeColor(form.typeEnum)">{{form.typeEnum}}</el-tag>
-                                </template>
-                                <el-option v-for="item in type_options" :key="item.value" :value="item.value">
-                                    <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
-                                </el-option>
-                            </el-select>
-                        <!-- </template> -->
-                    </el-form-item>
-                    <el-form-item label="需求来源">
-                        <!-- <template #default="scope"> -->
-                            <el-select v-model="form.sourceEnum" class="hidden-text" placeholder="Select" popper-class="no-border">
-                                <template #prefix>
-                                    <el-tag :type="getTypeColor(form.sourceEnum)">{{form.sourceEnum}}</el-tag>
-                                </template>
-                                <el-option v-for="item in source_options" :key="item.value" :value="item.value">
-                                    <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
-                                </el-option>
-                            </el-select>
-                        <!-- </template> -->
-                    </el-form-item>        
-                </el-form>
-            </el-col>
-          </el-row>
-          <el-row class="button-container">
-            <el-button type="primary" @click="submitForm">提交</el-button>
-          </el-row>
-        </el-dialog>
-        <div class="page">
-            <el-pagination background :current-page="currentPage" :page-size="pageSize" :total="total"
+              <el-input placeholder="ZJK" disabled></el-input>
+            </el-form-item>
+            <el-form-item label="需求类型">
+              <!-- <template #default="scope"> -->
+              <el-select v-model="form.typeEnum" class="hidden-text" placeholder="Select" popper-class="no-border">
+                <template #prefix>
+                  <el-tag :type="getTypeColor(form.typeEnum)">{{ form.typeEnum }}</el-tag>
+                </template>
+                <el-option v-for="item in type_options" :key="item.value" :value="item.value">
+                  <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                </el-option>
+              </el-select>
+              <!-- </template> -->
+            </el-form-item>
+            <el-form-item label="需求来源">
+              <!-- <template #default="scope"> -->
+              <el-select v-model="form.sourceEnum" class="hidden-text" placeholder="Select" popper-class="no-border">
+                <template #prefix>
+                  <el-tag :type="getTypeColor(form.sourceEnum)">{{ form.sourceEnum }}</el-tag>
+                </template>
+                <el-option v-for="item in source_options" :key="item.value" :value="item.value">
+                  <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                </el-option>
+              </el-select>
+              <!-- </template> -->
+            </el-form-item>
+          </el-form>
+        </el-col>
+      </el-row>
+      <el-row class="button-container">
+        <el-button type="primary" @click="submitForm">提交</el-button>
+      </el-row>
+    </el-dialog>
+    <div class="page">
+      <el-pagination background :current-page="currentPage" :page-size="pageSize" :total="total"
         @current-change="handlePageChange"></el-pagination>
-        </div>
-    </el-container>
-  </template>
+    </div>
+  </el-container>
+</template>
 
 <script setup>
 // import {Edit} from '@element-plus/icons-vue';
-import {Plus, Delete} from '@element-plus/icons-vue';
+import { Plus, Delete } from '@element-plus/icons-vue';
 import { Check } from '@element-plus/icons-vue'
-import {ref,  reactive} from 'vue';
-import {onMounted} from 'vue';
-import { getProductRequireInPage, addProductRequire ,deleteProductRequire, updateProductRequire, getProductRequireDetail} from '@/api/require';
+import { ref, reactive } from 'vue';
+import { onMounted } from 'vue';
+import { getProductRequireInPage, addProductRequire, deleteProductRequire, updateProductRequire, getProductRequireDetail } from '@/api/require';
 import { ElMessage } from 'element-plus';
 
 /**
@@ -244,7 +235,7 @@ import { ElMessage } from 'element-plus';
 const currentUrl = window.location.href;
 // 提取产品 ID
 const productId = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);
-console.log('productId', productId); 
+console.log('productId', productId);
 
 
 
@@ -256,10 +247,10 @@ console.log('productId', productId);
 // 获取需求列表
 const allrequireData = ref([]);
 // 用于储存被选中的行的数据
-const multipleSelection = ref([]);  
+const multipleSelection = ref([]);
 // 选择改变时更新被选中的行
 const handleSelectionChange = (val) => {
-  multipleSelection.value = val;  
+  multipleSelection.value = val;
 }
 
 // 新建需求时的表单信息
@@ -270,7 +261,7 @@ const form = reactive({
   sourceEnum: '', //需求来源
   typeEnum: '', //需求类型
   detail: '', //描述
-  belongProductId:'',
+  belongProductId: '',
 });
 
 const type_options = [
@@ -313,7 +304,7 @@ const source_options = [
 
 const getTypeColor = (type) => {
   switch (type) {
-    case '功能需求' :
+    case '功能需求':
       return 'warning';
     case '体验优化':
       return 'info';
@@ -321,7 +312,7 @@ const getTypeColor = (type) => {
       return 'primary';
     case '技术需求':
       return 'success';
-    case '产品规划' :
+    case '产品规划':
       return 'warning';
     case '用户反馈':
       return 'info';
@@ -335,8 +326,8 @@ const getTypeColor = (type) => {
 };
 
 const getfromback = Array.from({ length: 10000 }).map((_, idx) => ({
-    value: `${idx + 1}`,
-    label: `${idx + 1}`,
+  value: `${idx + 1}`,
+  label: `${idx + 1}`,
 }))
 
 
@@ -359,11 +350,11 @@ const getPageDataFromServer = () => {
 
       // 添加需求数据到 allrequireData 数组
       allrequireData.value = resp.data.records; // 假设响应中的需求数据在 records 字段中
-      if(resp.data.records.total != 0){
+      if (resp.data.records.total != 0) {
         for (let i = 0; i < resp.data.records.length; i++) {
           allrequireData.value[i] = {
-              ...allrequireData.value[i],
-              "supervisorName":"ZJK"
+            ...allrequireData.value[i],
+            "supervisorName": "ZJK"
           };
         }
       }
@@ -375,7 +366,7 @@ const getPageDataFromServer = () => {
       });
     })
     .catch(err => {
-      console.log('getRequire err',err);
+      console.log('getRequire err', err);
       ElMessage.error('拉取需求失败');
     })
 }
@@ -399,18 +390,18 @@ onMounted(() => {
 /**
  * 删除某一行的需求
  */
-  const deleteRequireForRow = (row) => {
+const deleteRequireForRow = (row) => {
   console.log('Row Object:', row);
   const id = row.requirementId; // 获取要删除的产品的 ID
-  deleteProductRequire({requirementId:id}) // 调用删除产品的 API 函数
+  deleteProductRequire({ requirementId: id }) // 调用删除产品的 API 函数
     .then((resp) => {
-      console.log('resp for deleteRequire',resp);
+      console.log('resp for deleteRequire', resp);
       console.log(resp.code);
       // if(resp.code === 0){
-        // 更新前端产品列表，移除已删除的产品
-        allrequireData.value = allrequireData.value.filter(require => require.requirementId !== id);
-        ElMessage.success('产品删除成功');
-        getPageDataFromServer();
+      // 更新前端产品列表，移除已删除的产品
+      allrequireData.value = allrequireData.value.filter(require => require.requirementId !== id);
+      ElMessage.success('产品删除成功');
+      getPageDataFromServer();
       // } else {
       //   ElMessage.error('产品删除失败');
       // }
@@ -439,7 +430,7 @@ const submitForm = () => {
   const submitData = {
     name: form.name,
     // supervisorId: form.supervisorId,
-    supervisorId: '1',
+    supervisorId: 'd4cc64a1-ade4-4532-a4dc-1ad54ae0df90',
     moduleEnum: form.moduleEnum,
     sourceEnum: form.sourceEnum,
     typeEnum: form.typeEnum,
@@ -448,15 +439,15 @@ const submitForm = () => {
     belongProductId: productId,
   };
   addProductRequire(submitData)
-    .then(resp => {    
-        console.log(resp);
-        ElMessage({
-          message: '添加需求成功',
-          type: 'success',
-        })
-        // 从后端重新获取当前页的数据，确保新添加的项目能够出现在表格中
-        dialogVisible.value = false;
-        getPageDataFromServer();
+    .then(resp => {
+      console.log(resp);
+      ElMessage({
+        message: '添加需求成功',
+        type: 'success',
+      })
+      // 从后端重新获取当前页的数据，确保新添加的项目能够出现在表格中
+      dialogVisible.value = false;
+      getPageDataFromServer();
     })
     .catch(err => {
       console.log(err);
@@ -478,10 +469,10 @@ const selectedRow = ref({
   supervisorId: '',
   clientArr: [],
   backlogItemArr: [],
-  versionArr:[],
+  versionArr: [],
 });
 
-const dialogVisible = ref(false); 
+const dialogVisible = ref(false);
 const handleClose = () => {
   dialogVisible.value = false;
 };
@@ -493,41 +484,41 @@ const handleRowClick = (row) => {
 
   console.log('requirement row:', row)
   // 基本信息
-  getProductRequireDetail({ requirementId: row.requirementId }) 
+  getProductRequireDetail({ requirementId: row.requirementId })
     .then((response) => {
-      console.log('row.requirementId',row.requirementId)
-      console.log('response require detail',response.data);
+      console.log('row.requirementId', row.requirementId)
+      console.log('response require detail', response.data);
       // if (response.code === true) {
-        ElMessage({
-          message: '获取需求详情成功',
-          type: 'success',
-        })
-        const data = response.data;
-        selectedRow.value = response.data;
-        
-        // selectedRow.value.name = data.name;
-        // selectedRow.value.detail = data.detail;
-        // selectedRow.value.moduleEnum = data.moduleEnum;
-        // selectedRow.value.sourceEnum = data.sourceEnum;
-        // selectedRow.value.typeEnum = data.typeEnum;
-        
-        // 设置负责人的 ID 和姓名
-        if (response.data.supervisor) {
-          selectedRow.value.supervisorName = response.data.supervisor.supervisorId;
-          selectedRow.value.supervisorId = response.data.supervisor.supervisorName;
-        } else {
-          selectedRow.value.supervisorName = '';
-          selectedRow.value.supervisorId = '';
-        }
+      ElMessage({
+        message: '获取需求详情成功',
+        type: 'success',
+      })
+      const data = response.data;
+      selectedRow.value = response.data;
 
-        selectedRow.value.clientArr = response.data.clientArr;
-        console.log('response.data.clientArr',response.data.clientArr);
+      // selectedRow.value.name = data.name;
+      // selectedRow.value.detail = data.detail;
+      // selectedRow.value.moduleEnum = data.moduleEnum;
+      // selectedRow.value.sourceEnum = data.sourceEnum;
+      // selectedRow.value.typeEnum = data.typeEnum;
 
-        selectedRow.value.backlogItemArr = response.data.backlogItemArr;
-        selectedRow.value.versionArr = response.data.versionArr;
+      // 设置负责人的 ID 和姓名
+      if (response.data.supervisor) {
+        selectedRow.value.supervisorName = response.data.supervisor.supervisorId;
+        selectedRow.value.supervisorId = response.data.supervisor.supervisorName;
+      } else {
+        selectedRow.value.supervisorName = '';
+        selectedRow.value.supervisorId = '';
+      }
+
+      selectedRow.value.clientArr = response.data.clientArr;
+      console.log('response.data.clientArr', response.data.clientArr);
+
+      selectedRow.value.backlogItemArr = response.data.backlogItemArr;
+      selectedRow.value.versionArr = response.data.versionArr;
 
 
-        dialogVisible.value = true;
+      dialogVisible.value = true;
 
       // } else {
       //   ElMessage.error('获取需求详情失败');
@@ -554,9 +545,9 @@ const saveDetails = () => {
     supervisorId: '1',
     requirementId: requirementid.value,
     clientArr: null,
-    backlogItemArr:null,
+    backlogItemArr: null,
   };
-  console.log('requestData',requestData)
+  console.log('requestData', requestData)
 
   updateProductRequire(requestData)
     .then((response) => {
@@ -580,46 +571,52 @@ const saveDetails = () => {
 #allrequire {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; 
+  justify-content: flex-start;
   align-items: center;
-  height: 100vh; 
+  height: 100vh;
   margin: 0;
   padding: 0;
 }
+
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width:100%;
+  width: 100%;
   background-color: rgb(255, 255, 255);
 }
-.main{
+
+.main {
   display: flex;
-  flex-direction: column; 
-  justify-content: flex-start; 
+  flex-direction: column;
+  justify-content: flex-start;
   align-items: center;
   width: 100%;
   background-color: rgb(255, 255, 255);
-  flex: 1; 
+  flex: 1;
 }
-.page{
-    margin-bottom: 10%;
+
+.page {
+  margin-bottom: 10%;
 }
+
 .buttons-container {
   margin-left: auto;
 }
+
 .hidden-text::v-deep .el-input__inner {
-    color: transparent!important;
-    border: none!important;
-    box-shadow: none !important;
+  color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
-.hidden-text{
-    width:50%;
+
+.hidden-text {
+  width: 50%;
 }
+
 .button-container {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
 </style>

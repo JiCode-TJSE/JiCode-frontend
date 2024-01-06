@@ -1,8 +1,8 @@
 import request from '@/utils/request'
 import store from '@/store'
 
-const accountId = store.state.user.account_id;
-console.log(`accountId`,accountId)
+const accountId = localStorage.getItem("accountId")
+console.log(`accountId`, accountId)
 
 export function deleteProduct(data) {
     return request({
@@ -22,7 +22,7 @@ export function getProduct(data) {
 }
 export function addProduct(data) {
     return request({
-        url: "http://101.37.116.97:8080/api/product/item?id=" + accountId ,
+        url: "http://101.37.116.97:8080/api/product/item?id=" + accountId,
         method: "POST",
         data: data,
     })

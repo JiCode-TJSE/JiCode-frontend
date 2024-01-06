@@ -83,8 +83,8 @@
                     </el-form-item>
                     <el-form-item label="负责人">
                         <el-select v-model="form.manager_name" @change="handleManagerChange">
-                            <el-option v-for="(item, index) in getfromback" :key="index" :label="item.name"
-                                :value="item.name">
+                            <el-option v-for="(item, index) in getfromback" :key="index" :label="item.userName"
+                                :value="item.userName">
                             </el-option>
                         </el-select>
                     </el-form-item>
@@ -401,7 +401,7 @@ let total = ref(0);
 const getPageDataFromServer = async () => {
     try {
         const resp = await getAllBacklogItems({
-            organizationId: route.params.id,
+            organizationId: "1"
         });
 
         // 添加需求数据到 allrequireData 数组 
@@ -420,7 +420,7 @@ const getPageDataFromServer = async () => {
         ElMessage.success('拉取需求成功');
     } catch (err) {
         console.log("拉去失败！！！！！", err);
-        ElMessage.error('拉取需求失败');
+        // ElMessage.error('拉取需求失败');
     }
 }
 
@@ -594,11 +594,13 @@ const deleteRelatedForRow = (row) => {
 
 const memberList = ref([]);
 const getMemberList = () => {
+    console.log('获取!!!!成员列表：' + route.params.id);
     getProjectInfo({
         projectId: route.params.id,
     })
         .then(resp => {
             memberList.value = resp.data.projectAggregation.member;
+            console.log('获取!!!!成员列表：' + memberList.value);
             getManageName();
 
         })
@@ -657,7 +659,7 @@ const submitForm = () => {
         description: form.description,
         projectId: route.params.id,
         // TODO 这边看看要不要动态
-        organizationId: "2",
+        organizationId: "1",
         topic: form.topic,
         status: "status",
         managerId: form.managerId,
