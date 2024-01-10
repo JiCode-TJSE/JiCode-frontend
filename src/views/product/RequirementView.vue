@@ -47,7 +47,7 @@
       </el-table>
     </el-main>
 
-    <!--  -->
+    <!-- 需求详情 -->
     <el-dialog v-model="dialogVisible" title="需求详情" @close="handleClose">
       <el-tabs type="border-card">
         <el-tab-pane label="基本信息">
@@ -128,13 +128,17 @@
             </el-form-item>
           </el-form>
         </el-tab-pane>
-        <!-- <el-tab-pane label="客户">
-              
-            </el-tab-pane>
-            <el-tab-pane label="工作项">
-              
-            </el-tab-pane>
-            <el-tab-pane label="版本记录">版本记录</el-tab-pane> -->
+        <el-tab-pane label="客户">
+          <el-row>
+            <el-col :span="6" v-for="(client, index) in selectedRow.clientArr" :key="client.clientId">
+              <el-tag closable @close="handleTagClose(index)">{{ client.name }}</el-tag>
+            </el-col>
+          </el-row>
+        </el-tab-pane>
+        <!-- <el-tab-pane label="工作项">
+
+        </el-tab-pane> -->
+        <el-tab-pane label="版本记录">版本记录</el-tab-pane>
       </el-tabs>
     </el-dialog>
 
@@ -536,14 +540,13 @@ const handleRowClick = (row) => {
 const saveDetails = () => {
   // 构造请求参数
   const requestData = {
+    requirementId: requirementid.value,
     name: selectedRow.value.name,
     detail: selectedRow.value.detail,
     moduleEnum: selectedRow.value.moduleEnum,
     sourceEnum: selectedRow.value.sourceEnum,
     typeEnum: selectedRow.value.typeEnum,
-    // supervisorId: selectedRow.value.supervisorId,
-    supervisorId: '1',
-    requirementId: requirementid.value,
+    supervisorId: 'd4cc64a1-ade4-4532-a4dc-1ad54ae0df90',
     clientArr: null,
     backlogItemArr: null,
   };
