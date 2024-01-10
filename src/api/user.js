@@ -2,7 +2,6 @@ import request from '@/utils/request'
 
 //获取username
 export function getUserName(data) {
-    console.log("?????", data);
     return request({
         url: "http://101.37.116.97:8081/api/user/multiuserInfo",
         method: "POST",
@@ -22,7 +21,7 @@ export function getOrganization(data) {
 
 export function getUserInfo(data) {
     return request({
-        url: `http://101.37.116.97:8081/api/user/userinfo`,
+        url: `http://101.37.116.97:8081/api/account/info`,
         method: "GET",
         params: data,
     });

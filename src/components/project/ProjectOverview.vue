@@ -66,11 +66,11 @@
 
 <script setup>
 import Card from '@/components/CommonCard.vue'
-import { ref, onMounted, watch} from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { QuestionFilled } from '@element-plus/icons-vue'
 import * as echarts from "echarts";
-import {getProjectInfo, updateProject} from "@/api/project";
-import {getUserInfo, getUserName} from "@/api/user";
+import { getProjectInfo, updateProject } from "@/api/project";
+import { getUserInfo, getUserName } from "@/api/user";
 import { useRoute } from 'vue-router';
 
 let chartDom = ref(null); //注意变量名 和 ref名字要对应
@@ -135,7 +135,7 @@ const initChart = () => {
         series: [
             {
                 name: "用户故事",
-                data: [2, 18, 5],
+                data: [0, 0, 0],
                 type: "bar",
                 barWidth: "25%", //调整柱状图宽度
                 itemStyle: {

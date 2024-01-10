@@ -394,32 +394,44 @@ const saveDetails = () => {
         })
 }
 
-// 分页查询获取需求列表
+// 获取需求列表
 const allrequireData = ref([]);
 const route = useRoute();
-let total = ref(0);
+// let total = ref(0);
 const getPageDataFromServer = async () => {
     try {
         const resp = await getAllBacklogItems({
-            organizationId: "1"
+            organizationId: localStorage.getItem("organizationId"),
+            projectId: route.params.id,
         });
 
         // 添加需求数据到 allrequireData 数组 
-        // TODO 这边等 wh 接口改好
         allrequireData.value = resp.data;
-        let list = [];
+        let memberList = ref([]);
+        console.log(allrequireData.value.length)
         for (let i = 0; i < allrequireData.value.length; i++) {
-            list.push(allrequireData.value[i].managerId);
+            console.log(allrequireData.data[i].managerId)
+            memberList.value[i] = allrequireData.data[i].managerId;
         }
-        console.log("@@@@@", list)
-        let nameList = await getSupervisorNames(list);
-        for (let i = 0; i < allrequireData.value.length; i++) {
-            allrequireData.value[i].supervisorName = nameList[i].name;
-        }
+        await getUserName({
+            accountIdArr: memberList.value,
+        })
+            .then(resp => {
+                for (let i = 0; i < allrequireData.value.length; i++) {
+                    allrequireData.value[i] = {
+                        ...allrequireData.value[i],
+                        "supervisorName": resp.data.userName,
+                    }
+                }
+            })
+            .catch(resp => {
+                console.log(resp);
+            })
         total.value = resp.data.length;
+        console.log("allrequirementData：", list)
         ElMessage.success('拉取需求成功');
     } catch (err) {
-        console.log("拉去失败！！！！！", err);
+        console.log("拉取失败！", err);
         // ElMessage.error('拉取需求失败');
     }
 }
@@ -594,18 +606,16 @@ const deleteRelatedForRow = (row) => {
 
 const memberList = ref([]);
 const getMemberList = () => {
-    console.log('获取!!!!成员列表：' + route.params.id);
     getProjectInfo({
         projectId: route.params.id,
     })
         .then(resp => {
             memberList.value = resp.data.projectAggregation.member;
-            console.log('获取!!!!成员列表：' + memberList.value);
             getManageName();
 
         })
         .catch(resp => {
-            console.log('获取成员列表：' + resp);
+            console.log('获取成员列表错误：' + resp);
         })
 }
 
@@ -624,18 +634,6 @@ const getManageName = () => {
         })
 }
 
-//获取负责人列表喵 TODO
-const getSupervisorNames = async (arr) => {
-    try {
-        const resp = await getUserName({
-            accountIdArr: arr,
-        });
-        return resp.data;
-    } catch (error) {
-        console.log('获取成员name:' + error);
-        throw error; // 如果需要，你可以在这里抛出错误
-    }
-}
 
 /**
  * 新建需求部分逻辑
