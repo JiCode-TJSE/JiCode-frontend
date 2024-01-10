@@ -122,10 +122,6 @@
                 </el-col>
               </el-row>
             </el-form-item>
-
-            <el-form-item label="保存">
-              <el-button type="primary" :icon="Check" @click="saveDetails" />
-            </el-form-item>
           </el-form>
         </el-tab-pane>
         <el-tab-pane label="客户">
@@ -140,6 +136,11 @@
         </el-tab-pane> -->
         <el-tab-pane label="版本记录">版本记录</el-tab-pane>
       </el-tabs>
+      <el-form class="save">
+        <el-form-item label="保存">
+          <el-button type="primary" :icon="Check" @click="saveDetails" />
+        </el-form-item>
+      </el-form>
     </el-dialog>
 
 
@@ -241,7 +242,9 @@ const currentUrl = window.location.href;
 const productId = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);
 console.log('productId', productId);
 
-
+const handleTagClose = (index) => {
+  selectedRow.value.clientArr.splice(index, 1);
+};
 
 /**
  * 获取所有产品
@@ -536,8 +539,9 @@ const handleRowClick = (row) => {
 
 };
 
-// 基本信息
+// 保存需求信息
 const saveDetails = () => {
+  let clientIdArray = selectedRow.value.clientArr.map(client => client.clientId);
   // 构造请求参数
   const requestData = {
     requirementId: requirementid.value,
@@ -547,7 +551,7 @@ const saveDetails = () => {
     sourceEnum: selectedRow.value.sourceEnum,
     typeEnum: selectedRow.value.typeEnum,
     supervisorId: 'd4cc64a1-ade4-4532-a4dc-1ad54ae0df90',
-    clientArr: null,
+    clientArr: clientIdArray,
     backlogItemArr: null,
   };
   console.log('requestData', requestData)
@@ -571,6 +575,10 @@ const saveDetails = () => {
 
 </script>
 <style scoped>
+.save {
+  margin-top: 20px;
+}
+
 #allrequire {
   display: flex;
   flex-direction: column;
