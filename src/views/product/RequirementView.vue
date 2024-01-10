@@ -130,6 +130,10 @@
               <el-tag closable @close="handleTagClose(index)">{{ client.name }}</el-tag>
             </el-col>
           </el-row>
+          <el-select style="margin-top: 20px;" v-model="selectedClient" placeholder="添加客户" @change="handleClientChange">
+            <el-option v-for="item in client2sArr" :key="item.id" :label="item.name" :value="item">
+            </el-option>
+          </el-select>
         </el-tab-pane>
         <!-- <el-tab-pane label="工作项">
 
@@ -231,6 +235,7 @@ import { Check } from '@element-plus/icons-vue'
 import { ref, reactive } from 'vue';
 import { onMounted } from 'vue';
 import { getProductRequireInPage, addProductRequire, deleteProductRequire, updateProductRequire, getProductRequireDetail } from '@/api/require';
+import { getClientInPage } from '@/api/client';
 import { ElMessage } from 'element-plus';
 
 /**
@@ -244,6 +249,21 @@ console.log('productId', productId);
 
 const handleTagClose = (index) => {
   selectedRow.value.clientArr.splice(index, 1);
+};
+
+let selectedClient = ref(null);
+let clientList = reactive([{ clientId: '', name: 'test' }]);
+
+const handleClientChange = () => {
+  console.log('selectedClient', selectedClient.value);
+  const clientWithClientId = {
+    ...selectedClient.value,
+    clientId: selectedClient.value.id
+  };
+  selectedRow.value.clientArr.push(clientWithClientId);
+  console.log('selectedRow', selectedRow.value.clientArr);
+  client2sArr = client2sArr.filter(client => client.clientId !== selectedClient.value.id);
+  selectedClient.value = null;
 };
 
 /**
@@ -378,6 +398,23 @@ const getPageDataFromServer = () => {
     })
 }
 
+const getClientList = () => {
+  // 获取客户列表
+  getClientInPage({
+    pageSize: 10,
+    pageNo: 1,
+    productId: productId,
+  })
+    .then(resp => {
+      console.log('getClientInPage', resp);
+      clientList = resp.data.records;
+    })
+    .catch(err => {
+      console.log('拉取客户失败', err);
+    })
+
+};
+
 // 分页请求
 const handlePageChange = (newPage) => {
   currentPage.value = newPage;
@@ -387,6 +424,7 @@ const handlePageChange = (newPage) => {
 // 初始调用
 onMounted(() => {
   getPageDataFromServer();
+  getClientList();
 })
 
 /**
@@ -485,6 +523,7 @@ const handleClose = () => {
 };
 
 const requirementid = ref();
+let client2sArr = reactive([]);
 
 const handleRowClick = (row) => {
   requirementid.value = row.requirementId;
@@ -523,6 +562,11 @@ const handleRowClick = (row) => {
 
       selectedRow.value.backlogItemArr = response.data.backlogItemArr;
       selectedRow.value.versionArr = response.data.versionArr;
+
+      // 设置可选客户列表
+      client2sArr = clientList.filter(client => {
+        return !selectedRow.value.clientArr.some(selectedClient => selectedClient.clientId === client.clientId);
+      });
 
 
       dialogVisible.value = true;
