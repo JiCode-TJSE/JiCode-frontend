@@ -16,8 +16,10 @@
                         <span @click="goToSpecificProject(row)">{{ row.topic }}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="organizationName" label="所属">
+                <el-table-column label="所属">
+                    organization_name
                 </el-table-column>
+
                 <el-table-column label="操作">
                     <template v-slot="{ row }">
                         <el-button type="danger" @click="deleteProjectForRow(row)" :icon="Delete"></el-button>
@@ -59,43 +61,52 @@ import { ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
 import { ref, reactive, onMounted } from 'vue';
 import { getAllProject, deleteProject, addProject } from '@/api/project';
-import store from "@/store";
+//import store from "@/store";
 import { getOrganization } from '@/api/user';
 //import { defineEmits, defineProps } from 'vue';
+import { computed } from 'vue';
+import { useStore } from 'vuex';
+// 获取 Vuex store 实例
+const store = useStore();
 
-onMounted(() => {
+// 计算属性，用来获取 account_id
+const organizationId = computed(() => store.state.user.organizationId);
+const project_id = computed(() => store.state.user.project_id);
+onMounted(async() => {
     getMyProject();
-    console.log(localStorage.getItem("organizationId"));
+    getOrgnizationName();
+    console.log(organizationId.value);
 })
+
+//获取项目所属组织
+const organization_name = ref('1');
+const getOrgnizationName = () => {
+    getOrganization({
+        organizationId: organizationId.value,
+    })
+        .then(resp => {
+
+            organization_name.value = resp.data.organization_name;
+        })
+        .catch(resp => {
+            console.log(localStorage.getItem("organizationId"))
+            console.error(resp);
+        })
+}
 
 
 //获取全部项目列表 ok
 const allProjectsData = ref([]);
 const getMyProject = () => {
     getAllProject({
-        organization_id: localStorage.getItem("organizationId"),
+        organization_id: organizationId.value,//localStorage.getItem("organizationId"),
     })
         .then(resp => {
 
             allProjectsData.value = resp.data;
-            console.log(resp.data);
+            console.log(resp);
             console.log(allProjectsData);
-            ElMessage.success('拉取全部项目成功！');
-            getOrganization({
-                organizationId: localStorage.getItem("organizationId"),
-            })
-                .then(resp => {
-                    for (let i = 0; i < allProjectsData.value.length; i++) {
-                        allProjectsData.value[i] = {
-                            ...allProjectsData.value[i],
-                            "organizationName": resp.data.organizationName,
-                        }
-                    }
-                })
-                .catch(resp => {
-                    console.log(localStorage.getItem("organizationId"))
-                    console.error(resp);
-                })
+            ElMessage.success(resp.msg);//'拉取全部项目成功！'
 
         })
         .catch(resp => {
@@ -107,34 +118,37 @@ const getMyProject = () => {
 //点击具体项目跳转到该项目的详情页面 ok
 const router = useRouter();
 const goToSpecificProject = (row) => {
+    store.dispatch('setProjectId', row.id);
+    
     router.push({ name: 'specificProject', params: { id: row.id, name: row.topic } });
-
+    
 };
+//删除项目
+async function deleteProjectForRow(row) {
+  try {
+    const response = await deleteProject(row.id);
 
-
-//删除项目 ok
-const deleteProjectForRow = (row) => {
-    deleteProject({
-        projectId: row.id
-    })
-        .then((resp) => {
-            if (resp.code === 200) {
-                console.log('row: ', row.id);
-                allProjectsData.value = allProjectsData.value.filter(project => project.id !== row.id);
-                ElMessage.success('项目删除成功');
-            }
-            else {
-                console.log(row.id)
-                console.log(resp);
-            }
-        })
-        .catch(resp => {
-            console.log(resp);
-            //ElMessage.error('项目删除失败，请重试！');
-        })
+    if (response.code==200) {
+        console.log(row.id);
+        allProjectsData.value = allProjectsData.value.filter(project => project.id !== row.id);
+      ElMessage({
+        type: 'success',
+        message: '项目删除成功',
+      });
+    } else {
+      ElMessage({
+        type: 'error',
+        message: response.msg,
+      });
+    }
+  } catch (error) {
+    ElMessage({
+      type: 'error',
+      message: 'An error occurred during user data update',
+    });
+    console.error('Update Error:', error);
+  }
 }
-
-
 //新建项目表单填写
 const dialogFormVisible = ref(false);
 const formLabelWidth = '140px';
@@ -154,22 +168,57 @@ const rules = reactive({
     ],
 })
 
-//新建项目 ok
-const submit = () => {
+//新建项目
+/*const submit = () => {
     addProject({
-        organizationId: localStorage.getItem("organizationId"),
+        organizationId: organizationId.value,
         topic: ProjectForm.name,
         description: ProjectForm.desc,
     })
         .then(resp => {
+            console.log(resp);
+            ElMessage.success(resp);
             ElMessage.success('新建项目成功！')
-            getMyProject();
         })
         .catch(resp => {
             console.error(resp);
+            ElMessage.success(resp)
         })
     dialogFormVisible.value = false;
+}*/
+
+//新建项目
+async function submit() {
+  try {
+    const updatedData = {
+        organizationId: organizationId.value,
+        topic: ProjectForm.name,
+        description: ProjectForm.desc,
+    };
+
+    const response = await addProject(updatedData);
+    if (response.code==200) {
+      await getMyProject(); // 确保这是异步的
+      ElMessage({
+        type: 'success',
+        message: '新建项目成功！',
+      });
+    } else {
+      ElMessage({
+        type: 'error',
+        message: updatedData,//.msg,
+      });
+    }
+  } catch (error) {
+    ElMessage({
+      type: 'error',
+      message: 'An error occurred during user data update',
+    });
+    console.error('Update Error:', error);
+  }
+  dialogFormVisible.value = false;
 }
+
 
 //控制退出表单填写之后，再次进入清空原先填写的内容
 const handleclose = () => {

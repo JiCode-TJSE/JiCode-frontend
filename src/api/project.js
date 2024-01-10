@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-//获取全部项目 ok
+//获取全部项目
 export function getAllProject(data) {
     return request({
         url: `http://101.37.116.97:8082/api/productdev/projects`,
@@ -10,16 +10,16 @@ export function getAllProject(data) {
 }
 
 
-//删除项目 ok
-export function deleteProject(data) {
+//删除项目
+export function deleteProject(account_id) {
     return request({
-        url: `http://101.37.116.97:8082/api/productdev/project`,
+        url: `http://101.37.116.97:8082/api/productdev/project?projectId=${encodeURIComponent(account_id)}`,
         method: "DELETE",
-        params: data,
-    });
+        data: {},
+    })
 }
 
-//新建项目 ok
+//新建项目
 export function addProject(data) {
     return request({
         url: `http://101.37.116.97:8082/api/productdev/project`,
@@ -37,12 +37,21 @@ export function getProjectInfo(data) {
     });
 }
 
-//修改项目基本信息 ok
+//修改项目基本信息
 export function updateProject(data) {
     return request({
-        url: `http://101.37.116.97:8082/api/productdev/project`,
+        url: `
+        http://101.37.116.97:8082/api/productdev/project`,
         method: "PUT",
         data: data,
     });
 }
 
+//删除项目
+export function getProjectINFO(project_id) {
+    return request({
+        url: `http://101.37.116.97:8082/api/productdev/project?projectId=${encodeURIComponent(project_id)}`,
+        method: "GET",
+        data: {},
+    })
+}
