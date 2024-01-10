@@ -117,9 +117,7 @@
 
             <el-form-item label="版本">
               <el-row>
-                <el-col :span="6" v-for="version in selectedRow.versionArr" :key="version.id">
-                  <el-tag>{{ version.name }}</el-tag>
-                </el-col>
+                <el-tag>{{ selectedRow.foundVersion.name }}</el-tag>
               </el-row>
             </el-form-item>
           </el-form>
@@ -138,7 +136,20 @@
         <!-- <el-tab-pane label="工作项">
 
         </el-tab-pane> -->
-        <el-tab-pane label="版本记录">版本记录</el-tab-pane>
+        <el-tab-pane label="版本记录">
+          <el-table :data="selectedRow.versionArr" style="width: 100%">
+            <el-table-column prop="name" label="版本名称"></el-table-column>
+            <el-table-column prop="detail" label="版本详情"></el-table-column>
+            <el-table-column prop="createTime" label="创建时间"></el-table-column>
+            <el-table-column label="操作">
+              <template v-slot:default="scope">
+                <el-button v-if="selectedRow.foundVersion.id != scope.row.id" type="text"
+                  @click="handleClickTo(scope.row)">跳转</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-button style="margin-top: 20px;" type="primary" @click="handleNewVersion">新建</el-button>
+        </el-tab-pane>
       </el-tabs>
       <el-form class="save">
         <el-form-item label="保存">
@@ -147,6 +158,21 @@
       </el-form>
     </el-dialog>
 
+    <!-- 新建版本 -->
+    <el-dialog title="新建版本" v-model="dialogVersionVisible" width="30%" @close="resetForm">
+      <el-form :model="versionForm" label-width="80px">
+        <el-form-item label="版本名称">
+          <el-input v-model="versionForm.name"></el-input>
+        </el-form-item>
+        <el-form-item label="版本详情">
+          <el-input v-model="versionForm.detail"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVersionVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitVersionForm()">确 定</el-button>
+      </span>
+    </el-dialog>
 
     <!-- 新建需求 -->
     <el-dialog v-model="dialogTableVisible" title="新建需求" @close="handleTableClose">
@@ -234,9 +260,32 @@ import { Plus, Delete } from '@element-plus/icons-vue';
 import { Check } from '@element-plus/icons-vue'
 import { ref, reactive } from 'vue';
 import { onMounted } from 'vue';
-import { getProductRequireInPage, addProductRequire, deleteProductRequire, updateProductRequire, getProductRequireDetail } from '@/api/require';
+import { getProductRequireInPage, addProductRequire, deleteProductRequire, updateProductRequire, getProductRequireDetail, addVersion, switchVersion } from '@/api/require';
 import { getClientInPage } from '@/api/client';
 import { ElMessage } from 'element-plus';
+
+const handleClickTo = (row) => {
+  const submitData = {
+    versionId: row.id,
+    requirementId: requirementid.value,
+  };
+  switchVersion(submitData)
+    .then(resp => {
+      console.log(resp);
+      ElMessage({
+        message: '切换版本成功',
+        type: 'success',
+      })
+      // 从后端重新获取当前页的数据，确保新添加的项目能够出现在表格中
+      dialogVersionVisible.value = false;
+      dialogVisible.value = false;
+      getPageDataFromServer();
+    })
+    .catch(err => {
+      console.log(err);
+      ElMessage.error('切换版本失败');
+    })
+};
 
 /**
  * 获取产品id
@@ -265,6 +314,41 @@ const handleClientChange = () => {
   client2sArr = client2sArr.filter(client => client.clientId !== selectedClient.value.id);
   selectedClient.value = null;
 };
+
+let dialogVersionVisible = ref(false);
+const handleNewVersion = () => {
+  console.log("handleNewVersion")
+  dialogVersionVisible.value = true;
+};
+
+let versionForm = reactive({
+  name: '',
+  detail: '',
+});
+const submitVersionForm = () => {
+  const submitData = {
+    name: versionForm.name,
+    detail: versionForm.detail,
+    requirementId: requirementid.value,
+  };
+  console.log(submitData)
+  addVersion(submitData)
+    .then(resp => {
+      console.log(resp);
+      ElMessage({
+        message: '添加版本成功',
+        type: 'success',
+      })
+      // 从后端重新获取当前页的数据，确保新添加的项目能够出现在表格中
+      dialogVersionVisible.value = false;
+      dialogVisible.value = false;
+      getPageDataFromServer();
+    })
+    .catch(err => {
+      console.log(err);
+      ElMessage.error('添加版本失败');
+    })
+}
 
 /**
  * 获取所有产品
@@ -558,10 +642,13 @@ const handleRowClick = (row) => {
       }
 
       selectedRow.value.clientArr = response.data.clientArr;
-      console.log('response.data.clientArr', response.data.clientArr);
 
       selectedRow.value.backlogItemArr = response.data.backlogItemArr;
       selectedRow.value.versionArr = response.data.versionArr;
+
+      selectedRow.value.foundVersion = selectedRow.value.versionArr.find(version => version.id === selectedRow.value.versionId);
+      console.log('selectedRow.value.foundVersion', selectedRow.value.foundVersion);
+
 
       // 设置可选客户列表
       client2sArr = clientList.filter(client => {

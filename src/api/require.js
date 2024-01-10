@@ -15,6 +15,7 @@ export function getRequireInPage(data) {
     })
 }
 
+
 // 新建需求
 export function addRequire(data) {
     console.log("!!!!!", data)
@@ -44,6 +45,26 @@ export function updateRequire(data) {
 
 
 // ====================================================产品需求
+
+// 切换版本
+export function switchVersion(data) {
+    console.log("addVersion", data)
+    return request({
+        url: "http://101.37.116.97:8080/api/product/version/switch",
+        method: "PUT",
+        params: data
+    })
+}
+
+// 新建版本
+export function addVersion(data) {
+    console.log("addVersion", data)
+    return request({
+        url: "http://101.37.116.97:8080/api/product/version",
+        method: "POST",
+        data: data
+    })
+}
 
 export function deleteProductRequire(data) {
     return request({
