@@ -18,7 +18,7 @@ export function getOrganization(data) {
         params: data,
     });
 }
-
+//获取单个用户的基本信息
 export function getUserInfo(data) {
     return request({
         url: `http://101.37.116.97:8081/api/account/info`,

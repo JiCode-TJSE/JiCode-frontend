@@ -39,10 +39,10 @@
 
             </el-table>
         </el-main>
-        <div class="page">
+        <!-- <div class="page">
             <el-pagination background :current-page="currentPage" :page-size="pageSize" :total="total"
                 @current-change="handlePageChange"></el-pagination>
-        </div>
+        </div> -->
     </el-container>
 
     <!-- 新建需求 -->
@@ -138,92 +138,107 @@
     <el-dialog v-model="detailDialogVisible" title="需求详情" @close="handleClose" width="80%">
         <el-tabs type="border-card">
             <el-tab-pane label="基本信息">
-                <el-form :model="selectedRow" label-width="80px">
-                    <el-form-item label="标题">
-                        <el-input v-model="selectedRow.topic"></el-input>
-                    </el-form-item>
-                    <el-form-item label="描述">
-                        <el-input v-model="selectedRow.description" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea"
-                            placeholder="Please input" />
-                    </el-form-item>
-                    <el-form-item label="优先级">
-                        <el-select v-model="selectedRow.priority" class="hidden-text" placeholder="Select"
-                            popper-class="no-border">
-                            <template #prefix>
-                                <el-tag :type="getTypeColor(selectedRow.priority)">{{ selectedRow.priority }}</el-tag>
-                            </template>
-                            <el-option v-for="item in priority_options" :key="item.value" :value="item.value">
-                                <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="状态">
-                        <el-select v-model="selectedRow.status" class="hidden-text" placeholder="Select"
-                            popper-class="no-border">
-                            <template #prefix>
-                                <el-tag :type="getTypeColor(selectedRow.status)">{{ selectedRow.status }}</el-tag>
-                            </template>
-                            <el-option v-for="item in state_options" :key="item.value" :value="item.value">
-                                <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="负责人">
-                        <el-select v-model="selectedRow.manager_name">
-                            <el-option v-for="(item, index) in getfromback" :key="index" :label="item.name"
-                                :value="item.name">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="需求类型">
-                        <!-- <template #default="scope"> -->
-                        <el-select v-model="selectedRow.type" class="hidden-text" placeholder="Select"
-                            popper-class="no-border">
-                            <template #prefix>
-                                <el-tag :type="getTypeColor(selectedRow.type)">{{ selectedRow.type }}</el-tag>
-                            </template>
-                            <el-option v-for="item in type_options" :key="item.value" :value="item.value">
-                                <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
-                            </el-option>
-                        </el-select>
-                        <!-- </template> -->
-                    </el-form-item>
-                    <el-form-item label="需求来源">
-                        <el-select v-model="selectedRow.source" class="hidden-text" placeholder="Select"
-                            popper-class="no-border">
-                            <template #prefix>
-                                <el-tag :type="getTypeColor(selectedRow.source)">{{ selectedRow.source }}</el-tag>
-                            </template>
-                            <el-option v-for="item in source_options" :key="item.value" :value="item.value">
-                                <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-row>
-                        <el-col :span="11">
-                            <el-form-item label="开始时间">
-                                <el-date-picker v-model="selectedRow.start_time" type="date" placeholder="Pick a date"
-                                    class='date-picker' style="width: 100%" />
+                <el-row :gutter="20">
+                    <el-col :span="15">
+                        <el-form :model="selectedRow" label-width="80px">
+                            <el-form-item label="标题">
+                                <el-input v-model="selectedRow.topic"></el-input>
                             </el-form-item>
-                        </el-col>
-                        <el-col :span="2" class="text-center">
-                            <span class="text-gray-500"><br><br>-</span>
-                        </el-col>
-                        <el-col :span="11">
-                            <el-form-item label="结束时间">
-                                <el-date-picker v-model="selectedRow.end_time" type="date" placeholder="Pick a date"
-                                    class='date-picker' style="width: 100%" />
+                            <el-form-item label="描述">
+                                <el-input v-model="selectedRow.description" :autosize="{ minRows: 4, maxRows: 8 }"
+                                    type="textarea" placeholder="Please input" />
                             </el-form-item>
-                        </el-col>
+                            <el-form-item label="优先级">
+                                <el-select v-model="selectedRow.priority" class="hidden-text" placeholder="Select"
+                                    popper-class="no-border">
+                                    <template #prefix>
+                                        <el-tag :type="getTypeColor(selectedRow.priority)">{{ selectedRow.priority
+                                        }}</el-tag>
+                                    </template>
+                                    <el-option v-for="item in priority_options" :key="item.value" :value="item.value">
+                                        <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="状态">
+                                <el-select v-model="selectedRow.status" class="hidden-text" placeholder="Select"
+                                    popper-class="no-border">
+                                    <template #prefix>
+                                        <el-tag :type="getTypeColor(selectedRow.status)">{{ selectedRow.status }}</el-tag>
+                                    </template>
+                                    <el-option v-for="item in state_options" :key="item.value" :value="item.value">
+                                        <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="负责人">
+                                <el-select v-model="selectedRow.supervisorName">
+                                    <el-option v-for="item in manager_options" :key="item.value" :value="item.label">
+                                        <el-tag>{{ item.label }}</el-tag>
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="需求类型">
+                                <!-- <template #default="scope"> -->
+                                <el-select v-model="selectedRow.type" class="hidden-text" placeholder="Select"
+                                    popper-class="no-border">
+                                    <template #prefix>
+                                        <el-tag :type="getTypeColor(selectedRow.type)">{{ selectedRow.type }}</el-tag>
+                                    </template>
+                                    <el-option v-for="item in type_options" :key="item.value" :value="item.value">
+                                        <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                                    </el-option>
+                                </el-select>
+                                <!-- </template> -->
+                            </el-form-item>
+                            <el-form-item label="需求来源">
+                                <el-select v-model="selectedRow.source" class="hidden-text" placeholder="Select"
+                                    popper-class="no-border">
+                                    <template #prefix>
+                                        <el-tag :type="getTypeColor(selectedRow.source)">{{ selectedRow.source }}</el-tag>
+                                    </template>
+                                    <el-option v-for="item in source_options" :key="item.value" :value="item.value">
+                                        <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-row>
+                                <el-col :span="11">
+                                    <el-form-item label="开始时间">
+                                        <el-date-picker v-model="selectedRow.startTime" type="date"
+                                            placeholder="Pick a date" class='date-picker' style="width: 100%" />
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="2" class="text-center">
+                                    <span class="text-gray-500"><br><br>-</span>
+                                </el-col>
+                                <el-col :span="11">
+                                    <el-form-item label="结束时间">
+                                        <el-date-picker v-model="selectedRow.endTime" type="date" placeholder="Pick a date"
+                                            class='date-picker' style="width: 100%" />
+                                    </el-form-item>
+                                </el-col>
 
-                    </el-row>
+                            </el-row>
 
 
-                    <el-button type="primary" :icon="Check" @click="saveDetails">保存</el-button>
+                            <el-button type="primary" :icon="Check" @click="saveDetails">保存</el-button>
 
-                </el-form>
+                        </el-form>
+                    </el-col>
+                    <el-col :span="1">
+                        <el-divider direction="vertical" style="height:100%"></el-divider>
+                    </el-col>
+                    <el-col :span="8">
+                        所属迭代，所属发布（这个发布还可以修改?
+                        <el-row>
+
+                        </el-row>
+                    </el-col>
+                </el-row>
+
             </el-tab-pane>
-            <el-tab-pane label="关联">
+            <el-tab-pane label="关联工作项">
                 <el-button class="itemheader" type="primary" @click="showRelatedDialog"><el-icon>
                         <Plus />
                     </el-icon>&nbsp;&nbsp;添加工作项</el-button>
@@ -320,7 +335,7 @@ import { Plus, Delete } from '@element-plus/icons-vue';
 import { ref, reactive } from 'vue';
 import { onMounted, toRaw } from 'vue';
 import {
-    getAllBacklogItems, deleteRequirement, deleteRelatedItem, addRelatedItems, getRelatedItemById
+    getAllBacklogItems, deleteRequirement, deleteRelatedItem, addRelatedItems, getRelatedItemById, updateBacklogItem
 } from '@/api/backlogItem';
 import {
     getProjectInfo,
@@ -329,9 +344,14 @@ import {
     addRequire, updateRequire
 } from '@/api/require';
 
-import { getUserName } from '@/api/user';
+import { getUserName, getUserInfo } from '@/api/user';
 import { ElMessage } from 'element-plus';
 import { useRoute } from 'vue-router';
+// 初始调用
+onMounted(() => {
+    getPageDataFromServer();
+})
+
 
 const handleManagerChange = (newManagerName) => {
     let selectedManager = getfromback.value.find(item => item.name === newManagerName);
@@ -371,76 +391,161 @@ const handleSelectionChange = (selectedRows) => {
     // 在这里添加你的代码，这些代码会使用 multipleSelection.value
 }
 
+
+// 获取需求列表 to do :响应时间
+const allrequireData = ref([]);
+const route = useRoute();
+let total = ref(0);
+const getPageDataFromServer = () => {
+
+    getAllBacklogItems({
+        organizationId: localStorage.getItem("organizationId"),
+        projectId: route.params.id,
+    })
+        .then(resp => {
+            // 添加需求数据到 allrequireData 数组 
+            allrequireData.value = resp.data;
+            console.log('data:', allrequireData.value)
+            for (let i = 0; i < allrequireData.value.length; i++) {
+                if (allrequireData.value[i].managerId != null) {
+                    getUserInfo({
+                        account_id: resp.data[i].managerId,
+                    })
+                        .then(resp => {
+                            allrequireData.value[i] = {
+                                ...allrequireData.value[i],
+                                "supervisorName": resp.data.userName,
+                            }
+
+                        })
+                        .catch(resp => {
+                            console.log(resp);
+                        })
+                }
+            }
+
+            total.value = resp.data.length;
+            ElMessage.success('拉取需求成功');
+        })
+        .catch(resp => {
+            console.log('拉取需求error:', resp);
+        })
+
+}
+
+const selectedRow = ref({});
+const detailDialogVisible = ref(false);
+
+const relatedDialogVisible = ref(false);
+
+const showRelatedDialog = () => {
+    relatedDialogVisible.value = true;
+}
+// const memberList = ref([]);
+const getMemberList = () => {
+
+    getProjectInfo({
+        projectId: route.params.id,
+    })
+        .then(async resp => {
+            // 负责人选项列表
+            for (let i = 0; i < resp.data.projectAggregation.member.length; i++) {
+
+                manager_options.value.push({
+                    value: 'init',
+                    label: 'init'
+                })
+
+                let response = await getUserInfo({
+                    account_id: resp.data.projectAggregation.member[i]
+                })
+
+                let userName = response.data.userName;
+
+                manager_options.value[i].value = resp.data.projectAggregation.member[i];
+                manager_options.value[i].label = userName;
+                console.log(manager_options.value)
+            }
+
+
+            // memberList.value = resp.data.projectAggregation.member;
+            // getManageName();
+
+        })
+        .catch(resp => {
+            console.log('获取成员列表错误：' + resp);
+        })
+}
+
+//获取负责人列表
+// const getfromback = ref([]);
+// const getManageName = () => {
+
+//     getUserName({
+//         accountIdArr: memberList.value,
+//     })
+//         .then(resp => {
+//             getfromback.value = resp.data;
+//         })
+//         .catch(resp => {
+//             console.log('获取成员name:' + resp);
+//         })
+// }
+
+
+//弹出需求详情页 to check 其他的有没有问题
+const goToSpecificRequirement = (row) => {
+    row.startTime = new Date(row.startTime);
+    row.endTime = new Date(row.endTime);
+    selectedRow.value = row;
+    allRelatedData.value.ralations = [];
+    getMemberList();
+    getRelatedItem(row.id);
+    detailDialogVisible.value = true;
+};
+//转换时间格式
+const date_time = ref([]);
+const transferTimeFormat = (date) => {
+    const dateObj = new Date(date);
+    const year = dateObj.getUTCFullYear();
+    const month = (dateObj.getUTCMonth() + 1).toString().padStart(2, '0');
+    const day = dateObj.getUTCDate().toString().padStart(2, '0');
+    const hours = dateObj.getUTCHours().toString().padStart(2, '0');
+    const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+    const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
+    const milliseconds = dateObj.getUTCMilliseconds().toString().padStart(3, '0');
+
+    const formattedDate = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}+00:00`;
+
+    date_time.value.push(formattedDate);
+}
+
+//修改需求详情 ok
 const saveDetails = () => {
     let data = { ...selectedRow.value };
-    delete data.start_time
-    delete data.end_time
-    delete data.projectTopic
-    delete data.organizationId
-    delete data.scheduleId
-    data.startTime = data.startTime.split('T')[0];
-    data.endTime = data.endTime.split('T')[0];
-    data.memberIds = toRaw(selectedRow.value.memberIds);
-    data.releaseIds = toRaw(selectedRow.value.releaseIds);
-    data.sprintIds = toRaw(selectedRow.value.sprintIds);
-    updateRequire(
+
+    transferTimeFormat(data.startTime);
+    transferTimeFormat(data.endTime);
+    data.startTime = date_time.value[0];
+    data.endTime = date_time.value[1];
+    const manager = manager_options.value.find(option => option.label === data.supervisorName);
+    data.managerId = manager.value;
+    delete data.supervisorName;
+    console.log('date_time: ', date_time.value)
+    console.log('传参: ', data)
+    updateBacklogItem(
         data
     )
         .then(resp => {
+            console.log(resp);
             ElMessage.success('更新成功');
+            date_time.value = [];
         })
         .catch(err => {
             ElMessage.error('更新失败');
         })
 }
-
-// 获取需求列表
-const allrequireData = ref([]);
-const route = useRoute();
-// let total = ref(0);
-const getPageDataFromServer = async () => {
-    try {
-        const resp = await getAllBacklogItems({
-            organizationId: localStorage.getItem("organizationId"),
-            projectId: route.params.id,
-        });
-
-        // 添加需求数据到 allrequireData 数组 
-        allrequireData.value = resp.data;
-        let memberList = ref([]);
-        console.log(allrequireData.value.length)
-        for (let i = 0; i < allrequireData.value.length; i++) {
-            console.log(allrequireData.data[i].managerId)
-            memberList.value[i] = allrequireData.data[i].managerId;
-        }
-        await getUserName({
-            accountIdArr: memberList.value,
-        })
-            .then(resp => {
-                for (let i = 0; i < allrequireData.value.length; i++) {
-                    allrequireData.value[i] = {
-                        ...allrequireData.value[i],
-                        "supervisorName": resp.data.userName,
-                    }
-                }
-            })
-            .catch(resp => {
-                console.log(resp);
-            })
-        total.value = resp.data.length;
-        console.log("allrequirementData：", list)
-        ElMessage.success('拉取需求成功');
-    } catch (err) {
-        console.log("拉取失败！", err);
-        // ElMessage.error('拉取需求失败');
-    }
-}
-
 const allRelatedData = ref([]);
-// 初始调用
-onMounted(() => {
-    getPageDataFromServer();
-})
 
 //新建需求时的表单信息
 const form = reactive({
@@ -526,6 +631,7 @@ const priority_options = [
     },
 ]
 
+const manager_options = ref([])
 
 const getTypeColor = (type) => {
     switch (type) {
@@ -562,7 +668,7 @@ const getTypeColor = (type) => {
     }
 };
 
-//删除需求/工作项
+//删除需求/工作项 ok
 const deleteRequireForRow = (row) => {
     deleteRequirement({ id: row.id })
         .then((resp) => {
@@ -577,10 +683,9 @@ const deleteRequireForRow = (row) => {
         })
         .catch(resp => {
             console.log(resp);
-            //ElMessage.error('项目删除失败，请重试！');
         })
 }
-
+//删除关联工作项
 const deleteRelatedForRow = (row) => {
     deleteRelatedItem({
         backlogitemId1: row.id,
@@ -604,35 +709,6 @@ const deleteRelatedForRow = (row) => {
 
 }
 
-const memberList = ref([]);
-const getMemberList = () => {
-    getProjectInfo({
-        projectId: route.params.id,
-    })
-        .then(resp => {
-            memberList.value = resp.data.projectAggregation.member;
-            getManageName();
-
-        })
-        .catch(resp => {
-            console.log('获取成员列表错误：' + resp);
-        })
-}
-
-//获取负责人列表
-const getfromback = ref([]);
-const getManageName = () => {
-
-    getUserName({
-        accountIdArr: memberList.value,
-    })
-        .then(resp => {
-            getfromback.value = resp.data;
-        })
-        .catch(resp => {
-            console.log('获取成员name:' + resp);
-        })
-}
 
 
 /**
@@ -645,6 +721,9 @@ const showDialog = () => {
 };
 const handleClose = () => {
     dialogTableVisible.value = false;
+    detailDialogVisible.value = false;
+    manager_options.value = [];
+    date_time.value = [];
 };
 
 const submitForm = () => {
@@ -692,43 +771,16 @@ const submitForm = () => {
 
 }
 
-/**
- * 需求详情部分逻辑：获取、修改
- */
-/**
- * 需求详情部分逻辑：获取、修改
- */
-const selectedRow = ref({
-    topic: '',
-    description: '',
-    source: '',
-    type: '',
-    manager_name: '',
-    priority: '',
-    clientArr: [],
-    status: '',
-});
-const detailDialogVisible = ref(false);
 
-const relatedDialogVisible = ref(false);
-const showRelatedDialog = () => {
-    relatedDialogVisible.value = true;
-}
-const goToSpecificRequirement = (row) => {
-    row.start_time = new Date(row.startTime);
-    row.end_time = new Date(row.endTime);
-    selectedRow.value = row;
-    selectedRow.value.manager_name = row.supervisorName;
-    console.log("row", row);
-    allRelatedData.value.ralations = [];
-    getMemberList();
-    getRelatedItem(row.id);
-    detailDialogVisible.value = true;
-};
+
+
+
+
+
 
 const needData = ref([]);
 const getRelatedItem = (id) => {
-    console.log("关联工作项", id);
+    //console.log("关联工作项", id);
     needData.value = [];
     getRelatedItemById({ id: id })
         .then(resp => {
@@ -739,12 +791,12 @@ const getRelatedItem = (id) => {
                 getRelatedItemById({ id: allRelatedData.value.ralations[i].id }).then(resp => {
                     allRelatedData.value.ralations[i] = resp.data;
                     needData.value.push({ id: resp.data.id, topic: resp.data.topic, status: resp.data.status, priority: resp.data.priority, supervisorName: resp.data.managerId });
-                    console.log('wwwwwwwwww' + JSON.stringify(allRelatedData.value.ralations[i]));
+                    //console.log('wwwwwwwwww' + JSON.stringify(allRelatedData.value.ralations[i]));
                 }).catch(resp => {
-                    console.log('获取关联工作项，，失败：' + resp);
+                    //console.log('获取关联工作项，，失败：' + resp);
                 })
             }
-            console.log("关联工作项&&&&&&&&&", allRelatedData.value.ralations);
+            //console.log("关联工作项&&&&&&&&&", allRelatedData.value.ralations);
         })
         .catch(resp => {
             console.log('获取关联工作项失败：' + resp);

@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-//获取全部工作项
+//获取全部工作项 ok
 export function getAllBacklogItems(data) {
     console.log(data)
     return request({
@@ -11,7 +11,7 @@ export function getAllBacklogItems(data) {
 }
 
 
-//删除需求
+//删除需求 ok
 export function deleteRequirement(data) {
     return request({
         url: `http://101.37.116.97:8082/api/productdev/backlogitem`,
@@ -20,8 +20,8 @@ export function deleteRequirement(data) {
     });
 }
 
-//获取指定工作项
-export function getRelatedItemById(params) {
+//查看需求详情
+export function getRelatedItemById(data) {
     return request({
         url: `http://101.37.116.97:8082/api/productdev/backlogitem`,
         method: "GET",
@@ -58,11 +58,11 @@ export function getRelatedItem(data) {
 }
 
 
-//更新工作项
+//更新工作项 ok
 export function updateBacklogItem(data) {
     return request({
         url: `http://101.37.116.97:8082/api/productdev/backlogitem`,
-        method: "GET",
-        params: data,
+        method: "PUT",
+        data: data,
     });
 }

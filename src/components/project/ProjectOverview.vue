@@ -191,7 +191,7 @@ const initChart = () => {
             data: ["用户故事"], // 图例项名称
         },
     };
-    chartoption.value && myChart.setOption(chartoption.value);
+    // chartoption.value && myChart.setOption(chartoption.value);
 };
 
 const route = useRoute();
@@ -279,7 +279,7 @@ watch(() => form.value.end_time, (newValue) => {
                 console.log(resp);
             })
             .catch(resp => {
-                console.error('修改项目开始时间：' + resp);
+                console.error('修改项目结束时间：' + resp);
             })
     }
 });
@@ -330,7 +330,7 @@ function initProjectInfo() {
                 })
 
                 let response = await getUserInfo({
-                    accountId: resp.data.projectAggregation.member[i]
+                    account_id: resp.data.projectAggregation.member[i]
                 })
 
                 let userName = response.data.userName;
