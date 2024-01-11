@@ -25,7 +25,7 @@ export function getRelatedItemById(params) {
     return request({
         url: `http://101.37.116.97:8082/api/productdev/backlogitem`,
         method: "GET",
-        params: params,
+        params: data,
     });
 }
 
@@ -35,13 +35,12 @@ export function deleteRelatedItem(data) {
     return request({
         url: `https://mock.apifox.com/m1/3754258-0-default/api/backlogItem/deleteRequirement`,
         method: "DELETE",
-        data: data,
+        params: data,
     });
 }
 
 //关联工作项
 export function addRelatedItems(data) {
-    console.log("((((", data)
     return request({
         url: `http://101.37.116.97:8082/api/productdev/relation`,
         method: "POST",
@@ -54,7 +53,7 @@ export function getRelatedItem(data) {
     return request({
         url: `https://mock.apifox.com/m1/3754258-0-default/api/backlogItem/deleteRequirement`,
         method: "GET",
-        data: data,
+        params: data,
     });
 }
 
@@ -64,6 +63,6 @@ export function updateBacklogItem(data) {
     return request({
         url: `http://101.37.116.97:8082/api/productdev/backlogitem`,
         method: "GET",
-        data: data,
+        params: data,
     });
 }
