@@ -115,13 +115,16 @@
                     </el-select>
                     <!-- </template> -->
                 </el-form-item>
-                    <el-form-item label="负责人">
-                                    <el-select v-model="selectedRow.managerName">
-                                        <el-option v-for="item in manager_options" :key="item.value" :value="item.value">
-                                            <el-tag>{{ item.label }}</el-tag>
-                                        </el-option>
-                                    </el-select>
-                                </el-form-item>
+                     <el-form-item label="负责人">
+                    <el-select v-model="selectedRow.managerId">
+                        <el-option
+                        v-for="member in memberList"
+                        :key="member.accountId"
+                        :label="member.userName"
+                        :value="member.accountId"
+                        ></el-option>
+                    </el-select>
+                </el-form-item>
                                 <el-row>
                                     <el-col :span="11">
                                         <el-form-item label="开始时间">
@@ -209,9 +212,12 @@ import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import store from '@/store';
 
+const stages = ["未开始", "进行中", "已发布"];
+
 const route = useRoute();
 const projectId = route.params.id;
 let formOperate = reactive('新建发布')
+let manager_options = reactive([])
 
 const dialogTableVisible = ref(false);
 const showDialog = () => {
@@ -463,7 +469,6 @@ const addPublish = () => {
         endTime: form.end_time,
         type: form.type,
         projectId: route.params.id,
-        managerId: "0e92f261-504c-442e-9123-94e8ee7f6c00",
         topic: form.topic,
         organizationId: store.state.user.organizationId,
     })
