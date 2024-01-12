@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-//获取全部工作项 ok
+//获取全部工作项 ok +获取需求详情
 export function getAllBacklogItems(data) {
     console.log(data)
     return request({
@@ -20,7 +20,16 @@ export function deleteRequirement(data) {
     });
 }
 
-//查看需求详情
+//新建需求/工作项 ok
+export function addRequirement(data) {
+    return request({
+        url: `http://101.37.116.97:8082/api/productdev/backlogitem`,
+        method: "POST",
+        data: data,
+    });
+}
+
+//获取关联工作项 ok  
 export function getRelatedItemById(data) {
     return request({
         url: `http://101.37.116.97:8082/api/productdev/backlogitem`,
@@ -29,17 +38,26 @@ export function getRelatedItemById(data) {
     });
 }
 
+//获取需求详情 ok
+export function getBacklogItemInfo(data) {
+    return request({
+        url: `http://101.37.116.97:8082/api/productdev/backlogitem`,
+        method: "GET",
+        params: data,
+    });
+}
 
-//解除关联
+
+//解除关联 ok
 export function deleteRelatedItem(data) {
     return request({
-        url: `https://mock.apifox.com/m1/3754258-0-default/api/backlogItem/deleteRequirement`,
+        url: `http://101.37.116.97:8082/api/productdev/associate`,
         method: "DELETE",
         params: data,
     });
 }
 
-//关联工作项
+//添加关联工作项 ok
 export function addRelatedItems(data) {
     return request({
         url: `http://101.37.116.97:8082/api/productdev/relation`,
@@ -47,16 +65,6 @@ export function addRelatedItems(data) {
         data: data,
     });
 }
-
-//获取关联工作项
-export function getRelatedItem(data) {
-    return request({
-        url: `https://mock.apifox.com/m1/3754258-0-default/api/backlogItem/deleteRequirement`,
-        method: "GET",
-        params: data,
-    });
-}
-
 
 //更新工作项 ok
 export function updateBacklogItem(data) {

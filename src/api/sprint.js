@@ -27,11 +27,20 @@ export function deleteSprint(id) {
     });
 }
 
-//获取全部迭代
 export function getMemberINFO(data) {
     return request({
         url: `http://101.37.116.97:8081/api/user/multiuserInfo`,
         method: "POST",
+        params: data,
+    });
+}
+
+
+//获取迭代详细信息 ok
+export function getSprintInfo(data) {
+    return request({
+        url: `http://101.37.116.97:8082/api/productdev/sprint`,
+        method: "GET",
         params: data,
     });
 }

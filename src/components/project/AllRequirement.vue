@@ -68,7 +68,7 @@
             <el-col :span="15">
                 <el-form :model="form" label-width="80px">
                     <el-form-item label="所属项目">
-                        <span>{{ form.project_topic }}</span>
+                        <span>{{ route.params.name }}</span>
                     </el-form-item>
                     <el-form-item label="优先级">
                         <el-select v-model="form.priority" class="hidden-text" placeholder="Select"
@@ -82,9 +82,9 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="负责人">
-                        <el-select v-model="form.manager_name" @change="handleManagerChange">
-                            <el-option v-for="(item, index) in getfromback" :key="index" :label="item.userName"
-                                :value="item.userName">
+                        <el-select v-model="form.manager_name">
+                            <el-option v-for="item in manager_options" :key="item.value" :value="item.label">
+                                <el-tag>{{ item.label }}</el-tag>
                             </el-option>
                         </el-select>
                     </el-form-item>
@@ -136,6 +136,7 @@
     </el-dialog>
     <!--需求详情弹出框-->
     <el-dialog v-model="detailDialogVisible" title="需求详情" @close="handleClose" width="80%">
+
         <el-tabs type="border-card">
             <el-tab-pane label="基本信息">
                 <el-row :gutter="20">
@@ -173,7 +174,7 @@
                             </el-form-item>
                             <el-form-item label="负责人">
                                 <el-select v-model="selectedRow.supervisorName">
-                                    <el-option v-for="item in manager_options" :key="item.value" :value="item.label">
+                                    <el-option v-for="item in manager_options" :key="item.value" :value="item.value">
                                         <el-tag>{{ item.label }}</el-tag>
                                     </el-option>
                                 </el-select>
@@ -230,29 +231,47 @@
                         <el-divider direction="vertical" style="height:100%"></el-divider>
                     </el-col>
                     <el-col :span="8">
-                        所属迭代，所属发布（这个发布还可以修改?
                         <el-row>
-
+                            <span>所属迭代：</span>
+                            <br><br>
+                            <el-table :data="sprintData" border style="width: 100%">
+                                <el-table-column prop="topic" label="标题" width="180" />
+                                <!-- <el-table-column prop="status" label="状态" width="180" /> -->
+                                <el-table-column prop="type" label="类型" />
+                            </el-table>
+                        </el-row>
+                        <br><br><br>
+                        <el-row>
+                            <span>所属发布: </span>
+                            <br><br>
+                            <el-table :data="releaseData" border style="width: 100%">
+                                <el-table-column prop="topic" label="标题" width="180" />
+                                <!-- <el-table-column prop="stageStatus" label="阶段" width="180" /> -->
+                                <el-table-column prop="type" label="类型" />
+                            </el-table>
                         </el-row>
                     </el-col>
                 </el-row>
 
             </el-tab-pane>
             <el-tab-pane label="关联工作项">
+                <!-- <template #inner>
+                    <el-dialog v-modle="innerRelatedDialog" title="需求详情" @close="handleClose" width="80%"></el-dialog>
+                </template> -->
                 <el-button class="itemheader" type="primary" @click="showRelatedDialog"><el-icon>
                         <Plus />
                     </el-icon>&nbsp;&nbsp;添加工作项</el-button>
-                <el-table :data="needData" style="width: 100%" @selection-change="handleSelectionChange">
+                <el-table :data="relatedData" style="width: 100%" @selection-change="handleSelectionChange">
                     <el-table-column type="selection" width="50"></el-table-column>
                     <el-table-column prop="id" label="编号" sortable>
-                        <template #default="{ row }">
-                            <span @click="goToSpecificRequirement(row)">{{ row.id }}</span>
-                        </template>
+                        <!-- <template #default="{ row }">
+                            <span @click="goToRelatedRequirement(row)">{{ row.id }}</span>
+                        </template> -->
                     </el-table-column>
                     <el-table-column prop="topic" label="标题">
-                        <template #default="{ row }">
-                            <span @click="goToSpecificRequirement(row)">{{ row.topic }}</span>
-                        </template>
+                        <!-- <template #default="{ row }">
+                            <span @click="goToRelatedRequirement(row)">{{ row.topic }}</span>
+                        </template> -->
                     </el-table-column>
                     <el-table-column prop="status" label="状态">
                     </el-table-column>
@@ -278,14 +297,13 @@
 
     <!--添加关联工作项弹出框-->
     <el-dialog v-model="relatedDialogVisible">
-
         <el-table ref="multipleTableRef" :data="allrequireData" style="width: 100%"
             @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="50"></el-table-column>
             <el-table-column prop="id" label="编号" sortable>
-                <template #default="{ row }">
+                <!-- <template #default="{ row }">
                     <span @click="goToSpecificRequirement(row)">{{ row.id }}</span>
-                </template>
+                </template> -->
             </el-table-column>
             <el-table-column prop="topic" label="标题">
                 <template #default="{ row }">
@@ -335,7 +353,7 @@ import { Plus, Delete } from '@element-plus/icons-vue';
 import { ref, reactive } from 'vue';
 import { onMounted, toRaw } from 'vue';
 import {
-    getAllBacklogItems, deleteRequirement, deleteRelatedItem, addRelatedItems, getRelatedItemById, updateBacklogItem
+    getAllBacklogItems, deleteRequirement, deleteRelatedItem, addRelatedItems, getRelatedItemById, updateBacklogItem, addRequirement, getBacklogItemInfo
 } from '@/api/backlogItem';
 import {
     getProjectInfo,
@@ -343,7 +361,8 @@ import {
 import {
     addRequire, updateRequire
 } from '@/api/require';
-
+import { getSprintInfo } from '@/api/sprint';
+import { getReleaseInfo } from '@/api/release';
 import { getUserName, getUserInfo } from '@/api/user';
 import { ElMessage } from 'element-plus';
 import { useRoute } from 'vue-router';
@@ -362,26 +381,6 @@ const handleManagerChange = (newManagerName) => {
     }
 }
 
-const saveRelated = () => {
-    // 这里的数据传一下
-    for (let i = 0; i < multipleSelection.value.length; i++) {
-        addRelatedItems({ id1: multipleSelection.value[i], type1: "Backlogitem", id2: selectedRow.value.id, type2: "Backlogitem" }).then((resp) => {
-            if (resp.code === 200) {
-                ElMessage.success('需求关联成功');
-            }
-            else {
-                ElMessage.error(resp.message);
-            }
-        })
-            .catch(resp => {
-                console.log(resp);
-                //ElMessage.error('项目删除失败，请重试！');
-            })
-    }
-    // 刷新页面
-    location.reload();
-}
-
 
 // 用于储存被选中的行的数据
 const multipleSelection = ref([]);
@@ -390,7 +389,25 @@ const handleSelectionChange = (selectedRows) => {
     multipleSelection.value = selectedRows.map(row => row.id);
     // 在这里添加你的代码，这些代码会使用 multipleSelection.value
 }
-
+//添加关联工作项  ok
+const saveRelated = () => {
+    for (let i = 0; i < multipleSelection.value.length; i++) {
+        addRelatedItems({ id1: multipleSelection.value[i], type1: "Backlogitem", id2: selectedRow.value.id, type2: "Backlogitem" }).then((resp) => {
+            if (resp.code === 200) {
+                //ElMessage.success('需求关联成功');
+                relatedDialogVisible.value = false;
+                //console.log('保留选中行信息：', selectedRow.value.id)
+                getRelatedItem(selectedRow.value.id);  //重新获取关联工作项 
+            }
+            else {
+                ElMessage.error(resp.message);
+            }
+        })
+            .catch(resp => {
+                console.log(resp);
+            })
+    }
+}
 
 // 获取需求列表 to do :响应时间
 const allrequireData = ref([]);
@@ -425,7 +442,7 @@ const getPageDataFromServer = () => {
             }
 
             total.value = resp.data.length;
-            ElMessage.success('拉取需求成功');
+            //ElMessage.success('拉取需求成功');
         })
         .catch(resp => {
             console.log('拉取需求error:', resp);
@@ -442,6 +459,7 @@ const showRelatedDialog = () => {
     relatedDialogVisible.value = true;
 }
 // const memberList = ref([]);
+//获取成员列表名字
 const getMemberList = () => {
 
     getProjectInfo({
@@ -477,62 +495,80 @@ const getMemberList = () => {
         })
 }
 
-//获取负责人列表
-// const getfromback = ref([]);
-// const getManageName = () => {
-
-//     getUserName({
-//         accountIdArr: memberList.value,
-//     })
-//         .then(resp => {
-//             getfromback.value = resp.data;
-//         })
-//         .catch(resp => {
-//             console.log('获取成员name:' + resp);
-//         })
-// }
-
-
 //弹出需求详情页 to check 其他的有没有问题
+const sprintData = ref([]);
+const releaseData = ref([]);
 const goToSpecificRequirement = (row) => {
     row.startTime = new Date(row.startTime);
     row.endTime = new Date(row.endTime);
+    row.startTime = `${row.startTime.getFullYear()}-${(row.startTime.getMonth() + 1).toString().padStart(2, '0')}-${row.startTime.getDate().toString().padStart(2, '0')}`;
+    row.endTime = `${row.endTime.getFullYear()}-${(row.endTime.getMonth() + 1).toString().padStart(2, '0')}-${row.endTime.getDate().toString().padStart(2, '0')}`;
     selectedRow.value = row;
-    allRelatedData.value.ralations = [];
+    //console.log('selectedRow', selectedRow.value)
+    //allRelatedData.value.ralations = [];
     getMemberList();
-    getRelatedItem(row.id);
+    getRelatedItem(row.id);  //获取关联工作项 
+
+    for (let i = 0; i < selectedRow.value.sprintIds.length; i++) {
+        getSprintInfo({
+            sprintId: selectedRow.value.sprintIds[i],
+        })
+            .then(resp => {
+                sprintData.value.push(resp.data);
+                //console.log('sprintData1:    ', sprintData.value)
+            })
+            .catch(err => {
+                console.log(err);
+            })
+    }
+    // console.log('sprintData2:    ', sprintData.value)
+    for (let i = 0; i < selectedRow.value.releaseIds.length; i++) {
+        getReleaseInfo({
+            releaseId: selectedRow.value.releaseIds[i],
+        })
+            .then(resp => {
+                releaseData.value.push(resp.data);
+                //console.log('releaseData1:    ', sprintData.value)
+            })
+            .catch(err => {
+                console.log(err);
+            })
+    }
+    //console.log('releaseData2:    ', releaseData.value)
     detailDialogVisible.value = true;
 };
-//转换时间格式
-const date_time = ref([]);
-const transferTimeFormat = (date) => {
-    const dateObj = new Date(date);
-    const year = dateObj.getUTCFullYear();
-    const month = (dateObj.getUTCMonth() + 1).toString().padStart(2, '0');
-    const day = dateObj.getUTCDate().toString().padStart(2, '0');
-    const hours = dateObj.getUTCHours().toString().padStart(2, '0');
-    const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
-    const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
-    const milliseconds = dateObj.getUTCMilliseconds().toString().padStart(3, '0');
+// //转换时间格式
+// const date_time = ref([]);
+// const transferTimeFormat = (date) => {
+//     const dateObj = new Date(date);
+//     const year = dateObj.getUTCFullYear();
+//     const month = (dateObj.getUTCMonth() + 1).toString().padStart(2, '0');
+//     const day = dateObj.getUTCDate().toString().padStart(2, '0');
+//     const hours = dateObj.getUTCHours().toString().padStart(2, '0');
+//     const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+//     const seconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
+//     const milliseconds = dateObj.getUTCMilliseconds().toString().padStart(3, '0');
 
-    const formattedDate = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}+00:00`;
+//     const formattedDate = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}+00:00`;
 
-    date_time.value.push(formattedDate);
-}
+//     date_time.value.push(formattedDate);
+// }
 
 //修改需求详情 ok
 const saveDetails = () => {
     let data = { ...selectedRow.value };
 
-    transferTimeFormat(data.startTime);
-    transferTimeFormat(data.endTime);
-    data.startTime = date_time.value[0];
-    data.endTime = date_time.value[1];
+    // transferTimeFormat(data.startTime);
+    // transferTimeFormat(data.endTime);
+    // data.startTime = date_time.value[0];
+    // data.endTime = date_time.value[1];
+    data.startTime = `${data.startTime.getFullYear()}-${(data.startTime.getMonth() + 1).toString().padStart(2, '0')}-${data.startTime.getDate().toString().padStart(2, '0')}`;
+    data.endTime = `${data.endTime.getFullYear()}-${(data.endTime.getMonth() + 1).toString().padStart(2, '0')}-${data.endTime.getDate().toString().padStart(2, '0')}`;
     const manager = manager_options.value.find(option => option.label === data.supervisorName);
     data.managerId = manager.value;
     delete data.supervisorName;
-    console.log('date_time: ', date_time.value)
-    console.log('传参: ', data)
+    //console.log('date_time: ', date_time.value)
+    //console.log('传参: ', data)
     updateBacklogItem(
         data
     )
@@ -545,24 +581,69 @@ const saveDetails = () => {
             ElMessage.error('更新失败');
         })
 }
-const allRelatedData = ref([]);
+
 
 //新建需求时的表单信息
 const form = reactive({
-    topic: '', //标题（需求名字）
-    manager_name: '', //负责人
-    type: '', //需求类型
-    description: '', //描述
-    belongProjectId: '',
+    topic: '',
+    manager_name: '',
+    type: '',
+    description: '',
     priority: '',
     source: '',
     startTime: '',
     endTime: '',
     project_topic: '',
-    manager_id: '',
 
 });
 
+//新建需求 ok
+const dialogTableVisible = ref(false);
+const showDialog = () => {
+    dialogTableVisible.value = true;
+    getMemberList();
+};
+
+const submitForm = () => {
+    const manager = manager_options.value.find(option => option.label === form.manager_name);
+
+    const submitData = {
+        priority: form.priority,
+        startTime: `${form.startTime.getFullYear()}-${(form.startTime.getMonth() + 1).toString().padStart(2, '0')}-${form.startTime.getDate().toString().padStart(2, '0')}`,
+        endTime: `${form.endTime.getFullYear()}-${(form.endTime.getMonth() + 1).toString().padStart(2, '0')}-${form.endTime.getDate().toString().padStart(2, '0')}`,
+        source: form.source,
+        type: form.type,
+        description: form.description,
+        projectId: route.params.id,
+        organizationId: localStorage.getItem("organizationId"),
+        topic: form.topic,
+        managerId: manager.value,
+    };
+    console.log('新建需求提交表单:', submitData);
+    addRequirement(submitData)
+        .then(resp => {
+            ElMessage.success('添加需求成功')
+            console.log(resp);
+            getPageDataFromServer();
+            //handleClose();
+        })
+        .catch(err => {
+            console.log(err);
+            //ElMessage.error('添加需求失败');
+        })
+
+}
+//所有的关闭弹窗
+const handleClose = () => {
+    dialogTableVisible.value = false;
+    detailDialogVisible.value = false;
+    //innerRelatedDialog.value = false;
+    manager_options.value = [];
+    //date_time.value = [];
+    sprintData.value = [];
+    releaseData.value = [];
+    relatedData.value = [];
+};
 
 const type_options = [
     {
@@ -685,118 +766,53 @@ const deleteRequireForRow = (row) => {
             console.log(resp);
         })
 }
-//删除关联工作项
+//解除关联 ok
 const deleteRelatedForRow = (row) => {
     deleteRelatedItem({
-        backlogitemId1: row.id,
-        backlogitemId2: '',
+        backlogItemId2: row.id,
+        backlogItemId1: selectedRow.value.id,
 
     })
         .then((resp) => {
+            console.log('传参：', row.id, selectedRow.value.id)
             if (resp.code === 200) {
                 console.log(row.id);
-                allrequireData.value = allrequireData.value.filter(requirement => requirement.id !== row.id);
-                ElMessage.success('关联工作项删除成功');
+                relatedData.value = relatedData.value.filter(requirement => requirement.id !== row.id);
+                //console.log(relatedData.value);
+                //ElMessage.success('关联工作项删除成功');
+                console.log('解关联', resp);
+
             }
             else {
-                ElMessage.error(resp.message);
+                console.log(resp);
             }
         })
         .catch(resp => {
-            console.log(resp);
+            console.log('解除关联失败：', resp);
             //ElMessage.error('项目删除失败，请重试！');
         })
 
 }
 
-
-
-/**
- * 新建需求部分逻辑
- */
-const dialogTableVisible = ref(false);
-const showDialog = () => {
-    dialogTableVisible.value = true;
-    getMemberList();
-};
-const handleClose = () => {
-    dialogTableVisible.value = false;
-    detailDialogVisible.value = false;
-    manager_options.value = [];
-    date_time.value = [];
-};
-
-const submitForm = () => {
-    const submitData = {
-        priority: form.priority,
-        startTime: `${form.startTime.getFullYear()}-${(form.startTime.getMonth() + 1).toString().padStart(2, '0')}-${form.startTime.getDate().toString().padStart(2, '0')}`,
-        endTime: `${form.endTime.getFullYear()}-${(form.endTime.getMonth() + 1).toString().padStart(2, '0')}-${form.endTime.getDate().toString().padStart(2, '0')}`,
-        source: form.source,
-        type: form.type,
-        description: form.description,
-        projectId: route.params.id,
-        // TODO 这边看看要不要动态
-        organizationId: "1",
-        topic: form.topic,
-        status: "status",
-        managerId: form.managerId,
-    };
-    // const submitData = {
-    //     priority: "最低级",
-    //     startTime:"2024-01-02",
-    //     endTime: "2024-01-02",
-    //     source: "sorce",
-    //     type: "type",
-    //     description: "test",
-    //     projectId: "2",
-    //     organizationId: "1",
-    //     topic: "test",
-    //     status: "status"
-    // };
-    console.log(submitData);
-    addRequire(submitData)
-        .then(resp => {
-            ElMessage({
-                message: '添加需求成功',
-                type: 'success',
-            })
-            // 从后端重新获取当前页的数据，确保新添加的项目能够出现在表格中
-            getPageDataFromServer();
-            handleClose();
-        })
-        .catch(err => {
-            console.log(err);
-            ElMessage.error('添加需求失败');
-        })
-
-}
-
-
-
-
-
-
-
-
-const needData = ref([]);
+//获取关联工作项 ok ,todo :每次点开需求详情的时候再请求一遍算了会覆盖，有时间再做
+//const allRelatedData = ref([]);
+const relatedData = ref([]);
 const getRelatedItem = (id) => {
     //console.log("关联工作项", id);
-    needData.value = [];
+    relatedData.value = [];
     getRelatedItemById({ id: id })
         .then(resp => {
-            allRelatedData.value.ralations = resp.data.backlogitemIds.map(id => ({ id: id }));
+            let data = ref([]);
+            data = resp.data.backlogitemIds;
+            // console.log('关联工作项数组：', data);
+            // console.log('所有需求数组：', allrequireData.value)
 
-            for (let i = 0; i < allRelatedData.value.ralations.length; i++) {
-
-                getRelatedItemById({ id: allRelatedData.value.ralations[i].id }).then(resp => {
-                    allRelatedData.value.ralations[i] = resp.data;
-                    needData.value.push({ id: resp.data.id, topic: resp.data.topic, status: resp.data.status, priority: resp.data.priority, supervisorName: resp.data.managerId });
-                    //console.log('wwwwwwwwww' + JSON.stringify(allRelatedData.value.ralations[i]));
-                }).catch(resp => {
-                    //console.log('获取关联工作项，，失败：' + resp);
-                })
+            // console.log('data[0]', data[0])
+            for (let i = 0; i < data.length; i++) {
+                //console.log('查找结果：', allrequireData.value.find(item => item.id === data[i]));
+                relatedData.value.push(allrequireData.value.find(item => item.id === data[i]));
             }
-            //console.log("关联工作项&&&&&&&&&", allRelatedData.value.ralations);
+            //console.log('关联工作项：', relatedData.value);
         })
         .catch(resp => {
             console.log('获取关联工作项失败：' + resp);
