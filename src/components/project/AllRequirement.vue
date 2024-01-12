@@ -400,6 +400,7 @@ const saveRelated = () => {
                 getRelatedItem(selectedRow.value.id);  //重新获取关联工作项 
             }
             else {
+                console.log(resp);
                 ElMessage.error(resp.message);
             }
         })
@@ -557,18 +558,10 @@ const goToSpecificRequirement = (row) => {
 //修改需求详情 ok
 const saveDetails = () => {
     let data = { ...selectedRow.value };
-
-    // transferTimeFormat(data.startTime);
-    // transferTimeFormat(data.endTime);
-    // data.startTime = date_time.value[0];
-    // data.endTime = date_time.value[1];
-    //data.startTime = `${data.startTime.getFullYear()}-${(data.startTime.getMonth() + 1).toString().padStart(2, '0')}-${data.startTime.getDate().toString().padStart(2, '0')}`;
-    //data.endTime = `${data.endTime.getFullYear()}-${(data.endTime.getMonth() + 1).toString().padStart(2, '0')}-${data.endTime.getDate().toString().padStart(2, '0')}`;
     const manager = manager_options.value.find(option => option.label === data.supervisorName);
-    data.managerId = manager.value;
+    if (manager !== undefined)
+        data.managerId = manager.value;
     delete data.supervisorName;
-    //console.log('date_time: ', date_time.value)
-    //console.log('传参: ', data)
     updateBacklogItem(
         data
     )
@@ -576,6 +569,7 @@ const saveDetails = () => {
             console.log(resp);
             ElMessage.success('更新成功');
             //date_time.value = [];
+            handleClose();
         })
         .catch(err => {
             ElMessage.error('更新失败');
@@ -606,7 +600,7 @@ const showDialog = () => {
 
 const submitForm = () => {
     const manager = manager_options.value.find(option => option.label === form.manager_name);
-
+    console.log('manager:', manager)
     const submitData = {
         priority: form.priority,
         startTime: `${form.startTime.getFullYear()}-${(form.startTime.getMonth() + 1).toString().padStart(2, '0')}-${form.startTime.getDate().toString().padStart(2, '0')}`,
@@ -617,7 +611,7 @@ const submitForm = () => {
         projectId: route.params.id,
         organizationId: localStorage.getItem("organizationId"),
         topic: form.topic,
-        managerId: manager.value,
+        managerId: manager ? manager.value : undefined,
     };
     console.log('新建需求提交表单:', submitData);
     addRequirement(submitData)
@@ -625,7 +619,7 @@ const submitForm = () => {
             ElMessage.success('添加需求成功')
             console.log(resp);
             getPageDataFromServer();
-            //handleClose();
+            handleClose();
         })
         .catch(err => {
             console.log(err);
@@ -778,8 +772,6 @@ const deleteRelatedForRow = (row) => {
             if (resp.code === 200) {
                 console.log(row.id);
                 relatedData.value = relatedData.value.filter(requirement => requirement.id !== row.id);
-                //console.log(relatedData.value);
-                //ElMessage.success('关联工作项删除成功');
                 console.log('解关联', resp);
 
             }

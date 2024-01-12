@@ -4,10 +4,10 @@
             <Card>
                 我参与的工作项
                 <el-table :data="allrequireData" border style="width: 100%" height="500px">
-                    <el-table-column fixed prop="name" label="标题" width="180" />
-                    <el-table-column prop="state" label="状态" />
+                    <el-table-column fixed prop="topic" label="标题" width="180" />
+                    <el-table-column prop="status" label="状态" />
                     <el-table-column prop="priority" label="优先级" />
-                    <el-table-column prop="name" label="负责人" width="180" />
+                    <el-table-column prop="supervisorName" label="负责人" width="180" />
                 </el-table>
             </Card>
         </el-col>
@@ -15,10 +15,10 @@
             <Card>
                 我负责的工作项
                 <el-table :data="managerData" border style="width: 100%" height="500px">
-                    <el-table-column fixed prop="name" label="标题" width="180" />
-                    <el-table-column prop="state" label="状态" />
+                    <el-table-column fixed prop="topic" label="标题" width="180" />
+                    <el-table-column prop="status" label="状态" />
                     <el-table-column prop="priority" label="优先级" />
-                    <el-table-column prop="name" label="负责人" width="180" />
+                    <el-table-column prop="supervisorName" label="负责人" width="180" />
                 </el-table>
             </Card>
         </el-col>
@@ -33,6 +33,7 @@ import { ref, reactive } from 'vue';
 import { onMounted, toRaw } from 'vue';
 import {
     getAllBacklogItems, deleteRequirement, deleteRelatedItem, addRelatedItems, getRelatedItemById, updateBacklogItem, addRequirement, getBacklogItemInfo
+    , getManageItems
 } from '@/api/backlogItem';
 import {
     getProjectInfo,
@@ -46,7 +47,10 @@ import { getUserName, getUserInfo } from '@/api/user';
 import { ElMessage } from 'element-plus';
 import { useRoute } from 'vue-router';
 
-
+onMounted(() => {
+    getPageDataFromServer();
+    getManageData();
+})
 
 const allrequireData = ref([]);
 const route = useRoute();
@@ -81,6 +85,7 @@ const getPageDataFromServer = () => {
 
             total.value = resp.data.length;
             //ElMessage.success('拉取需求成功');
+            console.log('拉取需求：', resp);
         })
         .catch(resp => {
             console.log('拉取需求error:', resp);
@@ -90,7 +95,32 @@ const getPageDataFromServer = () => {
 
 const managerData = ref([]);
 const getManageData = () => {
+    getManageItems({
+        accountId: localStorage.getItem("accountId"),
+    })
+        .then(resp => {
+            managerData.value = resp.data;
+            for (let i = 0; i < managerData.value.length; i++) {
+                if (managerData.value[i].managerId != null) {
+                    getUserInfo({
+                        account_id: resp.data[i].managerId,
+                    })
+                        .then(resp => {
+                            managerData.value[i] = {
+                                ...managerData.value[i],
+                                "supervisorName": resp.data.userName,
+                            }
 
+                        })
+                        .catch(resp => {
+                            console.log(resp);
+                        })
+                }
+            }
+        })
+        .catch(resp => {
+            console.log(resp);
+        })
 }
 
 

@@ -474,7 +474,7 @@ const addPublish = () => {
         type: form.type,
         projectId: route.params.id,
         topic: form.topic,
-        organizationId: store.state.user.organizationId,
+        organizationId: localStorage.getItem("organizationId"),
     })
         .then(resp => {
             ElMessage.success('新建发布成功！');

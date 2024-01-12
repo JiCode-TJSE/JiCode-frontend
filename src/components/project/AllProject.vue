@@ -33,7 +33,7 @@
     <el-dialog v-model="dialogFormVisible" title="新建项目">
         <el-form :model="ProjectForm" :rules="rules">
             <el-form-item label="所属" :label-width="formLabelWidth" prop="owner">
-                王琳的公司
+                JiCode
             </el-form-item>
             <el-form-item label="项目名称" :label-width="formLabelWidth" prop="name">
                 <el-input v-model="ProjectForm.name" />

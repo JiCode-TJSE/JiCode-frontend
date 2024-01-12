@@ -262,6 +262,7 @@ const showDialog = () => {
 //关闭所有弹窗
 const handleClose = () => {
     dialogTableVisible.value = false;
+    detailDialogVisible.value = false;
     resetForm();
     backlogItem.value = [];
     releaseData.value = [];
@@ -410,7 +411,7 @@ const add = () => {
             goal: form.goal,
             type: form.type,
             projectId: route.params.id,
-            managerId: (manager_options.value.find(item => item.label === form.managerId)).value,
+            managerId: form.managerId ? (manager_options.value.find(item => item.label === form.managerId)).value : undefined,
             organizationId: localStorage.getItem("organizationId"),
             topic: form.topic,
         })
@@ -609,7 +610,8 @@ const saveDetails = () => {
     let data = { ...selectedRow.value };
     console.log('data:', data)
     const manager = manager_options.value.find(option => option.label === data.supervisorName);
-    data.managerId = manager.value;
+    if (manager !== undefined)
+        data.managerId = manager.value;
     delete data.supervisorName;
     updateSprintInfo(
         data
@@ -618,6 +620,7 @@ const saveDetails = () => {
             console.log(resp);
             ElMessage.success('更新成功');
             //date_time.value = [];
+            handleClose();
         })
         .catch(err => {
             //ElMessage.error('更新失败');

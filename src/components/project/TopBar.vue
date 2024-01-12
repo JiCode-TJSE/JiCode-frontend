@@ -14,7 +14,7 @@
                 <el-menu-item index="projectRequirement">需求</el-menu-item>
                 <el-menu-item index="sprint">迭代</el-menu-item>
                 <el-menu-item index="publish">发布</el-menu-item>
-                <el-menu-item index="projectSetting">设置</el-menu-item>
+                <!-- <el-menu-item index="projectSetting">设置</el-menu-item> -->
             </el-menu>
 
         </el-col>

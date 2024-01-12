@@ -170,7 +170,7 @@ const getAllProduct = () => {
         message: '拉取产品成功',
         type: 'success',
       })
-      console.log(resp);
+      //console.log(resp);
     })
     .catch(err => {
       console.log('err for pull products', err);

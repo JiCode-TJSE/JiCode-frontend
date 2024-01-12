@@ -28,7 +28,7 @@ export function addProject(data) {
     });
 }
 
-//获取项目基本信息
+//获取项目基本信息 ok
 export function getProjectInfo(data) {
     return request({
         url: `http://101.37.116.97:8082/api/productdev/project`,

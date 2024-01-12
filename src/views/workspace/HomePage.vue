@@ -96,10 +96,10 @@ export default {
             product_name: item.projectTopic
           }));
           allItems = allItems.concat(itemsFromResponse1); // 继续合并数据
-          ElMessage({
-            type: 'success',
-            message: '成功获取项目信息',
-          });
+          // ElMessage({
+          //   type: 'success',
+          //   message: '成功获取项目信息',
+          // });
         } else {
           ElMessage({
             type: 'error',

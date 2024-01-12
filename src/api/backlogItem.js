@@ -74,3 +74,12 @@ export function updateBacklogItem(data) {
         data: data,
     });
 }
+
+//我负责的工作项
+export function getManageItems(data) {
+    return request({
+        url: `http://101.37.116.97:8082/api/productdev/manageditems`,
+        method: "GET",
+        params: data,
+    });
+}
