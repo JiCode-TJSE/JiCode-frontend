@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-//获取全部迭代
+//获取全部迭代 ok
 export function getAllSprint(data) {
     return request({
         url: `http://101.37.116.97:8082/api/productdev/sprints`,
@@ -9,7 +9,7 @@ export function getAllSprint(data) {
     });
 }
 
-//新建迭代
+//新建迭代 ok
 export function addSprint(data) {
     return request({
         url: `http://101.37.116.97:8082/api/productdev/sprint`,
@@ -18,12 +18,12 @@ export function addSprint(data) {
     });
 }
 
-//删除迭代
-export function deleteSprint(id) {
+//删除迭代 ok
+export function deleteSprint(data) {
     return request({
-        url: `http://101.37.116.97:8082/api/productdev/sprint?sprintId=${encodeURIComponent(id)}`,
+        url: `http://101.37.116.97:8082/api/productdev/sprint`,
         method: "DELETE",
-        data: {},
+        params: data,
     });
 }
 

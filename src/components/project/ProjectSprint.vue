@@ -60,12 +60,14 @@
             <el-col :span="15">
                 <el-form :model="form" label-width="80px">
                     <el-form-item label="所属项目">
-                        <el-select v-model="form.belongProjectId" :options="getfromback">
-                        </el-select>
+                        <span>{{ route.params.name }}</span>
                     </el-form-item>
 
                     <el-form-item label="负责人">
-                        <el-select v-model="form.supervisorId" :options="getfromback">
+                        <el-select v-model="form.managerId">
+                            <el-option v-for="item in manager_options" :key="item.value" :value="item.label">
+                                <el-tag>{{ item.label }}</el-tag>
+                            </el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="类型">
@@ -111,8 +113,9 @@
 
 import { Plus, Delete, Edit } from '@element-plus/icons-vue'
 import { ref, reactive, onMounted } from 'vue';
-import { getAllSprint, addSprint } from '@/api/sprint';
-import { getUserName } from '@/api/user';
+import { getAllSprint, addSprint, deleteSprint } from '@/api/sprint';
+import { getUserName, getUserInfo } from '@/api/user';
+import { getProjectInfo } from '@/api/project';
 import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 
@@ -122,23 +125,32 @@ const showDialog = () => {
 };
 const handleClose = () => {
     dialogTableVisible.value = false;
+    resetForm();
 };
 onMounted(() => {
     getSprint();
+    getMemberList();
 })
 
 
-const sprintData = ref([]);
+
 
 const form = reactive({
     topic: '',
     managerId: '',
     goal: '',
     type: '',
-    belongProjectId: '',
     start_time: '',
     end_time: ' ',
 });
+const resetForm = () => {
+    form.topic = '';
+    form.managerId = '';
+    form.goal = '';
+    form.type = '';
+    form.start_time = '';
+    form.end_time = '';
+}
 const type_options = [
     {
         value: '正常迭代',
@@ -161,7 +173,8 @@ const getTypeColor = (type) => {
     }
 };
 
-//获取所有迭代列表
+//获取所有迭代列表 ok
+const sprintData = ref([]);
 const getSprint = () => {
     getAllSprint({
         organizationId: localStorage.getItem("organizationId"),
@@ -169,14 +182,39 @@ const getSprint = () => {
         .then(resp => {
             console.log(resp);
             sprintData.value = resp.data;
-            getUserName({
+            let managerList = ref([]);
+            for (let i = 0; i < sprintData.value.length; i++) {
+                managerList.value.push(sprintData.value[i].managerId);
+                const start = new Date(resp.data[i].startTime);
+                const end = new Date(resp.data[i].endTime);
 
+                // 获取年、月、日部分
+                const startYear = start.getFullYear();
+                const startMonth = String(start.getMonth() + 1).padStart(2, '0');
+                const startDay = String(start.getDate()).padStart(2, '0');
+
+                const endYear = end.getFullYear();
+                const endMonth = String(end.getMonth() + 1).padStart(2, '0');
+                const endDay = String(end.getDate()).padStart(2, '0');
+
+                // 格式化为日期字符串（YYYY-MM-DD）
+                sprintData.value[i].startTime = `${startYear}-${startMonth}-${startDay}`;
+                sprintData.value[i].endTime = `${endYear}-${endMonth}-${endDay}`;
+            }
+
+            getUserName({
+                accountIdArr: managerList.value,
             })
                 .then(resp => {
-
+                    for (let i = 0; i < resp.data.length; i++) {
+                        sprintData.value[i] = {
+                            ...sprintData.value[i],
+                            "supervisorName": resp.data[i].userName
+                        };
+                    }
                 })
                 .catch(resp => {
-
+                    console.log('error:', resp)
                 })
             // ElMessage.success('拉取迭代成功！')
         })
@@ -185,21 +223,58 @@ const getSprint = () => {
         })
 }
 
+//获取成员列表名字
+const manager_options = ref([]);
+const getMemberList = () => {
+
+    getProjectInfo({
+        projectId: route.params.id,
+    })
+        .then(async resp => {
+            // 负责人选项列表
+            for (let i = 0; i < resp.data.projectAggregation.member.length; i++) {
+
+                manager_options.value.push({
+                    value: 'init',
+                    label: 'init'
+                })
+
+                let response = await getUserInfo({
+                    account_id: resp.data.projectAggregation.member[i]
+                })
+
+                let userName = response.data.userName;
+
+                manager_options.value[i].value = resp.data.projectAggregation.member[i];
+                manager_options.value[i].label = userName;
+                console.log(manager_options.value)
+            }
+
+
+            // memberList.value = resp.data.projectAggregation.member;
+            // getManageName();
+
+        })
+        .catch(resp => {
+            console.log('获取成员列表错误：' + resp);
+        })
+}
 const route = useRoute();
-//新建迭代
+//新建迭代 ok
 const add = () => {
     addSprint(
         {
-            startTime: form.start_time,
-            endTime: form.end_time,
+            startTime: `${form.start_time.getFullYear()}-${(form.start_time.getMonth() + 1).toString().padStart(2, '0')}-${form.start_time.getDate().toString().padStart(2, '0')}`,
+            endTime: `${form.end_time.getFullYear()}-${(form.end_time.getMonth() + 1).toString().padStart(2, '0')}-${form.end_time.getDate().toString().padStart(2, '0')}`,
             goal: form.goal,
             type: form.type,
             projectId: route.params.id,
-            managerId: "1",
+            managerId: (manager_options.value.find(item => item.label === form.managerId)).value,
             organizationId: localStorage.getItem("organizationId"),
             topic: form.topic,
         })
         .then(resp => {
+            console.log('传参：', `${form.start_time.getFullYear()}-${(form.start_time.getMonth() + 1).toString().padStart(2, '0')}-${form.start_time.getDate().toString().padStart(2, '0')}`, `${form.end_time.getFullYear()}-${(form.end_time.getMonth() + 1).toString().padStart(2, '0')}-${form.end_time.getDate().toString().padStart(2, '0')}`, form.goal, form.type, route.params.id, form.managerId, localStorage.getItem("organizationId"), form.topic)
             dialogTableVisible.value = false;
             console.log(resp);
             getSprint();
@@ -209,8 +284,34 @@ const add = () => {
         })
 }
 
+//删除迭代 ok
+const deleteRequireForRow = (row) => {
+    //console.log('id:', row.id);
+    deleteSprint({
+        sprintId: row.id,
+    })
+        .then(resp => {
+            console.log(resp);
+            getSprint();
+        })
+        .catch(resp => {
+            console.log(resp);
+        })
+}
 
+//修改迭代信息
+const editRequireForRow = (row) => {
+    dialogTableVisible.value = true;
+    let data = sprintData.value.find(item => item.id === row.id);
+    //console.log('start_time:', data.start_time)
+    form.topic = data.topic;
+    form.managerId = (manager_options.value.find(item => item.value === data.managerId)).label;
+    form.goal = data.goal;
+    form.type = data.type;
+    form.start_time = data.startTime;
+    form.end_time = data.endTime;
 
+}
 
 </script>
 
