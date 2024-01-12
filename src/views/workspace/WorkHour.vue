@@ -1,10 +1,9 @@
 <template>
+  <div class="hourbody">
+    <!-- 筛选区域 -->
+    <el-row>
+      <el-input v-model="searchText" placeholder="搜索" class="filter-input"></el-input>
 
-    <div class="hourbody">
-      <!-- 筛选区域 -->
-      <el-row>
-        <el-input v-model="searchText" placeholder="搜索" class="filter-input"></el-input>
-      
       <el-select v-model="selectedFilter" placeholder="筛选" class="filter-select">
         <el-option label="全部" value="all"></el-option>
         <el-option label="用户故事" value="用户故事"></el-option>
@@ -12,43 +11,44 @@
       <div>
         <WorkHourForm />
       </div>
-      
-      </el-row>
-      
 
-      <el-row class="date-row">
-        <el-date-picker v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" class="date-picker"></el-date-picker>
-      </el-row>
-  
-      <!-- 表格区域 -->
-      <el-table :data="filteredItems" class="hourtable">
-  <!-- 登记人列保持默认对齐（通常是左对齐） -->
-  <el-table-column prop="name" label="登记人"></el-table-column>
-  
-  <!-- 登记时间列内容居中显示 -->
-  <el-table-column prop="hours" label="登记时间(小时)" align="center"></el-table-column>
-  
-  <!-- 登记日期列内容居中显示 -->
-  <el-table-column prop="date" label="登记日期" ></el-table-column>
-  
-  <!-- 工作项编号列内容居中显示 -->
-  <el-table-column prop="item_number" label="工作项编号" align="center"></el-table-column>
-  
-  <!-- 事项列保持默认对齐（通常是左对齐） -->
-  <el-table-column prop="item_name" label="事项"></el-table-column>
-</el-table>
+    </el-row>
 
-    </div>
-  </template>
+
+    <el-row class="date-row">
+      <el-date-picker v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
+        end-placeholder="结束日期" class="date-picker"></el-date-picker>
+    </el-row>
+
+    <!-- 表格区域 -->
+    <el-table :data="filteredItems" class="hourtable">
+      <!-- 登记人列保持默认对齐（通常是左对齐） -->
+      <el-table-column prop="name" label="登记人"></el-table-column>
+
+      <!-- 登记时间列内容居中显示 -->
+      <el-table-column prop="hours" label="登记时间(小时)" align="center"></el-table-column>
+
+      <!-- 登记日期列内容居中显示 -->
+      <el-table-column prop="date" label="登记日期"></el-table-column>
+
+      <!-- 工作项编号列内容居中显示 -->
+      <el-table-column prop="item_number" label="工作项编号" align="center"></el-table-column>
+
+      <!-- 事项列保持默认对齐（通常是左对齐） -->
+      <el-table-column prop="item_name" label="事项"></el-table-column>
+    </el-table>
+
+  </div>
+</template>
   
-  <script>
+<script>
 import { ref, computed, onMounted, watch } from 'vue';
 import { getWorkHourRequest } from '@/api/workspace.js';
 import { ElMessage } from 'element-plus';
 //import WorkHourForm from '@/components/RegisterWorkHour.vue';
 import WorkHourForm from '@/components/workspace/RegisterHour.vue'; // 引入你的组件
 export default {
-    components: {
+  components: {
     WorkHourForm, // 注册你的组件
   },
   setup() {
@@ -65,42 +65,42 @@ export default {
     const fetchItems = async () => {
       try {
         // 格式化日期为YYYY-MM-DD，调整回本地时区
-       /*const formatDate = (date) => {
-       const tzOffset = date.getTimezoneOffset() * 60000; // 时区偏移量（分钟）转换为毫秒
-       const localDate = new Date(date - tzOffset);
-       return localDate.toISOString().split('T')[0];
-       };
-        // 格式化日期为YYYY-MM-DD
-        const [start, end] = dateRange.value.map(formatDate);*/
+        /*const formatDate = (date) => {
+        const tzOffset = date.getTimezoneOffset() * 60000; // 时区偏移量（分钟）转换为毫秒
+        const localDate = new Date(date - tzOffset);
+        return localDate.toISOString().split('T')[0];
+        };
+         // 格式化日期为YYYY-MM-DD
+         const [start, end] = dateRange.value.map(formatDate);*/
         const response = await getWorkHourRequest(); // 使用日期范围调用API
-        if (response.code === 200 ) {
-            items.value = response.data.map((item) => ({
+        if (response.code === 200) {
+          items.value = response.data.map((item) => ({
             name: item.id,
             hours: item.hours,
             date: item.date,
             item_number: "Jcode-1",
             item_name: "Jcode",
-            type:"用户故事",//item.type
+            type: "用户故事",//item.type
             // 根据实际返回的数据结构映射其他属性
-            
+
           }));
-          
+
           ElMessage({
-              type: 'success',
-              message: '成功获取用户需求',
-            });
+            type: 'success',
+            message: '成功获取用户需求',
+          });
         } else {
           ElMessage({
-              type: 'error',
-              message: '获取用户需求失败',
-            });
+            type: 'error',
+            message: '获取用户需求失败',
+          });
           console.error('Unexpected response structure:', response.data);
         }
       } catch (error) {
-        ElMessage({
-            type: 'error',
-            message: 'An error occurred during workhour data retrieval',
-          });
+        // ElMessage({
+        //   type: 'error',
+        //   message: 'An error occurred during workhour data retrieval',
+        // });
         console.error('Failed to fetch items:', error);
       }
     };
@@ -138,34 +138,42 @@ export default {
 </script>
 
   
-  <style>
-  .filter-input,
+<style>
+.filter-input,
 .date-picker,
 .filter-select {
   display: flex;
-  align-items: center; /* 这会垂直居中对齐flex项目 */
+  align-items: center;
+  /* 这会垂直居中对齐flex项目 */
 }
-.date-row{
-    margin-left:20px;
-    width:400px;
+
+.date-row {
+  margin-left: 20px;
+  width: 400px;
 }
-  .filter-input{
-    margin-bottom:0px;
-    margin-left: 20px;
-    margin-right: 20px;
-    width:200px  !important;
-  }
-  .date-picker, .filter-select {
-    margin-right: 10px;
-  }
-  .hourbody{
-    margin-top:20px;
-    width:1000px;
-  }
-  .hourtable{
-    margin-left:20px;
-    margin-top: 20px;
-  }
-  /* 样式可能需要根据实际情况调整 */
-  </style>
+
+.filter-input {
+  margin-bottom: 0px;
+  margin-left: 20px;
+  margin-right: 20px;
+  width: 200px !important;
+}
+
+.date-picker,
+.filter-select {
+  margin-right: 10px;
+}
+
+.hourbody {
+  margin-top: 20px;
+  width: 1000px;
+}
+
+.hourtable {
+  margin-left: 20px;
+  margin-top: 20px;
+}
+
+/* 样式可能需要根据实际情况调整 */
+</style>
   

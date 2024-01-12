@@ -44,3 +44,13 @@ export function getSprintInfo(data) {
         params: data,
     });
 }
+
+
+//修改迭代信息
+export function updateSprintInfo(data) {
+    return request({
+        url: `http://101.37.116.97:8082/api/productdev/sprint`,
+        method: "PUT",
+        data: data,
+    });
+}

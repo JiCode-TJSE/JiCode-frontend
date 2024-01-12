@@ -562,8 +562,8 @@ const saveDetails = () => {
     // transferTimeFormat(data.endTime);
     // data.startTime = date_time.value[0];
     // data.endTime = date_time.value[1];
-    data.startTime = `${data.startTime.getFullYear()}-${(data.startTime.getMonth() + 1).toString().padStart(2, '0')}-${data.startTime.getDate().toString().padStart(2, '0')}`;
-    data.endTime = `${data.endTime.getFullYear()}-${(data.endTime.getMonth() + 1).toString().padStart(2, '0')}-${data.endTime.getDate().toString().padStart(2, '0')}`;
+    //data.startTime = `${data.startTime.getFullYear()}-${(data.startTime.getMonth() + 1).toString().padStart(2, '0')}-${data.startTime.getDate().toString().padStart(2, '0')}`;
+    //data.endTime = `${data.endTime.getFullYear()}-${(data.endTime.getMonth() + 1).toString().padStart(2, '0')}-${data.endTime.getDate().toString().padStart(2, '0')}`;
     const manager = manager_options.value.find(option => option.label === data.supervisorName);
     data.managerId = manager.value;
     delete data.supervisorName;
@@ -575,7 +575,7 @@ const saveDetails = () => {
         .then(resp => {
             console.log(resp);
             ElMessage.success('更新成功');
-            date_time.value = [];
+            //date_time.value = [];
         })
         .catch(err => {
             ElMessage.error('更新失败');

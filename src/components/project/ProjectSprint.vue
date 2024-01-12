@@ -15,10 +15,12 @@
             <el-table ref="multipleTableRef" :data="sprintData" style="width: 100%"
                 @selection-change="handleSelectionChange" @row-click="handleRowClick">
                 <el-table-column type="selection" width="50"></el-table-column>
-                <el-table-column prop="topic" label="迭代名称" sortable>
+                <el-table-column prop="topic" label="迭代名称">
+                    <template #default="{ row }">
+                        <span @click="goToSpecificSprint(row)">{{ row.topic }}</span>
+                    </template>
                 </el-table-column>
-                <!-- <el-table-column prop="status" label="状态">
-                </el-table-column> -->
+
                 <el-table-column prop="type" label="类型">
                 </el-table-column>
                 <el-table-column prop="supervisorName" label="负责人">
@@ -29,8 +31,8 @@
                 </el-table-column>
                 <el-table-column label="操作">
                     <template v-slot="{ row }">
-                        <el-button type="danger" @click="deleteRequireForRow(row)" :icon="Delete"></el-button>
-                        <el-button type="primary" @click="editRequireForRow(row)" :icon="Edit"></el-button>
+                        <el-button type="danger" @click="deleteSprintForRow(row)" :icon="Delete"></el-button>
+                        <!-- <el-button type="primary" @click="editRequireForRow(row)" :icon="Edit"></el-button> -->
                     </template>
                 </el-table-column>
 
@@ -107,25 +109,163 @@
             <el-button type="primary" @click="add">提交</el-button>
         </el-row>
     </el-dialog>
+
+    <!--迭代详情/修改迭代-->
+    <el-dialog v-model="detailDialogVisible" title="迭代详情" @close="handleClose" width="80%">
+        <el-tabs type="border-card">
+            <el-tab-pane label="基本信息">
+                <el-row :gutter="20">
+                    <el-col :span="15">
+                        <el-form :model="selectedRow" label-width="80px">
+                            <el-form-item label="标题">
+                                <el-input v-model="selectedRow.topic"></el-input>
+                            </el-form-item>
+                            <el-form-item label="目标">
+                                <el-input v-model="selectedRow.goal" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea"
+                                    placeholder="Please input" />
+                            </el-form-item>
+                            <el-form-item label="负责人">
+                                <el-select v-model="selectedRow.supervisorName">
+                                    <el-option v-for="item in manager_options" :key="item.value" :value="item.value">
+                                        <el-tag>{{ item.label }}</el-tag>
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="类型">
+
+                                <el-select v-model="selectedRow.type" class="hidden-text" placeholder="Select"
+                                    popper-class="no-border">
+                                    <template #prefix>
+                                        <el-tag :type="getTypeColor(selectedRow.type)">{{ selectedRow.type }}</el-tag>
+                                    </template>
+                                    <el-option v-for="item in type_options" :key="item.value" :value="item.value">
+                                        <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                                    </el-option>
+                                </el-select>
+
+                            </el-form-item>
+                            <el-row>
+                                <el-col :span="11">
+                                    <el-form-item label="开始时间">
+                                        <el-date-picker v-model="selectedRow.startTime" type="date"
+                                            placeholder="Pick a date" class='date-picker' style="width: 100%" />
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="2" class="text-center">
+                                    <span class="text-gray-500"><br><br>-</span>
+                                </el-col>
+                                <el-col :span="11">
+                                    <el-form-item label="结束时间">
+                                        <el-date-picker v-model="selectedRow.endTime" type="date" placeholder="Pick a date"
+                                            class='date-picker' style="width: 100%" />
+                                    </el-form-item>
+                                </el-col>
+
+                            </el-row>
+
+
+                            <el-button type="primary" :icon="Check" @click="saveDetails">保存</el-button>
+
+                        </el-form>
+                    </el-col>
+                    <el-col :span="1">
+                        <el-divider direction="vertical" style="height:100%"></el-divider>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-row>
+                            <span>所属发布: </span>
+                            <br><br>
+                            <el-table :data="releaseData" border style="width: 100%">
+                                <el-table-column prop="topic" label="标题" width="180" />
+                                <!-- <el-table-column prop="stageStatus" label="阶段" width="180" /> -->
+                                <el-table-column prop="type" label="类型" />
+                            </el-table>
+                        </el-row>
+                    </el-col>
+                </el-row>
+
+            </el-tab-pane>
+            <el-tab-pane label="工作项">
+                <el-button class="itemheader" type="primary" @click="showRelatedDialog"><el-icon>
+                        <Plus />
+                    </el-icon>&nbsp;&nbsp;添加工作项</el-button>
+                <el-table :data="backlogItem" style="width: 100%" @selection-change="handleSelectionChange">
+                    <el-table-column type="selection" width="50"></el-table-column>
+                    <el-table-column prop="id" label="编号" sortable>
+                    </el-table-column>
+                    <el-table-column prop="topic" label="标题">
+                    </el-table-column>
+                    <el-table-column prop="status" label="状态">
+                    </el-table-column>
+                    <el-table-column prop="priority" label="优先级">
+                    </el-table-column>
+                    <el-table-column prop="supervisorName" label="负责人">
+                    </el-table-column>
+                    <!-- <el-table-column label="操作">
+                        <template v-slot="{ row }">
+                            <el-button type="danger" @click="deleteRelatedForRow(row)">解除关联</el-button>
+                        </template>
+                    </el-table-column> -->
+
+                </el-table>
+
+            </el-tab-pane>
+
+        </el-tabs>
+    </el-dialog>
+
+
+    <!--添加工作项弹出框-->
+    <el-dialog v-model="relatedDialogVisible">
+        <el-table ref="multipleTableRef" :data="allrequireData" style="width: 100%"
+            @selection-change="handleSelectionChange">
+            <el-table-column type="selection" width="50"></el-table-column>
+            <el-table-column prop="id" label="编号" sortable>
+            </el-table-column>
+            <el-table-column prop="topic" label="标题">
+                <template #default="{ row }">
+                    <span @click="goToSpecificRequirement(row)">{{ row.topic }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column prop="status" label="状态">
+            </el-table-column>
+            <el-table-column prop="type" label="类型">
+            </el-table-column>
+            <el-table-column prop="priority" label="优先级">
+            </el-table-column>
+            <el-table-column prop="supervisorName" label="负责人">
+            </el-table-column>
+        </el-table>
+        <br>
+        <br>
+        <el-button type="primary" :icon="Check" @click="saveRelated">确定</el-button>
+    </el-dialog>
 </template>
 
 <script setup>
 
 import { Plus, Delete, Edit } from '@element-plus/icons-vue'
 import { ref, reactive, onMounted } from 'vue';
-import { getAllSprint, addSprint, deleteSprint } from '@/api/sprint';
+import { getAllSprint, addSprint, deleteSprint, updateSprintInfo } from '@/api/sprint';
 import { getUserName, getUserInfo } from '@/api/user';
 import { getProjectInfo } from '@/api/project';
+import { getRelatedItemById, getAllBacklogItems, updateBacklogItem } from '@/api/backlogItem';
 import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
+import { getReleaseInfo } from '@/api/release';
 
 const dialogTableVisible = ref(false);
 const showDialog = () => {
     dialogTableVisible.value = true;
 };
+
+//关闭所有弹窗
 const handleClose = () => {
     dialogTableVisible.value = false;
     resetForm();
+    backlogItem.value = [];
+    releaseData.value = [];
+
 };
 onMounted(() => {
     getSprint();
@@ -217,6 +357,7 @@ const getSprint = () => {
                     console.log('error:', resp)
                 })
             // ElMessage.success('拉取迭代成功！')
+            console.log('所有迭代信息', sprintData.value);
         })
         .catch(resp => {
             ElMessage.error('拉取全部迭代失败！')
@@ -299,20 +440,190 @@ const deleteRequireForRow = (row) => {
         })
 }
 
-//修改迭代信息
-const editRequireForRow = (row) => {
-    dialogTableVisible.value = true;
-    let data = sprintData.value.find(item => item.id === row.id);
-    //console.log('start_time:', data.start_time)
-    form.topic = data.topic;
-    form.managerId = (manager_options.value.find(item => item.value === data.managerId)).label;
-    form.goal = data.goal;
-    form.type = data.type;
-    form.start_time = data.startTime;
-    form.end_time = data.endTime;
+const selectedRow = ref({});
+const detailDialogVisible = ref(false);
+// const editRequireForRow = (row) => {
+//     dialogTableVisible.value = true;
+//     let data = sprintData.value.find(item => item.id === row.id);
+//     //console.log('start_time:', data.start_time)
+//     form.topic = data.topic;
+//     form.managerId = (manager_options.value.find(item => item.value === data.managerId)).label;
+//     form.goal = data.goal;
+//     form.type = data.type;
+//     form.start_time = data.startTime;
+//     form.end_time = data.endTime;
+//     updateSprintInfo({
+//         id: row.id,
+//         startTime: form.start_time,
+//         endTime: form.end_time,
+
+//     })
+//         .then({
+
+//         })
+//         .catch({
+
+//         })
+
+// }
+
+//迭代详情 ok
+const releaseData = ref([]);
+const backlogItem = ref([]);
+const goToSpecificSprint = (row) => {
+    row.startTime = new Date(row.startTime);
+    row.endTime = new Date(row.endTime);
+    row.startTime = `${row.startTime.getFullYear()}-${(row.startTime.getMonth() + 1).toString().padStart(2, '0')}-${row.startTime.getDate().toString().padStart(2, '0')}`;
+    row.endTime = `${row.endTime.getFullYear()}-${(row.endTime.getMonth() + 1).toString().padStart(2, '0')}-${row.endTime.getDate().toString().padStart(2, '0')}`;
+    selectedRow.value = row;
+    getMemberList();
+    //console.log('backlogItem_length:', row.backlogItemIds.length);
+    //todo
+    getRelatedItem(row);
+    console.log('backlogItem:', backlogItem.value);
+    getReleaseInfo({
+        releaseId: selectedRow.value.releaseId,
+    })
+        .then(resp => {
+            releaseData.value.push(resp.data);
+            //console.log('releaseData1:    ', sprintData.value)
+        })
+        .catch(err => {
+            console.log(err);
+        })
+
+
+    detailDialogVisible.value = true;
+};
+const showRelatedDialog = () => {
+    getPageDataFromServer();
+    relatedDialogVisible.value = true;
+}
+const allrequireData = ref([]);
+const relatedDialogVisible = ref(false);
+const getPageDataFromServer = () => {
+
+    getAllBacklogItems({
+        organizationId: localStorage.getItem("organizationId"),
+        projectId: route.params.id,
+    })
+        .then(resp => {
+            // 添加需求数据到 allrequireData 数组 
+            allrequireData.value = resp.data;
+            console.log('data:', allrequireData.value)
+            for (let i = 0; i < allrequireData.value.length; i++) {
+                if (allrequireData.value[i].managerId != null) {
+                    getUserInfo({
+                        account_id: resp.data[i].managerId,
+                    })
+                        .then(resp => {
+                            allrequireData.value[i] = {
+                                ...allrequireData.value[i],
+                                "supervisorName": resp.data.userName,
+                            }
+
+                        })
+                        .catch(resp => {
+                            console.log(resp);
+                        })
+                }
+            }
+
+            //total.value = resp.data.length;
+            //ElMessage.success('拉取需求成功');
+            console.log('全部需求数据:', allrequireData)
+        })
+        .catch(resp => {
+            console.log('拉取需求error:', resp);
+        })
 
 }
+const getRelatedItem = (row) => {
+    backlogItem.value = [];
+    for (let i = 0; i < row.backlogItemIds.length; i++) {
+        getRelatedItemById({ id: row.backlogItemIds[i] })
+            .then(resp => {
 
+                backlogItem.value.push(resp.data)
+
+                if (backlogItem.value[i].managerId != null) {
+                    getUserInfo({
+                        account_id: resp.data.managerId,
+                    })
+                        .then(resp => {
+                            backlogItem.value[i] = {
+                                ...backlogItem.value[i],
+                                "supervisorName": resp.data.userName,
+                            }
+
+                        })
+                        .catch(resp => {
+                            console.log(resp);
+                        })
+
+                }
+            })
+            .catch(resp => {
+                console.log('error:', resp);
+
+            })
+    }
+}
+// 用于储存被选中的行的数据
+const multipleSelection = ref([]);
+// 选择改变时更新被选中的行
+const handleSelectionChange = (selectedRows) => {
+    multipleSelection.value = selectedRows.map(row => row.id);
+    // 在这里添加你的代码，这些代码会使用 multipleSelection.value
+}
+//添加所属的工作项  ok
+const saveRelated = () => {
+    const sprint = ref([]);
+    sprint.value = selectedRow.value.backlogItemIds;
+    for (let i = 0; i < multipleSelection.value.length; i++) {
+        sprint.value.push(multipleSelection.value[i]);
+        console.log('看一下value：', sprint.value)
+        updateSprintInfo({
+            id: selectedRow.value.id,
+            backlogItemIds: sprint.value,
+        })
+            .then((resp) => {
+                if (resp.code === 200) {
+                    relatedDialogVisible.value = false;
+                    getRelatedItem(selectedRow.value);  //重新获取工作项 
+                    console.log(resp)
+                }
+                else {
+                    console.log('error', resp)
+                }
+            })
+            .catch(resp => {
+                console.log(resp);
+            })
+    }
+}
+
+
+//修改迭代信息 ok
+const saveDetails = () => {
+    let data = { ...selectedRow.value };
+    console.log('data:', data)
+    const manager = manager_options.value.find(option => option.label === data.supervisorName);
+    data.managerId = manager.value;
+    delete data.supervisorName;
+    updateSprintInfo(
+        data
+    )
+        .then(resp => {
+            console.log(resp);
+            ElMessage.success('更新成功');
+            //date_time.value = [];
+        })
+        .catch(err => {
+            //ElMessage.error('更新失败');
+            console.log(err);
+        })
+}
 </script>
 
 
@@ -369,5 +680,13 @@ const editRequireForRow = (row) => {
     margin-left: 20px;
     margin-right: 20px;
     padding: 0;
+}
+
+.itemheader {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    background-color: rgb(255, 255, 255);
 }
 </style>
