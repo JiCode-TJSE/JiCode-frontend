@@ -39,3 +39,11 @@ export function updateClient(data) {
         data: data
     })
 }
+
+export function getClientSearch(data) {
+    return request({
+        url: "http://101.37.116.97:8080/api/product/clients/search",
+        method: "GET",
+        params: data
+    })
+}

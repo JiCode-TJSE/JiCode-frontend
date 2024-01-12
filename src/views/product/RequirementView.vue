@@ -20,17 +20,10 @@
           </template>
         </el-table-column>
 
-        <!-- 类型选择器 -->
+        <!-- 类型 -->
         <el-table-column prop="typeEnum" label="类型">
           <template #default="scope">
-            <el-select v-model="scope.row.typeEnum" class="hidden-text" placeholder="Select" popper-class="no-border">
-              <template #prefix>
-                <el-tag :type="getTypeColor(scope.row.typeEnum)">{{ scope.row.typeEnum }}</el-tag>
-              </template>
-              <el-option v-for="item in type_options" :key="item.value" :value="item.value">
-                <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
-              </el-option>
-            </el-select>
+            <el-tag :type="getTypeColor(scope.row.typeEnum)">{{ scope.row.typeEnum }}</el-tag>
           </template>
         </el-table-column>
 
@@ -45,6 +38,10 @@
         </el-table-column>
 
       </el-table>
+      <div class="page">
+        <el-pagination background :current-page="currentPage" :page-size="pageSize" :total="total"
+          @current-change="handlePageChange"></el-pagination>
+      </div>
     </el-main>
 
     <!-- 需求详情 -->
@@ -247,10 +244,6 @@
         <el-button type="primary" @click="submitForm">提交</el-button>
       </el-row>
     </el-dialog>
-    <div class="page">
-      <el-pagination background :current-page="currentPage" :page-size="pageSize" :total="total"
-        @current-change="handlePageChange"></el-pagination>
-    </div>
   </el-container>
 </template>
 
@@ -739,7 +732,7 @@ const saveDetails = () => {
 }
 
 .page {
-  margin-bottom: 10%;
+  margin-top: 20px;
 }
 
 .buttons-container {
