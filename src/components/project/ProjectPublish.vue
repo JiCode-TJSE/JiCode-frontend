@@ -1,7 +1,6 @@
 <template>
     <el-container class="container">
 
-
         <el-header class="header">
             <h1 class="title" style="color: black;">全部发布</h1>
             <div class="buttons-container">
@@ -12,7 +11,7 @@
         </el-header>
         <el-main class="main">
             <el-table ref="multipleTableRef" :data="releaseData" style="width: 100%"
-                @selection-change="handleSelectionChange">
+                @selection-change="handleSelectionChange" @row-click="handleRowClick">
                 <el-table-column type="selection" width="50"></el-table-column>
                 <el-table-column prop="topic" label="发布名称" sortable>
                 </el-table-column>
@@ -21,11 +20,12 @@
                         {{ row.stageStatus ? row.stageStatus : '暂无' }}
                     </template>
                 </el-table-column>
-                <el-table-column prop="type" label="类型">
+                <el-table-column label="类型">
                     <template v-slot="{ row }">
-                        {{ row.type ? row.type : '暂无' }}
+                        <el-tag v-if="row.type" :type="getTypeColor(row.type)">{{ row.type }}</el-tag>
+                        <span v-else>暂无</span>
                     </template>
-                </el-table-column>
+                    </el-table-column>
                 <el-table-column prop="managerName" label="负责人">
                 </el-table-column>
                 <el-table-column prop="startTime" label="开始时间">
@@ -92,6 +92,123 @@
             <el-button type="primary" @click="addPublish">提交</el-button>
         </el-row>
     </el-dialog>
+
+       <!--发布详情弹出框-->
+    <el-dialog v-model="detailDialogVisible" title="发布详情" @close="handleClose" width="80%">
+
+            <el-tabs type="border-card">
+                <el-tab-pane label="基本信息">
+                    <el-row :gutter="20">
+                        <el-col :span="15">
+                            <el-form :model="selectedRow" label-width="80px">
+                                <el-form-item label="标题">
+                                    <el-input v-model="selectedRow.topic"></el-input>
+                                </el-form-item>
+                                 <el-form-item label="类型">
+                    <!-- <template #default="scope"> -->
+                    <el-select v-model="selectedRow.type" class="hidden-text" placeholder="Select" popper-class="no-border">
+                        <template #prefix>
+                            <el-tag :type="getTypeColor(selectedRow.type)">{{ selectedRow.type }}</el-tag>
+                        </template>
+                        <el-option v-for="item in type_options" :key="item.value" :value="item.value">
+                            <el-tag :type="getTypeColor(item.value)">{{ item.label }}</el-tag>
+                        </el-option>
+                    </el-select>
+                    <!-- </template> -->
+                </el-form-item>
+                                <el-form-item label="负责人">
+                                    <el-select v-model="selectedRow.managerName">
+                                        <el-option v-for="item in manager_options" :key="item.value" :value="item.value">
+                                            <el-tag>{{ item.label }}</el-tag>
+                                        </el-option>
+                                    </el-select>
+                                </el-form-item>
+                                <el-row>
+                                    <el-col :span="11">
+                                        <el-form-item label="开始时间">
+                                            <el-date-picker v-model="selectedRow.startTime" type="date"
+                                                placeholder="Pick a date" class='date-picker' style="width: 100%" />
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="2" class="text-center">
+                                        <span class="text-gray-500"><br><br>-</span>
+                                    </el-col>
+                                    <el-col :span="11">
+                                        <el-form-item label="结束时间">
+                                            <el-date-picker v-model="selectedRow.endTime" type="date" placeholder="Pick a date"
+                                                class='date-picker' style="width: 100%" />
+                                        </el-form-item>
+                                    </el-col>
+
+                                </el-row>
+
+
+                                <el-button type="primary" :icon="Check" @click="saveDetails">保存</el-button>
+
+                            </el-form>
+                        </el-col>
+                        <el-col :span="1">
+                            <el-divider direction="vertical" style="height:100%"></el-divider>
+                        </el-col>
+                        <el-col :span="8">
+                            <el-row>
+                                <span>关联迭代：</span>
+                                <br><br>
+                                <el-table :data="sprintData" border style="width: 100%">
+                                    <el-table-column prop="topic" label="标题" width="180" />
+                                    <!-- <el-table-column prop="status" label="状态" width="180" /> -->
+                                    <el-table-column prop="type" label="类型" />
+                                </el-table>
+                            </el-row>
+                            <br><br><br>
+                        </el-col>
+                    </el-row>
+
+                </el-tab-pane>
+                <el-tab-pane label="发布范围">
+                    <!-- <template #inner>
+                    <el-dialog v-modle="innerRelatedDialog" title="需求详情" @close="handleClose" width="80%"></el-dialog>
+                </template> -->
+                   <el-button class="itemheader" type="primary" @click="showRelatedDialog" style="float: left;">
+      <el-icon>
+        <Plus />
+      </el-icon>
+      &nbsp;&nbsp;关联工作项
+    </el-button>
+                    <el-table :data="relatedData" style="width: 100%" @selection-change="handleSelectionChange">
+                        <el-table-column type="selection" width="50"></el-table-column>
+                        <el-table-column prop="id" label="编号" sortable>
+                            <!-- <template #default="{ row }">
+                            <span @click="goToRelatedRequirement(row)">{{ row.id }}</span>
+                        </template> -->
+                        </el-table-column>
+                        <el-table-column prop="topic" label="标题">
+                            <!-- <template #default="{ row }">
+                            <span @click="goToRelatedRequirement(row)">{{ row.topic }}</span>
+                        </template> -->
+                        </el-table-column>
+                        <el-table-column prop="status" label="状态">
+                        </el-table-column>
+                        <el-table-column label="关系">
+                            关联
+                        </el-table-column>
+                        <el-table-column prop="priority" label="优先级">
+                        </el-table-column>
+                        <el-table-column prop="supervisorName" label="负责人">
+                        </el-table-column>
+                        <el-table-column label="操作">
+                            <template v-slot="{ row }">
+                                <el-button type="danger" @click="deleteRelatedForRow(row)">解除关联</el-button>
+                            </template>
+                        </el-table-column>
+
+                    </el-table>
+
+                </el-tab-pane>
+
+            </el-tabs>
+    </el-dialog>
+
 </template>
 
 <script setup>
@@ -126,9 +243,18 @@ const releaseData = ref([
   
 ]);
 
+let selectedRow = reactive({});
+
+const handleRowClick = (row) => {
+    selectedRow = row;
+    detailDialogVisible.value = true;
+};
+
 const managerIdList = ref([])
 
 const memberList = ref([])
+
+let detailDialogVisible = ref(false);
 
 
 // 获取项目成员列表
@@ -187,9 +313,9 @@ const type_options = [
 ]
 const getTypeColor = (type) => {
     switch (type) {
-        case '正常迭代':
+        case '普通发布':
             return 'success';
-        case '临时迭代':
+        case '修复发布':
             return 'info';
         default:
             return '';
@@ -215,6 +341,8 @@ const getReleaseList = () => {
             }
             else{
                 releaseData.value = resp.data;
+
+                console.log("releaseData!!!",releaseData.value)
 
                 if(resp.data.length!=null){
                     managerIdList.value = []; //要先清空，不然会保留上一次的！！！
@@ -260,7 +388,7 @@ const addPublish = () => {
         endTime: form.end_time,
         type: form.type,
         projectId: route.params.id,
-        managerId: form.supervisorId,
+        managerId: "0e92f261-504c-442e-9123-94e8ee7f6c00",
         topic: form.topic,
         organizationId: store.state.user.organizationId,
     })
