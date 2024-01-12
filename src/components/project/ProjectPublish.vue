@@ -93,9 +93,8 @@
         </el-row>
     </el-dialog>
 
-       <!--发布详情弹出框-->
+    <!--发布详情弹出框-->
     <el-dialog v-model="detailDialogVisible" title="发布详情" @close="handleClose" width="80%">
-
             <el-tabs type="border-card">
                 <el-tab-pane label="基本信息">
                     <el-row :gutter="20">
@@ -116,7 +115,7 @@
                     </el-select>
                     <!-- </template> -->
                 </el-form-item>
-                                <el-form-item label="负责人">
+                    <el-form-item label="负责人">
                                     <el-select v-model="selectedRow.managerName">
                                         <el-option v-for="item in manager_options" :key="item.value" :value="item.value">
                                             <el-tag>{{ item.label }}</el-tag>
@@ -141,40 +140,43 @@
                                     </el-col>
 
                                 </el-row>
-
-
-                                <el-button type="primary" :icon="Check" @click="saveDetails">保存</el-button>
-
                             </el-form>
                         </el-col>
                         <el-col :span="1">
                             <el-divider direction="vertical" style="height:100%"></el-divider>
                         </el-col>
                         <el-col :span="8">
-                            <el-row>
-                                <span>关联迭代：</span>
-                                <br><br>
-                                <el-table :data="sprintData" border style="width: 100%">
-                                    <el-table-column prop="topic" label="标题" width="180" />
-                                    <!-- <el-table-column prop="status" label="状态" width="180" /> -->
-                                    <el-table-column prop="type" label="类型" />
-                                </el-table>
-                            </el-row>
-                            <br><br><br>
+                      <el-row>
+                            <el-col :span="5" style="display: flex; align-items: center; justify-content: flex-end;">
+                                <span>关联迭代</span>
+                            </el-col>
+                            <el-col :span="2"></el-col> <!-- 添加这一行来创建间隔 -->
+                            <el-col :span="16">
+                                <el-select v-model="selectedSprint" placeholder="请选择">
+                                <el-option
+                                    v-for="item in sprintData"
+                                    :key="item.id"
+                                    :label="item.topic"
+                                    :value="item">
+                                </el-option>
+                                </el-select>
+                            </el-col>
+                         </el-row>
+                        <br><br>
+                        <el-table :data="sprintData" border style="width: 100%">
+                        <el-table-column prop="topic" label="标题" width="180" />
+                        <!-- <el-table-column prop="status" label="状态" width="180" /> -->
+                        <el-table-column prop="type" label="类型" />
+                        </el-table>
+                        <br><br><br>
                         </el-col>
                     </el-row>
-
                 </el-tab-pane>
                 <el-tab-pane label="发布范围">
                     <!-- <template #inner>
                     <el-dialog v-modle="innerRelatedDialog" title="需求详情" @close="handleClose" width="80%"></el-dialog>
                 </template> -->
-                   <el-button class="itemheader" type="primary" @click="showRelatedDialog" style="float: left;">
-      <el-icon>
-        <Plus />
-      </el-icon>
-      &nbsp;&nbsp;关联工作项
-    </el-button>
+                    <el-button type="primary" :icon="Plus" @click="handleAdd" style="float: left;">新添工作项</el-button>
                     <el-table :data="relatedData" style="width: 100%" @selection-change="handleSelectionChange">
                         <el-table-column type="selection" width="50"></el-table-column>
                         <el-table-column prop="id" label="编号" sortable>
@@ -205,10 +207,22 @@
                     </el-table>
 
                 </el-tab-pane>
-
+                 <el-button type="primary" style="margin-top: 20px" :icon="Check" @click="saveDetails">保存</el-button>
             </el-tabs>
     </el-dialog>
 
+    <!-- 关联工作项弹出框 -->
+    <el-dialog v-model="workItemsdialogVisible" title="请选择关联工作项">
+      <el-table :data="workItems" @selection-change="handleSelectionChange">
+      <el-table-column type="selection"></el-table-column>
+      <el-table-column prop="id" label="ID" width="180"></el-table-column>
+      <el-table-column prop="name" label="名称"></el-table-column>
+    </el-table>
+      <span slot="footer" class="dialog-footer" style="margin-top: 20px;">
+        <el-button @click="workItemsdialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="handleConfirm">确 定</el-button>
+      </span>
+    </el-dialog>
 </template>
 
 <script setup>
@@ -218,6 +232,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { getAllRelease, addRelease, deleteRelease } from '@/api/release';
 import { getProjectInfo} from '@/api/project'
 import { getUserInfo, getUserName } from '@/api/user';
+import { getAllBacklogItems } from '@/api/backlogItem'
 import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import store from '@/store';
@@ -229,6 +244,7 @@ let formOperate = reactive('新建发布')
 const dialogTableVisible = ref(false);
 const showDialog = () => {
     dialogTableVisible.value = true;
+    console.log("dialogTableVisible",workItems)
 };
 
 const handleClose = () => {
@@ -237,7 +253,18 @@ const handleClose = () => {
 
 onMounted(() => {
     getReleaseList();
+    workItemsdialogVisible.value = false;
 })
+
+let workItems = reactive([{}])
+let selectedRows = reactive([])
+const handleSelectionChange = (val) => {
+    selectedRows = val;
+};
+const handleConfirm = () => {
+    workItemsdialogVisible.value = false;
+    console.log("!@#$%^&&*", selectedRows)
+};
 
 const releaseData = ref([
   
@@ -245,9 +272,31 @@ const releaseData = ref([
 
 let selectedRow = reactive({});
 
+let workItemsdialogVisible =ref('false')
+const handleAdd = () => {
+    workItemsdialogVisible.value = true;
+    console.log("workItemsdialogVisible",workItemsdialogVisible.value)
+};
+
 const handleRowClick = (row) => {
     selectedRow = row;
     detailDialogVisible.value = true;
+    // 获取所有可以选择的工作项
+    getAllBacklogItems({ organizationId: "1" })
+        .then(resp => {
+            // 处理成功的结果
+            // 例如，如果 response 是一个包含工作项的数组，你可以将它赋值给一个数据属性
+            workItems = resp.data.map(item => ({
+                id: item.id,
+                name: item.topic,
+            }))
+            console.log("workItems",workItems)
+        })
+        .catch(error => {
+            // 处理错误
+            // 例如，你可以打印错误信息
+            console.error(error);
+        });
 };
 
 const managerIdList = ref([])
