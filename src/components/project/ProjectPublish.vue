@@ -433,6 +433,8 @@ const getReleaseList = () => {
                         const end = new Date(resp.data[i].endTime);
                         releaseData.value[i].startTime = start.toISOString().split("T")[0];
                         releaseData.value[i].endTime = end.toISOString().split("T")[0];
+
+                        releaseData.value[i].stageStatus = stages[Math.floor(Math.random() * 3)];
                     }
                     getUserName({
                         accountIdArr: managerIdList.value
