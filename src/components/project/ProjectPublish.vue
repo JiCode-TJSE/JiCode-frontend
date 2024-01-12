@@ -123,14 +123,7 @@ onMounted(() => {
 })
 
 const releaseData = ref([
-    // {
-    //     topic: 'Tom',
-    //     status: '未开始',
-    //     type: '正常迭代',
-    //     supervisorName: '王琳',
-    //     start_time: '2016-05-03',
-    //     end_time: '2016-05-03',
-    // },
+  
 ]);
 
 const managerIdList = ref([])
@@ -209,13 +202,13 @@ const getTypeColor = (type) => {
 //to check userinfo
 const getReleaseList = () => {
 
-    console.log("原releaseData",releaseData.value)
+    //console.log("原releaseData",releaseData.value)
     getAllRelease({
         projectId: projectId,
         organizationId: store.state.user.organizationId,
     })
         .then(resp => {
-            console.log("重新获取resp.data",resp)
+            //console.log("重新获取resp.data",resp)
 
             if(resp.code == 500){
                 ElMessage.error(resp.msg)

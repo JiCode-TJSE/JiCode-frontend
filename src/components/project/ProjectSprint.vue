@@ -17,20 +17,20 @@
                 <el-table-column type="selection" width="50"></el-table-column>
                 <el-table-column prop="topic" label="迭代名称" sortable>
                 </el-table-column>
-                <el-table-column prop="status" label="状态">
-                </el-table-column>
+                <!-- <el-table-column prop="status" label="状态">
+                </el-table-column> -->
                 <el-table-column prop="type" label="类型">
                 </el-table-column>
                 <el-table-column prop="supervisorName" label="负责人">
                 </el-table-column>
-                <el-table-column prop="start_time" label="开始时间">
+                <el-table-column prop="startTime" label="开始时间">
                 </el-table-column>
-                <el-table-column prop="end_time" label="结束时间">
+                <el-table-column prop="endTime" label="结束时间">
                 </el-table-column>
                 <el-table-column label="操作">
                     <template v-slot="{ row }">
                         <el-button type="danger" @click="deleteRequireForRow(row)" :icon="Delete"></el-button>
-                        <el-button type="primary" :icon="Edit"></el-button><!-- @click="editRequireForRow(row)"-->
+                        <el-button type="primary" @click="editRequireForRow(row)" :icon="Edit"></el-button>
                     </template>
                 </el-table-column>
 
@@ -60,13 +60,13 @@
             <el-col :span="15">
                 <el-form :model="form" label-width="80px">
                     <el-form-item label="所属项目">
-                        <el-input v-model="form.belongProjectId" :options="getfromback">
-                        </el-input>
+                        <el-select v-model="form.belongProjectId" :options="getfromback">
+                        </el-select>
                     </el-form-item>
 
                     <el-form-item label="负责人">
-                      <el-input v-model="form.supervisorId" :options="getfromback">
-                        </el-input>
+                        <el-select v-model="form.supervisorId" :options="getfromback">
+                        </el-select>
                     </el-form-item>
                     <el-form-item label="类型">
                         <!-- <template #default="scope"> -->
@@ -111,54 +111,29 @@
 
 import { Plus, Delete, Edit } from '@element-plus/icons-vue'
 import { ref, reactive, onMounted } from 'vue';
-import { getAllSprint, addSprint, deleteSprint,} from '@/api/sprint';
-import {  getUserName } from '@/api/user';
-import { getProjectInfo,getProjectINFO } from '@/api/project';
-
+import { getAllSprint, addSprint } from '@/api/sprint';
+import { getUserName } from '@/api/user';
 import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import { computed } from 'vue';
-import { useStore } from 'vuex';
 
-// 获取 Vuex store 实例
-const store = useStore();
-
-// 计算属性，用来获取组织ID和项目ID
-const organizationId = computed(() => store.state.user.organizationId);
-const project_id = computed(() => store.state.user.project_id);
 const dialogTableVisible = ref(false);
-
-
-
-// 显示对话框
 const showDialog = () => {
     dialogTableVisible.value = true;
-    //getSupervisors(); // 打开对话框时获取成员列表
 };
-
-// 关闭对话框
 const handleClose = () => {
     dialogTableVisible.value = false;
 };
-onMounted(async () => {
-    
-    
+onMounted(() => {
     getSprint();
-    //getSupervisors(members)
-    
 })
-
-
-const memberList = ref([])
-
 
 
 const sprintData = ref([]);
 
 const form = reactive({
     topic: '',
-    managerId: '', //负责人
-    goal: '', //需求来源
+    managerId: '',
+    goal: '',
     type: '',
     belongProjectId: '',
     start_time: '',
@@ -194,110 +169,46 @@ const getSprint = () => {
         .then(resp => {
             console.log(resp);
             sprintData.value = resp.data;
+            getUserName({
 
+            })
+                .then(resp => {
+
+                })
+                .catch(resp => {
+
+                })
+            // ElMessage.success('拉取迭代成功！')
         })
         .catch(resp => {
-
+            ElMessage.error('拉取全部迭代失败！')
         })
-
 }
 
 const route = useRoute();
 //新建迭代
-/*
 const add = () => {
-    addSprint({
-        organizationId: '1',
-        projectId: '84277b74-2562-45ce-953e-6e44be0c4bb2',
-        topic: '123',
-        goal: 'form.goal',
-        manager_id: '1',
-        type: 'good project',
-        start_time: null,
-        end_time: null,
-    })
+    addSprint(
+        {
+            startTime: form.start_time,
+            endTime: form.end_time,
+            goal: form.goal,
+            type: form.type,
+            projectId: route.params.id,
+            managerId: "1",
+            organizationId: localStorage.getItem("organizationId"),
+            topic: form.topic,
+        })
         .then(resp => {
+            dialogTableVisible.value = false;
             console.log(resp);
+            getSprint();
         })
         .catch(resp => {
             console.error(resp);
         })
-}*/
-
-//新建项目
-async function add() {
-  try {
-    const updatedData = {
-        /*
-    "startTime":null,
-    "endTime":null,
-    "goal":"final goal",
-    "type":"正常迭代",
-    "projectId":"2",
-    "managerId":"1",
-    "organizationId":"1",
-    "topic":"昂",*/
-    organizationId: "1",//organizationId.value,//"1",//form.organizationId, // 确保在表单中有这个字段
-      projectId: "6e0326ca-5f75-41d4-82fb-b585c6788138",//project_id.value,//"2",//form.belongProjectId, // 或者 form.projectId，取决于您的表单字段名
-      topic: form.topic,
-      goal: form.goal,
-      managerId: "0eed0085-e741-45ee-8e72-310f7f3d6618",//form.supervisorId, // 确保在表单中有这个字段
-      type: form.type,
-      startTime: form.start_time,
-      endTime:form.end_time,
-    };
-
-    const response = await addSprint(updatedData);
-    if (response.code==200) {
-        await getSprint();
-      ElMessage({
-        type: 'success',
-        message: '新建迭代成功！',
-      });
-      dialogTableVisible.value = false;
-    } else {
-      ElMessage({
-        type: 'error',
-        message: updatedData,//.msg,
-      });
-    }
-  } catch (error) {
-    ElMessage({
-      type: 'error',
-      message: 'An error occurred during user data update',
-    });
-    console.error('Update Error:', error);
-  }
-  
 }
 
-//删除迭代
-async function deleteRequireForRow(row) {
-  try {
-    const response = await deleteSprint(row.id);
-
-    if (response.code==200) {
-        await getSprint(); 
-        console.log(row.id);
-        //allProjectsData.value = allProjectsData.value.filter(project => project.id !== row.id);
-      ElMessage({
-        type: 'success',
-        message: '项目删除成功',
-      });
-    } else {
-      ElMessage({
-        type: 'error',
-        message: response.msg,
-      });
-    }
-  } catch (error) {
-    ElMessage({
-      type: 'error',
-      message: 'An error occurred during user data update',
-    });
-    console.error('Update Error:', error);
-  }
-}
 
 
 
