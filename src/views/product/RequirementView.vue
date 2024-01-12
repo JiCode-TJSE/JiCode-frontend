@@ -137,19 +137,20 @@
           <el-table :data="selectedRow.versionArr" style="width: 100%">
             <el-table-column prop="name" label="版本名称"></el-table-column>
             <el-table-column prop="detail" label="版本详情"></el-table-column>
-            <el-table-column label="创建时间">
+            <el-table-column label="创建时间" width="100">
               <template v-slot:default="scope">
                 {{ new Date(scope.row.createTime).toLocaleDateString() }}
               </template>
             </el-table-column>
-            <el-table-column label="操作">
+            <el-table-column label="操作" width="156">
               <template v-slot:default="scope">
-                <el-button v-if="selectedRow.foundVersion.id != scope.row.id" type="text"
+                <el-button type="text" @click="handleEdit(scope.row)">修改</el-button>
+                <el-button v-if="selectedRow.foundVersion.id != scope.row.id" type="primary"
                   @click="handleClickTo(scope.row)">跳转</el-button>
               </template>
             </el-table-column>
           </el-table>
-          <el-button style="margin-top: 20px; float: right;" type="" @click="handleNewVersion">新建</el-button>
+          <el-button style="margin-top: 20px; float: right;" type="primary" @click="handleNewVersion">新建</el-button>
         </el-tab-pane>
       </el-tabs>
       <el-button style="margin-top: 20px" type="success" :icon="Check" @click="saveDetails">保存</el-button>
@@ -168,6 +169,23 @@
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVersionVisible = false">取 消</el-button>
         <el-button type="primary" @click="submitVersionForm()">确 定</el-button>
+      </span>
+    </el-dialog>
+
+
+    <!-- 修改版本 -->
+    <el-dialog title="新建版本" v-model="putVersionVisible" width="30%" @close="resetForm">
+      <el-form :model="versionForm" label-width="80px">
+        <el-form-item label="版本名称">
+          <el-input v-model="versionForm.name"></el-input>
+        </el-form-item>
+        <el-form-item label="版本详情">
+          <el-input v-model="versionForm.detail"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="putVersionVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitEditVersionForm()">确 定</el-button>
       </span>
     </el-dialog>
 
@@ -253,7 +271,7 @@ import { Plus, Delete } from '@element-plus/icons-vue';
 import { Check } from '@element-plus/icons-vue'
 import { ref, reactive } from 'vue';
 import { onMounted } from 'vue';
-import { getProductRequireInPage, addProductRequire, deleteProductRequire, updateProductRequire, getProductRequireDetail, addVersion, switchVersion } from '@/api/require';
+import { getProductRequireInPage, addProductRequire, deleteProductRequire, updateProductRequire, getProductRequireDetail, addVersion, switchVersion, editVersion } from '@/api/require';
 import { getClientInPage } from '@/api/client';
 import { ElMessage } from 'element-plus';
 
@@ -341,6 +359,39 @@ const submitVersionForm = () => {
       ElMessage.error('添加版本失败');
     })
 }
+
+let putVersionVisible = ref(false);
+const handleEdit = (row) => {
+  putVersionVisible.value = true;
+  versionForm.name = row.name;
+  versionForm.detail = row.detail;
+  versionForm.id = row.id;
+};
+const submitEditVersionForm = () => {
+  const submitData = {
+    requirementId: requirementid.value,
+    name: versionForm.name,
+    detail: versionForm.detail,
+    id: versionForm.id,
+  };
+  editVersion(submitData)
+    .then(resp => {
+      console.log(resp);
+      ElMessage({
+        message: '修改版本成功',
+        type: 'success',
+      })
+      // 从后端重新获取当前页的数据，确保新添加的项目能够出现在表格中
+      putVersionVisible.value = false;
+      dialogVisible.value = false;
+      getPageDataFromServer();
+    })
+    .catch(err => {
+      console.log(err);
+      ElMessage.error('修改版本失败');
+    })
+}
+
 
 /**
  * 获取所有产品

@@ -107,4 +107,10 @@ export function updateProductRequire(data) {
     })
 }
 
-
+export function editVersion(data) {
+    return request({
+        url: "http://101.37.116.97:8080/api/product/version",
+        method: "PUT",
+        data: data
+    })
+}
