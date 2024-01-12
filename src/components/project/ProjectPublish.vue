@@ -152,8 +152,7 @@
                     <el-dialog v-modle="innerRelatedDialog" title="需求详情" @close="handleClose" width="80%"></el-dialog>
                 </template> -->
                     <el-button type="primary" :icon="Plus" @click="handleAdd" style="float: left;">新添工作项</el-button>
-                    <el-table :data="relatedData" style="width: 100%" @selection-change="handleSelectionChange">
-                        <el-table-column type="selection" width="50"></el-table-column>
+                    <el-table :data="showWorkItems" style="width: 100%" @selection-change="handleSelectionChange">
                         <el-table-column prop="id" label="编号" sortable>
                             <!-- <template #default="{ row }">
                             <span @click="goToRelatedRequirement(row)">{{ row.id }}</span>
@@ -171,8 +170,6 @@
                         </el-table-column>
                         <el-table-column prop="priority" label="优先级">
                         </el-table-column>
-                        <el-table-column prop="supervisorName" label="负责人">
-                        </el-table-column>
                         <el-table-column label="操作">
                             <template v-slot="{ row }">
                                 <el-button type="danger" @click="deleteRelatedForRow(row)">解除关联</el-button>
@@ -188,15 +185,15 @@
 
     <!-- 关联工作项弹出框 -->
     <el-dialog v-model="workItemsdialogVisible" title="请选择关联工作项">
-      <el-table :data="workItems" @selection-change="handleSelectionChange">
+      <el-table :data="workItems" @selection-change="handleSelectionChange" height="500">
       <el-table-column type="selection"></el-table-column>
       <el-table-column prop="id" label="ID" width="180"></el-table-column>
       <el-table-column prop="name" label="名称"></el-table-column>
     </el-table>
-      <span slot="footer" class="dialog-footer" style="margin-top: 20px;">
-        <el-button @click="workItemsdialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="handleConfirm">确 定</el-button>
-      </span>
+    <span slot="footer" class="dialog-footer">
+      <el-button style="margin-top: 20px;" @click="workItemsdialogVisible = false">取 消</el-button>
+    <el-button style="margin-top: 20px;" type="primary" @click="handleConfirm">确 定</el-button>
+    </span>
     </el-dialog>
 </template>
 
@@ -207,7 +204,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { getAllRelease, addRelease, deleteRelease, updateRelease } from '@/api/release';
 import { getProjectInfo} from '@/api/project'
 import { getUserInfo, getUserName } from '@/api/user';
-import { getAllBacklogItems } from '@/api/backlogItem'
+import { getAllBacklogItems, getBacklogItemInfo } from '@/api/backlogItem'
 import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import store from '@/store';
@@ -252,6 +249,20 @@ const handleConfirm = () => {
         }
     })
 };
+const deleteRelatedForRow = (row) => {
+    const index = selectedRow.backlogItemIds.indexOf(row.id);
+    selectedRow.backlogItemIds.splice(index, 1);
+    updateRelease(selectedRow).then(resp => {
+        if (resp.code === 500) {
+            ElMessage.error('保存失败', resp.msg)
+        }
+        else {
+            ElMessage.success('保存成功！')
+            getReleaseList();
+            detailDialogVisible.value = false;
+        }
+    })
+};
 
 const saveDetails = ()=>{
     console.log("selectedRow@@@@@@@@",selectedRow)
@@ -278,9 +289,24 @@ const handleAdd = () => {
     console.log("workItemsdialogVisible",workItemsdialogVisible.value)
 };
 
+let showWorkItems = reactive([])
+
 const handleRowClick = (row) => {
     selectedRow = row;
     detailDialogVisible.value = true;
+    // 获取所有的关联工作项
+    selectedRows.splice(0, selectedRows.length);
+    showWorkItems.splice(0, showWorkItems.length);
+    selectedRow.backlogItemIds.forEach(id => {
+        getBacklogItemInfo({ id: id })
+            .then(resp => {
+                showWorkItems.push(resp.data)
+                console.log("workItems", showWorkItems)
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    });
     // 获取所有可以选择的工作项
     getAllBacklogItems({ organizationId: "1" })
         .then(resp => {
