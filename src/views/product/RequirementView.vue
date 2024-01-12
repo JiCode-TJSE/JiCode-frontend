@@ -130,9 +130,18 @@
             </el-option>
           </el-select>
         </el-tab-pane>
-        <!-- <el-tab-pane label="工作项">
-
-        </el-tab-pane> -->
+        <el-tab-pane label="工作项">
+          <el-row>
+            <el-col :span="6" v-for="(workItem, index) in selectedRow.backlogItemArr" :key="workItem.backlogItemId">
+              <el-tag closable @close="handleWorkItemTagClose(index)">{{ workItem.name }}</el-tag>
+            </el-col>
+          </el-row>
+          <el-select style="margin-top: 20px;" v-model="selectedWorkItem" placeholder="添加工作项"
+            @change="handleWorkItemChange">
+            <el-option v-for="item in workItemsArr" :key="item.id" :label="item.name" :value="item">
+            </el-option>
+          </el-select>
+        </el-tab-pane>
         <el-tab-pane label="版本记录">
           <el-table :data="selectedRow.versionArr" style="width: 100%">
             <el-table-column prop="name" label="版本名称"></el-table-column>
@@ -272,6 +281,7 @@ import { Check } from '@element-plus/icons-vue'
 import { ref, reactive } from 'vue';
 import { onMounted } from 'vue';
 import { getProductRequireInPage, addProductRequire, deleteProductRequire, updateProductRequire, getProductRequireDetail, addVersion, switchVersion, editVersion } from '@/api/require';
+import { getAllBacklogItems } from '@/api/backlogItem';
 import { getClientInPage } from '@/api/client';
 import { ElMessage } from 'element-plus';
 
@@ -311,7 +321,12 @@ const handleTagClose = (index) => {
   selectedRow.value.clientArr.splice(index, 1);
 };
 
+const handleWorkItemTagClose = (index) => {
+  selectedRow.value.backlogItemArr.splice(index, 1);
+};
+
 let selectedClient = ref(null);
+let selectedWorkItem = ref(null);
 let clientList = reactive([{ clientId: '', name: 'test' }]);
 
 const handleClientChange = () => {
@@ -323,6 +338,17 @@ const handleClientChange = () => {
   selectedRow.value.clientArr.push(clientWithClientId);
   client2sArr = client2sArr.filter(client => client.id !== selectedClient.value.id);
   selectedClient.value = null;
+};
+
+const handleWorkItemChange = () => {
+  console.log('selectedWorkItem', selectedWorkItem.value);
+  const workItemWithBacklogItemId = {
+    ...selectedWorkItem.value,
+    backlogItemId: selectedWorkItem.value.id
+  };
+  selectedRow.value.backlogItemArr.push(workItemWithBacklogItemId);
+  workItemsArr = workItemsArr.filter(workItem => workItem.id !== selectedWorkItem.value.id);
+  selectedWorkItem.value = null;
 };
 
 let dialogVersionVisible = ref(false);
@@ -552,7 +578,24 @@ const handlePageChange = (newPage) => {
 onMounted(() => {
   getPageDataFromServer();
   getClientList();
+  getWorkitems();
 })
+
+const getWorkitems = () => {
+  // 设置工作项列表
+  getAllBacklogItems({ organizationId: "1" })
+    .then(resp => {
+      console.log("!@#$%^^&", resp.data);
+      workItemsArr = resp.data.map(item => ({
+        id: item.id,
+        name: item.topic,
+      }))
+      console.log("!@#$%^^&", workItemsArr);
+    })
+    .catch(err => {
+      console.log('拉取工作项失败', err);
+    })
+}
 
 /**
  * TODO：删除选择的需求部分逻辑
@@ -651,6 +694,7 @@ const handleClose = () => {
 
 const requirementid = ref();
 let client2sArr = reactive([]);
+let workItemsArr = reactive([]);
 
 const handleRowClick = (row) => {
   requirementid.value = row.requirementId;
@@ -698,6 +742,13 @@ const handleRowClick = (row) => {
         return !selectedRow.value.clientArr.some(selectedClient => selectedClient.clientId === client.id);
       });
 
+      // 设置可选工作项列表
+      workItemsArr = workItemsArr.filter(workItem => {
+        return !selectedRow.value.backlogItemArr.some(selectedWorkItem => selectedWorkItem.backlogItemId === workItem.id);
+      });
+
+      console.log('selectedRow.value.workItemsArr', workItemsArr);
+
       dialogVisible.value = true;
 
       // } else {
@@ -715,6 +766,7 @@ const handleRowClick = (row) => {
 // 保存需求信息
 const saveDetails = () => {
   let clientIdArray = selectedRow.value.clientArr.map(client => client.clientId);
+  let backlogItemIdArray = selectedRow.value.backlogItemArr.map(workItem => workItem.backlogItemId);
   // 构造请求参数
   const requestData = {
     requirementId: requirementid.value,
@@ -725,7 +777,7 @@ const saveDetails = () => {
     typeEnum: selectedRow.value.typeEnum,
     supervisorId: 'd4cc64a1-ade4-4532-a4dc-1ad54ae0df90',
     clientArr: clientIdArray,
-    backlogItemArr: null,
+    backlogItemArr: backlogItemIdArray,
   };
   console.log('requestData', requestData)
 
