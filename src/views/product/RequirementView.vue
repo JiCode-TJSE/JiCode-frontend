@@ -137,7 +137,11 @@
           <el-table :data="selectedRow.versionArr" style="width: 100%">
             <el-table-column prop="name" label="版本名称"></el-table-column>
             <el-table-column prop="detail" label="版本详情"></el-table-column>
-            <el-table-column prop="createTime" label="创建时间"></el-table-column>
+            <el-table-column label="创建时间">
+              <template v-slot:default="scope">
+                {{ new Date(scope.row.createTime).toLocaleDateString() }}
+              </template>
+            </el-table-column>
             <el-table-column label="操作">
               <template v-slot:default="scope">
                 <el-button v-if="selectedRow.foundVersion.id != scope.row.id" type="text"
@@ -145,14 +149,10 @@
               </template>
             </el-table-column>
           </el-table>
-          <el-button style="margin-top: 20px;" type="primary" @click="handleNewVersion">新建</el-button>
+          <el-button style="margin-top: 20px; float: right;" type="" @click="handleNewVersion">新建</el-button>
         </el-tab-pane>
       </el-tabs>
-      <el-form class="save">
-        <el-form-item label="保存">
-          <el-button type="primary" :icon="Check" @click="saveDetails" />
-        </el-form-item>
-      </el-form>
+      <el-button style="margin-top: 20px" type="success" :icon="Check" @click="saveDetails">保存</el-button>
     </el-dialog>
 
     <!-- 新建版本 -->
@@ -303,8 +303,7 @@ const handleClientChange = () => {
     clientId: selectedClient.value.id
   };
   selectedRow.value.clientArr.push(clientWithClientId);
-  console.log('selectedRow', selectedRow.value.clientArr);
-  client2sArr = client2sArr.filter(client => client.clientId !== selectedClient.value.id);
+  client2sArr = client2sArr.filter(client => client.id !== selectedClient.value.id);
   selectedClient.value = null;
 };
 
@@ -645,9 +644,8 @@ const handleRowClick = (row) => {
 
       // 设置可选客户列表
       client2sArr = clientList.filter(client => {
-        return !selectedRow.value.clientArr.some(selectedClient => selectedClient.clientId === client.clientId);
+        return !selectedRow.value.clientArr.some(selectedClient => selectedClient.clientId === client.id);
       });
-
 
       dialogVisible.value = true;
 
