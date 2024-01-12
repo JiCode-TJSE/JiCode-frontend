@@ -318,10 +318,12 @@ const handleRowClick = (row) => {
         .then(resp => {
             // 处理成功的结果
             // 例如，如果 response 是一个包含工作项的数组，你可以将它赋值给一个数据属性
-            workItems = resp.data.map(item => ({
-                id: item.id,
-                name: item.topic,
-            }))
+             workItems = resp.data
+                .filter(item => !selectedRow.backlogItemIds.includes(item.id))
+                .map(item => ({
+                    id: item.id,
+                    name: item.topic,
+                }));
             console.log("workItems",workItems)
         })
         .catch(error => {
