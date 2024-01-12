@@ -35,3 +35,12 @@ export function getReleaseInfo(data) {
         params: data,
     });
 }
+
+// 修改发布
+export function updateRelease(data) {
+    return request({
+        url: `http://101.37.116.97:8082/api/productdev/release`,
+        method: "PUT",
+        data: data,
+    });
+}

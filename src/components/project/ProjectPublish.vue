@@ -145,32 +145,7 @@
                         <el-col :span="1">
                             <el-divider direction="vertical" style="height:100%"></el-divider>
                         </el-col>
-                        <el-col :span="8">
-                      <el-row>
-                            <el-col :span="5" style="display: flex; align-items: center; justify-content: flex-end;">
-                                <span>关联迭代</span>
-                            </el-col>
-                            <el-col :span="2"></el-col> <!-- 添加这一行来创建间隔 -->
-                            <el-col :span="16">
-                                <el-select v-model="selectedSprint" placeholder="请选择">
-                                <el-option
-                                    v-for="item in sprintData"
-                                    :key="item.id"
-                                    :label="item.topic"
-                                    :value="item">
-                                </el-option>
-                                </el-select>
-                            </el-col>
-                         </el-row>
-                        <br><br>
-                        <el-table :data="sprintData" border style="width: 100%">
-                        <el-table-column prop="topic" label="标题" width="180" />
-                        <!-- <el-table-column prop="status" label="状态" width="180" /> -->
-                        <el-table-column prop="type" label="类型" />
-                        </el-table>
-                        <br><br><br>
-                        </el-col>
-                    </el-row>
+                        </el-row>   
                 </el-tab-pane>
                 <el-tab-pane label="发布范围">
                     <!-- <template #inner>
@@ -229,7 +204,7 @@
 
 import { Plus, Delete, Edit } from '@element-plus/icons-vue'
 import { ref, reactive, onMounted } from 'vue';
-import { getAllRelease, addRelease, deleteRelease } from '@/api/release';
+import { getAllRelease, addRelease, deleteRelease, updateRelease } from '@/api/release';
 import { getProjectInfo} from '@/api/project'
 import { getUserInfo, getUserName } from '@/api/user';
 import { getAllBacklogItems } from '@/api/backlogItem'
@@ -263,9 +238,34 @@ const handleSelectionChange = (val) => {
 };
 const handleConfirm = () => {
     workItemsdialogVisible.value = false;
-    console.log("!@#$%^&&*", selectedRows)
+    selectedRows.forEach(row => {
+        selectedRow.backlogItemIds.push(row.id);
+    });
+    updateRelease(selectedRow).then(resp => {
+        if (resp.code === 500) {
+            ElMessage.error('保存失败', resp.msg)
+        }
+        else {
+            ElMessage.success('保存成功！')
+            getReleaseList();
+            detailDialogVisible.value = false;
+        }
+    })
 };
 
+const saveDetails = ()=>{
+    console.log("selectedRow@@@@@@@@",selectedRow)
+    updateRelease(selectedRow).then(resp=>{
+        if(resp.code === 500){
+            ElMessage.error('保存失败', resp.msg)
+        }
+        else{
+            ElMessage.success('保存成功！')
+            getReleaseList();
+            detailDialogVisible.value = false;
+        }
+    })
+}
 const releaseData = ref([
   
 ]);
