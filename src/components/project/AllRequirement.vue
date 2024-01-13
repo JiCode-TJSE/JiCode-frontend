@@ -174,7 +174,7 @@
                             </el-form-item>
                             <el-form-item label="负责人">
                                 <el-select v-model="selectedRow.supervisorName">
-                                    <el-option v-for="item in manager_options" :key="item.value" :value="item.value">
+                                    <el-option v-for="item in manager_options" :key="item.value" :value="item.label">
                                         <el-tag>{{ item.label }}</el-tag>
                                     </el-option>
                                 </el-select>

@@ -53,7 +53,7 @@
                     </el-tooltip>
                 </el-row>
 
-                <el-progress :percentage="form.progress * 100" :stroke-width="15" striped />
+                <el-progress :percentage="25" :stroke-width="15" striped />
             </Card>
         </el-col>
         <el-col :span="17" class="chart">
@@ -289,7 +289,7 @@ function initProjectInfo() {
         projectId: route.params.id,
     })
         .then(async resp => {
-            console.log(resp)
+            console.log('拉取项目信息：', resp)
             projectAggregation.value = resp.data.projectAggregation;
             getUserName({
                 accountIdArr: [resp.data.projectAggregation.managerId],
@@ -311,7 +311,7 @@ function initProjectInfo() {
             // 项目进度
             const newSeries = {
                 ...chartoption.value.series[0],
-                data: [resp.data.not_begin, resp.data.in_progress, resp.data.finished]
+                data: [resp.data.finished, resp.data.in_progress, resp.data.not_begin]
             };
 
             chartoption.value = {

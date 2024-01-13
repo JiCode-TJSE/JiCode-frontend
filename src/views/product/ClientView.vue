@@ -279,7 +279,7 @@ const submitForm = () => {
     .then(resp => {
       console.log('add client', resp);
       ElMessage({
-        message: '添加需求成功',
+        message: '添加客户成功',
         type: 'success',
       })
       // 从后端重新获取当前页的数据，确保新添加的项目能够出现在表格中
@@ -288,7 +288,7 @@ const submitForm = () => {
     })
     .catch(err => {
       console.log('add client error', err);
-      ElMessage.error('添加需求失败');
+      ElMessage.error('添加客户失败');
     })
 
 }

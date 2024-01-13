@@ -317,6 +317,7 @@ const getTypeColor = (type) => {
 //获取所有迭代列表 ok
 const sprintData = ref([]);
 const getSprint = () => {
+    sprintData.value = [];
     getAllSprint({
         organizationId: localStorage.getItem("organizationId"),
     })
